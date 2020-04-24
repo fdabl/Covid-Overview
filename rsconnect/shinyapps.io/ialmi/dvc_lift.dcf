@@ -1,0 +1,10 @@
+name: dvc_lift
+title:
+username:
+account: ialmi
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2175238
+bundleId: 3057756
+url: https://ialmi.shinyapps.io/dvc_lift/
+when: 1587696553.35128
