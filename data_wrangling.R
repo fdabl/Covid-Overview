@@ -16,7 +16,9 @@ data_for_graph <- data %>%
   
   # conservative decision: we fill in missings with the last recorded value
   fill(ConfirmedCases) %>% 
-  fill(ConfirmedDeaths) %>% 
+  fill(ConfirmedDeaths) %>%
+  #for StringencyIndexForDisplay fill in with adjecent values
+  fill(StringencyIndexForDisplay,.direction="downup") %>%
   
   # before the first record, we consider that the value is 0
   mutate(ConfirmedCases=replace_na(ConfirmedCases, 0)) %>% 
