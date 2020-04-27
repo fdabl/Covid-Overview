@@ -50,10 +50,12 @@ world$region <- recode(world$region, "USA" = "United States", "Democratic Republ
 #   theme_bw()
 
 # temp example with only one day. We would want a slider so participants can slide through the dates.
-data_for_map <- left_join(data_for_graph, world, by = c("CountryName" = "region")) %>% filter(Date == "20200423")
+data_for_map <- left_join(data_for_graph, world, by = c("CountryName" = "region")) %>% 
+  filter(Date == "20200423")
 
 heatmap <- ggplot(data_for_map, aes(x = long, y = lat)) +
-  geom_polygon(aes(group = group, fill = StringencyIndexForDisplay), colour = "black") +
+  geom_polygon(data = world, aes(group = group), fill = "lightgrey", colour = "black") +
+  geom_polygon(aes(group = group, fill = StringencyIndexForDisplay)) +
   scale_fill_viridis_c(option = "plasma", name = "Stringency of measures") + # use colourblind-friendly palette
   scale_x_continuous(expand = c(0,0)) +
   scale_y_continuous(expand = c(0,0)) +

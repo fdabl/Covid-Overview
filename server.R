@@ -69,6 +69,7 @@ shinyServer(function(input, output) {
   data_for_map <- left_join(data, world, by = c("CountryName" = "region")) %>% filter(Date == "20200423")
   
   heatmap <- ggplot(data_for_map, aes(x = long, y = lat)) +
+    geom_polygon(data = world, aes(group = group), fill = "lightgrey", colour = "black") +
     geom_polygon(aes(group = group, fill = StringencyIndexForDisplay,
                      text = paste(CountryName, "\n", StringencyIndexForDisplay)),
                  colour = "black") +
