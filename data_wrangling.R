@@ -55,12 +55,13 @@ data_for_map <- left_join(data_for_graph, world, by = c("CountryName" = "region"
 
 heatmap <- ggplot(data_for_map, aes(x = long, y = lat)) +
   geom_polygon(data = world, aes(group = group), fill = "lightgrey", colour = "black") +
-  geom_polygon(aes(group = group, fill = StringencyIndexForDisplay)) +
+  geom_polygon(aes(group = group, fill = StringencyIndexForDisplay), colour = "black") +
   scale_fill_viridis_c(option = "plasma", name = "Stringency of measures") + # use colourblind-friendly palette
   scale_x_continuous(expand = c(0,0)) +
   scale_y_continuous(expand = c(0,0)) +
   ggtitle("Stringency of measures around the world") +
   theme_bw() +
-  theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), plot.title = element_text(hjust = 0.5))
+  theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), 
+        plot.title = element_text(hjust = 0.5), panel.grid.minor = element_blank(), panel.grid.major = element_blank())
 
 ggplotly(heatmap)

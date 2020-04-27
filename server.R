@@ -81,7 +81,8 @@ shinyServer(function(input, output) {
     theme_bw() +
     theme(axis.title = element_blank(), axis.text = element_blank(), 
           axis.ticks = element_blank(), plot.title = element_text(hjust = 0.5),
-          legend.position="bottom")
+          legend.position="bottom", panel.grid.minor = element_blank(), 
+          panel.grid.major = element_blank())
   
   heatmap_ly <- heatmap %>% 
     ggplotly(tooltip = "text")
