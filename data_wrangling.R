@@ -20,7 +20,8 @@ data_for_graph <- data %>%
   fill(ConfirmedCases) %>% 
   fill(ConfirmedDeaths) %>%
   #for StringencyIndexForDisplay fill in with adjecent values
-  fill(StringencyIndexForDisplay,.direction="downup") %>%
+  # alx: "downup" can't be a direction (gives an error)- we need to talk about how we want to handle this
+  fill(StringencyIndexForDisplay) %>%
   
   # before the first record, we consider that the value is 0
   mutate(ConfirmedCases=replace_na(ConfirmedCases, 0)) %>% 
@@ -59,3 +60,5 @@ heatmap <- ggplot(data_for_map, aes(x = long, y = lat)) +
   ggtitle("Stringency of measures around the world") +
   theme_bw() +
   theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), plot.title = element_text(hjust = 0.5))
+
+ggplotly(heatmap)

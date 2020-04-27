@@ -1,8 +1,21 @@
 library(shinydashboard)
 library(shiny)
 library(plotly)
+library(shinyWidgets)
+library(maps)
+library(viridis)
+library(lubridate)
+library(tidyverse)
 
 
+
+
+data <- read_csv("data_processed.csv")
+
+most_recent <- max(data$date_processed)
+
+data <- data %>% 
+  filter(date_processed==most_recent)
 
 #Dashboard header carrying the title of the dashboard
 header <- dashboardHeader(title = "Lifting lockdown")  
@@ -44,7 +57,10 @@ body <- dashboardBody(
           
           tags$br(),
           
-          height = "100%", width = "100%")
+          plotlyOutput("heatmap"),
+          width = "100%"
+          
+          )
     ),
     
     # this is the first tab with graphs
@@ -56,6 +72,20 @@ body <- dashboardBody(
                status = "primary",
                solidHeader = TRUE, 
                collapsible = TRUE,
+               
+               # let the user choose the countries they want to be displayed
+               multiInput(
+                 inputId = "id", label = "Countries:",
+                 choices = data$CountryName,
+                 
+                 # it's nice to start with a default; I chose our countries + UK; we can change that
+                 selected = c("Germany", "Netherlands", "Romania", "Serbia", "United Kingdom"), width = "350px",
+                 options = list(
+                   enable_search = TRUE,
+                   non_selected_header = "Choose between:",
+                   selected_header = "You have selected:"
+                 )
+               ),
                plotlyOutput("first_plot"),
                height = 1000, width = "100%"
                )
