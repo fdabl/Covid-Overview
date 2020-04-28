@@ -66,28 +66,52 @@ shinyServer(function(input, output) {
   
   # make the heatmap
   # temp example with only one day. We would want a slider so participants can slide through the dates.
-  data_for_map <- left_join(data, world, by = c("CountryName" = "region")) %>% filter(Date == "20200423")
+  map_dta <- left_join(data1, world, by = c("CountryName" = "region"))
+  selected_mapdate = reactive({input$mapdate})
+  # select data for chosen date
+  data_for_map <- reactive({map_dta %>%
+      filter(date_processed == selected_mapdate())
+  })
+  #data_for_map <- filter(data_for_map, date_processed == max(data1$date_processed))
   
-  heatmap <- ggplot(data_for_map, aes(x = long, y = lat)) +
-    geom_polygon(data = world, aes(group = group), fill = "lightgrey", colour = "black") +
-    geom_polygon(aes(group = group, fill = StringencyIndexForDisplay,
-                     text = paste(CountryName, "\n", StringencyIndexForDisplay)),
-                 colour = "black") +
-    scale_fill_viridis_c(option = "plasma", limits=c(0, 100), # so we always get the same color for the same value
-                         name = "Stringency of measures") + # use colourblind-friendly palette
-    scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0)) +
-    ggtitle("Stringency of measures around the world") +
-    theme_bw() +
-    theme(axis.title = element_blank(), axis.text = element_blank(), 
-          axis.ticks = element_blank(), plot.title = element_text(hjust = 0.5),
-          legend.position="bottom", panel.grid.minor = element_blank(), 
-          panel.grid.major = element_blank())
-  
-  heatmap_ly <- heatmap %>% 
-    ggplotly(tooltip = "text")
+  # heatmap <- ggplot(data_for_map, aes(x = long, y = lat)) +
+  #   geom_polygon(data = world, aes(group = group), fill = "lightgrey", colour = "black") +
+  #   geom_polygon(aes(group = group, fill = StringencyIndexForDisplay,
+  #                    text = paste(CountryName, "\n", StringencyIndexForDisplay)),
+  #                colour = "black") +
+  #   scale_fill_viridis_c(option = "plasma", limits=c(0, 100), # so we always get the same color for the same value
+  #                        name = "Stringency of measures") + # use colourblind-friendly palette
+  #   scale_x_continuous(expand = c(0,0)) +
+  #   scale_y_continuous(expand = c(0,0)) +
+  #   ggtitle("Stringency of measures around the world") +
+  #   theme_bw() +
+  #   theme(axis.title = element_blank(), axis.text = element_blank(), 
+  #         axis.ticks = element_blank(), plot.title = element_text(hjust = 0.5),
+  #         legend.position="bottom", panel.grid.minor = element_blank(), 
+  #         panel.grid.major = element_blank())
+  # 
+  # heatmap_ly <- heatmap %>% 
+  #   ggplotly(tooltip = "text")
   
   output$heatmap <- renderPlotly({
+    heatmap <- ggplot(data_for_map(), aes(x = long, y = lat)) +
+      geom_polygon(data = world, aes(group = group), fill = "lightgrey", colour = "black") +
+      geom_polygon(aes(group = group, fill = StringencyIndexForDisplay,
+                       text = paste(CountryName, "\n", StringencyIndexForDisplay)),
+                   colour = "black") +
+      scale_fill_viridis_c(option = "plasma", limits=c(0, 100), # so we always get the same color for the same value
+                           name = "Stringency of measures") + # use colourblind-friendly palette
+      scale_x_continuous(expand = c(0,0)) +
+      scale_y_continuous(expand = c(0,0)) +
+      theme_bw() +
+      theme(axis.title = element_blank(), axis.text = element_blank(), 
+            axis.ticks = element_blank(), 
+            legend.position="bottom", panel.grid.minor = element_blank(), 
+            panel.grid.major = element_blank())
+    
+    heatmap_ly <- heatmap %>% 
+      ggplotly(tooltip = "text")
+    
     heatmap_ly 
   })
 })
