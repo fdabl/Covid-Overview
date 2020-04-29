@@ -59,7 +59,7 @@ body <- dashboardBody(
           tags$br(),
           width = "100%"
           ),
-          box(title = "Stringency of lockdown measures around the world",
+          box(title = "World Overview",
             status = "primary",
             solidHeader = TRUE,
             collapsible = TRUE,
@@ -71,6 +71,12 @@ body <- dashboardBody(
                         value = most_recent,
                         step = 1,
                         width = "75%"),
+            radioButtons(inputId = "infoType", label = "Information displayed:", 
+                         choices = c("Stringency" = "StringencyIndexForDisplay",
+                                     "Deaths" = "DeathsPerMillion",
+                                     "Cases" = "CasesPerMillion"),
+                         selected = "StringencyIndexForDisplay",
+                         inline = TRUE),
             width = "100%",
             )
     ),

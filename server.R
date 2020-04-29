@@ -3,6 +3,7 @@ library(ggplot2)
 library(lubridate)
 library(plotly)
 library(maps)
+library(wbstats)
 library(viridis)
 library(shinyWidgets)
 
@@ -27,7 +28,14 @@ world <- map_data('world') %>% data.frame() %>% filter(region != "Antarctica") #
 world$region <- recode(world$region, "USA" = "United States", "Democratic Republic of the Congo" = "Democratic Republic of Congo",
                        "UK" = "United Kingdom", "Kyrgyzstan" = "Kyrgyz Republic", "Slovakia" = "Slovak Republic", 
                        "Swaziland" = "Eswatini", "Trinidad" = "Trinidad and Tobago", "Tobago" = "Trinidad and Tobago")
+map_data <- left_join(data1, world, by = c("CountryName" = "region"))
+pop_data <- wb(country = "all", indicator = "SP.POP.TOTL", startdate = 2019, enddate = 2019, mrv = 1, gapfill = TRUE) %>%
+  dplyr::rename(population = value) %>%
+  select(iso3c, population, date)
 
+map_data <- left_join(map_data, pop_data, by = c("CountryCode" = "iso3c")) # Taiwan and Kosovo missing
+map_data <- map_data %>% mutate(DeathsPerMillion = round((ConfirmedDeaths/population)*1000000),
+                                CasesPerMillion = round((ConfirmedCases/population)*1000000))
 
 shinyServer(function(input, output) {
   
@@ -65,53 +73,76 @@ shinyServer(function(input, output) {
   
   
   # make the heatmap
-  # temp example with only one day. We would want a slider so participants can slide through the dates.
-  map_dta <- left_join(data1, world, by = c("CountryName" = "region"))
   selected_mapdate = reactive({input$mapdate})
+  selected_infotype = reactive({input$infoType})
   # select data for chosen date
-  data_for_map <- reactive({map_dta %>%
+  data_for_map <- reactive({map_data %>%
       filter(date_processed == selected_mapdate())
   })
-  #data_for_map <- filter(data_for_map, date_processed == max(data1$date_processed))
-  
-  # heatmap <- ggplot(data_for_map, aes(x = long, y = lat)) +
-  #   geom_polygon(data = world, aes(group = group), fill = "lightgrey", colour = "black") +
-  #   geom_polygon(aes(group = group, fill = StringencyIndexForDisplay,
-  #                    text = paste(CountryName, "\n", StringencyIndexForDisplay)),
-  #                colour = "black") +
-  #   scale_fill_viridis_c(option = "plasma", limits=c(0, 100), # so we always get the same color for the same value
-  #                        name = "Stringency of measures") + # use colourblind-friendly palette
-  #   scale_x_continuous(expand = c(0,0)) +
-  #   scale_y_continuous(expand = c(0,0)) +
-  #   ggtitle("Stringency of measures around the world") +
-  #   theme_bw() +
-  #   theme(axis.title = element_blank(), axis.text = element_blank(), 
-  #         axis.ticks = element_blank(), plot.title = element_text(hjust = 0.5),
-  #         legend.position="bottom", panel.grid.minor = element_blank(), 
-  #         panel.grid.major = element_blank())
-  # 
-  # heatmap_ly <- heatmap %>% 
-  #   ggplotly(tooltip = "text")
   
   output$heatmap <- renderPlotly({
-    heatmap <- ggplot(data_for_map(), aes(x = long, y = lat)) +
-      geom_polygon(data = world, aes(group = group), fill = "lightgrey", colour = "black") +
-      geom_polygon(aes(group = group, fill = StringencyIndexForDisplay,
-                       text = paste(CountryName, "\n", StringencyIndexForDisplay)),
-                   colour = "black") +
-      scale_fill_viridis_c(option = "plasma", limits=c(0, 100), # so we always get the same color for the same value
-                           name = "Stringency of measures") + # use colourblind-friendly palette
-      scale_x_continuous(expand = c(0,0)) +
-      scale_y_continuous(expand = c(0,0)) +
-      theme_bw() +
-      theme(axis.title = element_blank(), axis.text = element_blank(), 
-            axis.ticks = element_blank(), 
-            legend.position="bottom", panel.grid.minor = element_blank(), 
-            panel.grid.major = element_blank())
+    switch(selected_infotype(),
+           "StringencyIndexForDisplay" = 
+             ggplotly(
+              ggplot(data_for_map(), aes(x = long, y = lat)) +
+                geom_polygon(data = world, aes(group = group), fill = "lightgrey", colour = "black") +
+                geom_polygon(aes(group = group, fill = StringencyIndexForDisplay,
+                                 text = paste(CountryName, "\n", StringencyIndexForDisplay)),
+                             colour = "black") +
+                scale_fill_viridis_c(option = "plasma", limits=c(0, 100), # so we always get the same color for the same value
+                                     name = "Stringency of measures") + # use colourblind-friendly palette
+                scale_x_continuous(expand = c(0,0)) +
+                scale_y_continuous(expand = c(0,0)) +
+                ggtitle("Stringency of Lockdown Measures around the World") +
+                theme_bw() +
+                theme(axis.title = element_blank(), axis.text = element_blank(), 
+                      axis.ticks = element_blank(), plot.title = element_text(hjust = 0.5),
+                      legend.position="top", panel.grid.minor = element_blank(), 
+                      panel.grid.major = element_blank()),
+              tooltip = "text"),
+           "DeathsPerMillion" = 
+             ggplotly(
+               ggplot(data_for_map(), aes(x = long, y = lat)) +
+                 geom_polygon(data = world, aes(group = group), fill = "lightgrey", colour = "black") +
+                 geom_polygon(aes(group = group, fill = DeathsPerMillion,
+                                  text = paste(CountryName, "\n", DeathsPerMillion)),
+                              colour = "black") +
+                 scale_fill_viridis_c(option = "plasma", 
+                                      limits=c(0, ceiling(max(map_data$DeathsPerMillion, na.rm = TRUE)/100)*100), # dynamic upper limit
+                                      name = "Deaths per million") + # use colourblind-friendly palette
+                 scale_x_continuous(expand = c(0,0)) +
+                 scale_y_continuous(expand = c(0,0)) +
+                 ggtitle("Confirmed Deaths per Million Inhabitants") +
+                 theme_bw() +
+                 theme(axis.title = element_blank(), axis.text = element_blank(), 
+                       axis.ticks = element_blank(), plot.title = element_text(hjust = 0.5),
+                       legend.position="top", panel.grid.minor = element_blank(), 
+                       panel.grid.major = element_blank()),
+               tooltip = "text"),
+           "CasesPerMillion" = 
+             ggplotly(
+               ggplot(data_for_map(), aes(x = long, y = lat)) +
+                 geom_polygon(data = world, aes(group = group), fill = "lightgrey", colour = "black") +
+                 geom_polygon(aes(group = group, fill = CasesPerMillion,
+                                  text = paste(CountryName, "\n", CasesPerMillion)),
+                              colour = "black") +
+                 scale_fill_viridis_c(option = "plasma", 
+                                      limits=c(0, ceiling(max(map_data$CasesPerMillion, na.rm = TRUE)/1000)*1000), # dynamic upper limit
+                                      name = "Cases per million") + # use colourblind-friendly palette
+                 scale_x_continuous(expand = c(0,0)) +
+                 scale_y_continuous(expand = c(0,0)) +
+                 ggtitle("Confirmed Cases per Million Inhabitants") +
+                 theme_bw() +
+                 theme(axis.title = element_blank(), axis.text = element_blank(), 
+                       axis.ticks = element_blank(), plot.title = element_text(hjust = 0.5),
+                       legend.position="top", panel.grid.minor = element_blank(), 
+                       panel.grid.major = element_blank()),
+               tooltip = "text")
+    )
     
-    heatmap_ly <- heatmap %>% 
-      ggplotly(tooltip = "text")
-    
-    heatmap_ly 
+  # heatmap_ly <- heatmap %>%
+  #   ggplotly(tooltip = "text")
+  # 
+  # heatmap_ly
   })
 })
