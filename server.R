@@ -6,6 +6,7 @@ library(maps)
 library(wbstats)
 library(viridis)
 library(shinyWidgets)
+library(DT)
 
 
 
@@ -36,6 +37,10 @@ pop_data <- wb(country = "all", indicator = "SP.POP.TOTL", startdate = 2019, end
 map_data <- left_join(map_data, pop_data, by = c("CountryCode" = "iso3c")) # Taiwan and Kosovo missing
 map_data <- map_data %>% mutate(DeathsPerMillion = round((ConfirmedDeaths/population)*1000000),
                                 CasesPerMillion = round((ConfirmedCases/population)*1000000))
+
+## Table data
+
+source("table_fill.R")
 
 shinyServer(function(input, output) {
   
@@ -139,6 +144,14 @@ shinyServer(function(input, output) {
                        panel.grid.major = element_blank()),
                tooltip = "text")
     )
+    
+    # use user-selected countries for table
+    selected_countries_t = reactive({input$t_id})
+    data_for_table <- reactive({daycounts %>%
+        filter(Country %in% selected_countries_t())
+    })
+    
+  output$table = DT::renderDataTable(data_for_table())
     
   # heatmap_ly <- heatmap %>%
   #   ggplotly(tooltip = "text")
