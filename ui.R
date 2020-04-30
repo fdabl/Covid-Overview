@@ -12,10 +12,11 @@ library(tidyverse)
 
 data <- read_csv("data_processed.csv")
 
+earliest <- min(data$date_processed)
 most_recent <- max(data$date_processed)
 
-data <- data %>% 
-  filter(date_processed==most_recent)
+data_plot <- data %>%
+  filter(date_processed == most_recent)
 
 #Dashboard header carrying the title of the dashboard
 header <- dashboardHeader(title = "Lifting lockdown")  
@@ -56,11 +57,28 @@ body <- dashboardBody(
                  style = "font-size:100%", align = 'center'),
           
           tags$br(),
-          
-          plotlyOutput("heatmap"),
           width = "100%"
-          
-          )
+          ),
+          box(title = "World Overview",
+            status = "primary",
+            solidHeader = TRUE,
+            collapsible = TRUE,
+            align = "center",
+            plotlyOutput("heatmap", width = "75%"),
+            sliderInput(inputId = "mapdate", label = "Date:", 
+                        min = earliest, 
+                        max = most_recent,
+                        value = most_recent,
+                        step = 1,
+                        width = "75%"),
+            radioButtons(inputId = "infoType", label = "Information displayed:", 
+                         choices = c("Stringency" = "StringencyIndexForDisplay",
+                                     "Deaths" = "DeathsPerMillion",
+                                     "Cases" = "CasesPerMillion"),
+                         selected = "StringencyIndexForDisplay",
+                         inline = TRUE),
+            width = "100%",
+            )
     ),
     
     # this is the first tab with graphs
@@ -76,7 +94,7 @@ body <- dashboardBody(
                # let the user choose the countries they want to be displayed
                multiInput(
                  inputId = "id", label = "Countries:",
-                 choices = data$CountryName,
+                 choices = data_plot$CountryName,
                  
                  # it's nice to start with a default; I chose our countries + UK; we can change that
                  selected = c("Germany", "Netherlands", "Romania", "Serbia", "United Kingdom"), width = "350px",
