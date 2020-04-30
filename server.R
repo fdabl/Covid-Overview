@@ -18,10 +18,12 @@ library(shinyWidgets)
 
 
 
-data <- read_csv("data_04_24.csv") %>% 
-  select(1:26)
+# data <- read_csv("data_04_24.csv") %>% 
+#   select(1:26)
 
 data1 <- read_csv("data_processed.csv") 
+
+
 
 world <- map_data('world') %>% data.frame() %>% filter(region != "Antarctica") # Antarctica excluded
 # name adjustments
@@ -37,12 +39,17 @@ map_data <- left_join(map_data, pop_data, by = c("CountryCode" = "iso3c")) # Tai
 map_data <- map_data %>% mutate(DeathsPerMillion = round((ConfirmedDeaths/population)*1000000),
                                 CasesPerMillion = round((ConfirmedCases/population)*1000000))
 
+graph_data <- left_join(data1, pop_data, by = c("CountryCode" = "iso3c")) # Taiwan and Kosovo missing
+graph_data <- graph_data %>% mutate(DeathsPerMillion = round((ConfirmedDeaths/population)*1000000),
+                                CasesPerMillion = round((ConfirmedCases/population)*1000000))
+
+
 shinyServer(function(input, output) {
   
   # use user-selected countries
   selected_countries = reactive({input$id}) 
   data_for_graph <- reactive({
-    data1%>% 
+    graph_data%>% 
     # select only data from some countries
     filter(CountryName %in% selected_countries())
   })
@@ -60,34 +67,47 @@ shinyServer(function(input, output) {
       x = 4
     }
     else {
-      x = length(input$id) 
+      x = length(input$id)
     }
     return(x)
   })
-  
-  
+
+
   # set the height of the graph depending on number of countries selected
   how_high = reactive({
-    (((length(input$id)-1) %/%  num_cols()) + 1)*150
+    (((length(input$id)-1) %/%  num_cols()) + 1)*200
   })
   
-  output$first_plot <- renderPlotly({
+  output$first_plot <- renderPlot({
     # make the graph
-    graph <- ggplot(data = data_for_graph())+
-      geom_line(aes(x = date_processed, y = StringencyIndexForDisplay, group=1,
-                    text = paste(date_processed, "\n", StringencyIndexForDisplay)))+
-      facet_wrap(vars(CountryName), ncol = num_cols()) +
-      ggtitle("Stringency of measures in each selected country") +
-      xlab("Date") +
-      ylab("Stringency Index")
+    graph <- ggplot(data = data_for_graph(), aes(x = date_processed))+
+      geom_line(aes(y = StringencyIndexForDisplay, group=1,
+                    text = paste(date_processed, "\n", StringencyIndexForDisplay, "\n", DeathsPerMillion),
+                    color = "Stringency Index"))+
+      geom_line(aes( y = DeathsPerMillion/3, color = "Deaths per million")) +
+      scale_y_continuous(sec.axis = sec_axis(~.*3, name = "Deaths per million")) +
+      scale_colour_manual(values = c("red", "black")) +
+      facet_wrap(~CountryName, ncol = num_cols()) +
+      ggtitle("Stringency of measures and deaths per million in each selected country") +
+      labs(y = "Stringency Index",
+           x = "Date",
+           colour = " ") +
+      theme(legend.position="top")
+    
+    graph
     
     
-    # apply a plotly layer, look into customizing the tooltip
-    graph_ly <- graph %>% 
-      ggplotly(tooltip = "text", height = how_high(), width=750)
     
-    graph_ly 
-  })
+    # apply a plotly layer
+    # graph_ly <- graph %>%
+    #   ggplotly(tooltip = "text"
+    #            , height = how_high(), width=750
+    #            )
+    # 
+    # graph_ly
+  }
+  , height = reactive({how_high()})
+  )
   
   
   # make the heatmap

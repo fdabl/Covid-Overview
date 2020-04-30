@@ -77,7 +77,7 @@ body <- dashboardBody(
                                      "Cases" = "CasesPerMillion"),
                          selected = "StringencyIndexForDisplay",
                          inline = TRUE),
-            width = "100%",
+            width = "100%"
             )
     ),
     
@@ -104,7 +104,7 @@ body <- dashboardBody(
                    selected_header = "You have selected:"
                  )
                ),
-               plotlyOutput("first_plot"),
+               plotOutput("first_plot"),
                height = 1000, width = "100%"
                )
                
