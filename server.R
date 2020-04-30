@@ -25,7 +25,6 @@ library(DT)
 data1 <- read_csv("data_processed.csv") 
 
 
-
 world <- map_data('world') %>% data.frame() %>% filter(region != "Antarctica") # Antarctica excluded
 # name adjustments
 world$region <- recode(world$region, "USA" = "United States", "Democratic Republic of the Congo" = "Democratic Republic of Congo",
@@ -181,7 +180,7 @@ shinyServer(function(input, output) {
                        panel.grid.major = element_blank()),
                tooltip = "text")
     )
-    
+  })
     # use user-selected countries for table
     selected_countries_t = reactive({input$t_id})
     data_for_table <- reactive({daycounts %>%
@@ -194,5 +193,5 @@ shinyServer(function(input, output) {
   #   ggplotly(tooltip = "text")
   # 
   # heatmap_ly
-  })
+  
 })

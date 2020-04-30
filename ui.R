@@ -80,8 +80,7 @@ body <- dashboardBody(
                          inline = TRUE),
             width = "100%"
             ),
-            width = "100%"
-            ),
+
       
           box(title="Table",
               status="primary",
@@ -100,8 +99,9 @@ body <- dashboardBody(
                   selected_header = "You have selected:"
                 )
               ),
-              width = "100%",
-              DT::dataTableOutput("table"))
+              
+              DT::dataTableOutput("table"),
+              width = "100%")
     ),
     
     # this is the first tab with graphs
@@ -129,8 +129,8 @@ body <- dashboardBody(
                ),
                plotOutput("first_plot"),
                height = 1000, width = "100%"
-               )
                
+      )
             )
         )
     )
