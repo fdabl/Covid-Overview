@@ -6,6 +6,7 @@ library(maps)
 library(viridis)
 library(lubridate)
 library(tidyverse)
+library(DT)
 
 
 
@@ -78,7 +79,29 @@ body <- dashboardBody(
                          selected = "StringencyIndexForDisplay",
                          inline = TRUE),
             width = "100%"
-            )
+            ),
+            width = "100%"
+            ),
+      
+          box(title="Table",
+              status="primary",
+              solidHeader = TRUE,
+              collapsible = TRUE,
+              align = "center",
+              multiInput(
+                inputId = "t_id", label = "Countries:",
+                choices = data_plot$CountryName,
+                
+                # it's nice to start with a default; I chose our countries + UK; we can change that
+                selected = c("Germany", "Netherlands", "Romania", "Serbia", "United Kingdom"), width = "350px",
+                options = list(
+                  enable_search = TRUE,
+                  non_selected_header = "Choose between:",
+                  selected_header = "You have selected:"
+                )
+              ),
+              width = "100%",
+              DT::dataTableOutput("table"))
     ),
     
     # this is the first tab with graphs
