@@ -39,18 +39,36 @@ shinyServer(function(input, output) {
     filter(CountryName %in% selected_countries())
   })
   
+  
+  
+
+
+  # set the number of columns depending on number of countries selected
+  num_cols = reactive({
+    if (length(input$id) > 10 ) {
+      x = 5
+    }
+    else if (length(input$id) > 4) {
+      x = 4
+    }
+    else {
+      x = length(input$id) 
+    }
+    return(x)
+  })
+  
+  
   # set the height of the graph depending on number of countries selected
   how_high = reactive({
-    (((length(input$id)-1) %/%  5) + 2)*120
+    (((length(input$id)-1) %/%  num_cols()) + 1)*150
   })
-
   
   output$first_plot <- renderPlotly({
     # make the graph
     graph <- ggplot(data = data_for_graph())+
       geom_line(aes(x = date_processed, y = StringencyIndexForDisplay, group=1,
                     text = paste(date_processed, "\n", StringencyIndexForDisplay)))+
-      facet_wrap(vars(CountryName), ncol = 5) +
+      facet_wrap(vars(CountryName), ncol = num_cols()) +
       ggtitle("Stringency of measures in each selected country") +
       xlab("Date") +
       ylab("Stringency Index")
@@ -58,7 +76,7 @@ shinyServer(function(input, output) {
     
     # apply a plotly layer, look into customizing the tooltip
     graph_ly <- graph %>% 
-      ggplotly(tooltip = "text", height = how_high(), width=700)
+      ggplotly(tooltip = "text", height = how_high(), width=750)
     
     graph_ly 
   })
