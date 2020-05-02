@@ -1,0 +1,251 @@
+"Code","Country","Population"
+"ABW","Aruba",105845
+"AFG","Afghanistan",37172386
+"AGO","Angola",30809762
+"AIA","Anguilla",NA
+"ALA","Åland Islands",NA
+"ALB","Albania",2866376
+"AND","Andorra",77006
+"ARE","United Arab Emirates",9630959
+"ARG","Argentina",44494502
+"ARM","Armenia",2951776
+"ASM","American Samoa",55465
+"ATA","Antarctica",NA
+"ATF","French Southern Territories",NA
+"ATG","Antigua and Barbuda",96286
+"AUS","Australia",24982688
+"AUT","Austria",8840521
+"AZE","Azerbaijan",9939800
+"BDI","Burundi",11175378
+"BEL","Belgium",11433256
+"BEN","Benin",11485048
+"BES","Bonaire, Sint Eustatius and Saba",NA
+"BFA","Burkina Faso",19751535
+"BGD","Bangladesh",161356039
+"BGR","Bulgaria",7025037
+"BHR","Bahrain",1569439
+"BHS","Bahamas",385640
+"BIH","Bosnia and Herzegovina",3323929
+"BLM","Saint Barthélemy",NA
+"BLR","Belarus",9483499
+"BLZ","Belize",383071
+"BMU","Bermuda",63973
+"BOL","Bolivia (Plurinational State of)",11353142
+"BRA","Brazil",209469333
+"BRB","Barbados",286641
+"BRN","Brunei Darussalam",428962
+"BTN","Bhutan",754394
+"BVT","Bouvet Island",NA
+"BWA","Botswana",2254126
+"CAF","Central African Republic",4666377
+"CAN","Canada",37057765
+"CCK","Cocos (Keeling) Islands",NA
+"CHE","Switzerland",8513227
+"CHL","Chile",18729160
+"CHN","China",1392730000
+"CIV","Côte d'Ivoire",25069229
+"CMR","Cameroon",25216237
+"COD","Congo, Democratic Republic of the",84068091
+"COG","Congo",5244363
+"COK","Cook Islands",NA
+"COL","Colombia",49648685
+"COM","Comoros",832322
+"CPV","Cabo Verde",543767
+"CRI","Costa Rica",4999441
+"CUB","Cuba",11338138
+"CUW","Curaçao",159800
+"CXR","Christmas Island",NA
+"CYM","Cayman Islands",64174
+"CYP","Cyprus",1189265
+"CZE","Czech Republic",10629928
+"DEU","Germany",82905782
+"DJI","Djibouti",958920
+"DMA","Dominica",71625
+"DNK","Denmark",5793636
+"DOM","Dominican Republic",10627165
+"DZA","Algeria",42228429
+"ECU","Ecuador",17084357
+"EGY","Egypt",98423595
+"ERI","Eritrea",NA
+"ESH","Western Sahara",NA
+"ESP","Spain",46796540
+"EST","Estonia",1321977
+"ETH","Ethiopia",109224559
+"FIN","Finland",5515525
+"FJI","Fiji",883483
+"FLK","Falkland Islands (Malvinas)",NA
+"FRA","France",66977107
+"FRO","Faroe Islands",48497
+"FSM","Micronesia (Federated States of)",112640
+"GAB","Gabon",2119275
+"GBR","United Kingdom",66460344
+"GEO","Georgia",3726549
+"GGY","Guernsey",NA
+"GHA","Ghana",29767108
+"GIB","Gibraltar",33718
+"GIN","Guinea",12414318
+"GLP","Guadeloupe",NA
+"GMB","Gambia",2280102
+"GNB","Guinea-Bissau",1874309
+"GNQ","Equatorial Guinea",1308974
+"GRC","Greece",10731726
+"GRD","Grenada",111454
+"GRL","Greenland",56025
+"GTM","Guatemala",17247807
+"GUF","French Guiana",NA
+"GUM","Guam",165768
+"GUY","Guyana",779004
+"HKG","Hong Kong",7451000
+"HMD","Heard Island and McDonald Islands",NA
+"HND","Honduras",9587522
+"HRV","Croatia",4087843
+"HTI","Haiti",11123176
+"HUN","Hungary",9775564
+"IDN","Indonesia",267663435
+"IMN","Isle of Man",84077
+"IND","India",1352617328
+"IOT","British Indian Ocean Territory",NA
+"IRL","Ireland",4867309
+"IRN","Iran (Islamic Republic of)",81800269
+"IRQ","Iraq",38433600
+"ISL","Iceland",352721
+"ISR","Israel",8882800
+"ITA","Italy",60421760
+"JAM","Jamaica",2934855
+"JEY","Jersey",NA
+"JOR","Jordan",9956011
+"JPN","Japan",126529100
+"KAZ","Kazakhstan",18272430
+"KEN","Kenya",51393010
+"KGZ","Kyrgyzstan",6322800
+"KHM","Cambodia",16249798
+"KIR","Kiribati",115847
+"KNA","Saint Kitts and Nevis",52441
+"KOR","South Korea",51606633
+"KWT","Kuwait",4137309
+"LAO","Lao People's Democratic Republic",7061507
+"LBN","Lebanon",6848925
+"LBR","Liberia",4818977
+"LBY","Libya",6678567
+"LCA","Saint Lucia",181889
+"LIE","Liechtenstein",37910
+"LKA","Sri Lanka",21670000
+"LSO","Lesotho",2108132
+"LTU","Lithuania",2801543
+"LUX","Luxembourg",607950
+"LVA","Latvia",1927174
+"MAC","Macao",631636
+"MAF","Saint Martin (French part)",37264
+"MAR","Morocco",36029138
+"MCO","Monaco",38682
+"MDA","Moldova, Republic of",2706049
+"MDG","Madagascar",26262368
+"MDV","Maldives",515696
+"MEX","Mexico",126190788
+"MHL","Marshall Islands",58413
+"MKD","North Macedonia",2082958
+"MLI","Mali",19077690
+"MLT","Malta",484630
+"MMR","Myanmar",53708395
+"MNE","Montenegro",622227
+"MNG","Mongolia",3170208
+"MNP","Northern Mariana Islands",56882
+"MOZ","Mozambique",29495962
+"MRT","Mauritania",4403319
+"MSR","Montserrat",NA
+"MTQ","Martinique",NA
+"MUS","Mauritius",1265303
+"MWI","Malawi",18143315
+"MYS","Malaysia",31528585
+"MYT","Mayotte",NA
+"NAM","Namibia",2448255
+"NCL","New Caledonia",284060
+"NER","Niger",22442948
+"NFK","Norfolk Island",NA
+"NGA","Nigeria",195874740
+"NIC","Nicaragua",6465513
+"NIU","Niue",NA
+"NLD","Netherlands",17231624
+"NOR","Norway",5311916
+"NPL","Nepal",28087871
+"NRU","Nauru",12704
+"NZL","New Zealand",4841000
+"OMN","Oman",4829483
+"PAK","Pakistan",212215030
+"PAN","Panama",4176873
+"PCN","Pitcairn",NA
+"PER","Peru",31989256
+"PHL","Philippines",106651922
+"PLW","Palau",17907
+"PNG","Papua New Guinea",8606316
+"POL","Poland",37974750
+"PRI","Puerto Rico",3195153
+"PRK","North Korea",25549819
+"PRT","Portugal",10283822
+"PRY","Paraguay",6956071
+"PSE","Palestine, State of",4569087
+"PYF","French Polynesia",277679
+"QAT","Qatar",2781677
+"REU","Réunion",NA
+"ROU","Romania",19466145
+"RUS","Russian Federation",144478050
+"RWA","Rwanda",12301939
+"SAU","Saudi Arabia",33699947
+"SDN","Sudan",41801533
+"SEN","Senegal",15854360
+"SGP","Singapore",5638676
+"SGS","South Georgia and the South Sandwich Islands",NA
+"SHN","Saint Helena, Ascension and Tristan da Cunha",NA
+"SJM","Svalbard and Jan Mayen",NA
+"SLB","Solomon Islands",652858
+"SLE","Sierra Leone",7650154
+"SLV","El Salvador",6420744
+"SMR","San Marino",33785
+"SOM","Somalia",15008154
+"SPM","Saint Pierre and Miquelon",NA
+"SRB","Serbia",6982604
+"SSD","South Sudan",10975920
+"STP","Sao Tome and Principe",211028
+"SUR","Suriname",575991
+"SVK","Slovakia",5446771
+"SVN","Slovenia",2073894
+"SWE","Sweden",10175214
+"SWZ","Eswatini",1136191
+"SXM","Sint Maarten (Dutch part)",40654
+"SYC","Seychelles",96762
+"SYR","Syrian Arab Republic",16906283
+"TCA","Turks and Caicos Islands",37665
+"TCD","Chad",15477751
+"TGO","Togo",7889094
+"THA","Thailand",69428524
+"TJK","Tajikistan",9100837
+"TKL","Tokelau",NA
+"TKM","Turkmenistan",5850908
+"TLS","Timor-Leste",1267972
+"TON","Tonga",103197
+"TTO","Trinidad and Tobago",1389858
+"TUN","Tunisia",11565204
+"TUR","Turkey",82319724
+"TUV","Tuvalu",11508
+"TWN","Taiwan",NA
+"TZA","Tanzania, United Republic of",56318348
+"UGA","Uganda",42723139
+"UKR","Ukraine",44622516
+"UMI","United States Minor Outlying Islands",NA
+"URY","Uruguay",3449299
+"USA","United States",326687501
+"UZB","Uzbekistan",32955400
+"VAT","Vatican City",NA
+"VCT","Saint Vincent and the Grenadines",110210
+"VEN","Venezuela (Bolivarian Republic of)",28870195
+"VGB","Virgin Islands (British)",29802
+"VIR","Virgin Islands (U.S.)",106977
+"VNM","Viet Nam",95540395
+"VUT","Vanuatu",292680
+"WLF","Wallis and Futuna",NA
+"WSM","Samoa",196130
+"YEM","Yemen",28498687
+"ZAF","South Africa",57779622
+"ZMB","Zambia",17351822
+"ZWE","Zimbabwe",14439018
+"RKS","Kosovo",NA
