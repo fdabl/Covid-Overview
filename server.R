@@ -31,7 +31,7 @@ shinyServer(function(session, input, output) {
   
   output$lockdown_plot <- renderPlot({
     plot_stringency_data(dat, selected_countries(), num_cols())
-  })
+  }, height = how_high)
   
   
   # TODO: Make this a plotly figure

@@ -81,7 +81,7 @@ body <- dashboardBody(
             'Deaths' = 'Deaths',
             'Cases' = 'Cases'
           ), selected = 'StringencyIndex', inline = TRUE
-        ),
+        )
       ),
       
       box(
