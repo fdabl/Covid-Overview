@@ -232,7 +232,7 @@ plot_world_data <- function(world, dat, date, variable) {
 #' @param countries list of countries to be shown
 #' 
 #' @returns ggplot object
-plot_stringency_data <- function(dat, countries) {
+plot_stringency_data <- function(dat, countries, nr_cols) {
   
   d <- filter(dat, Country %in% countries)
   
@@ -246,7 +246,7 @@ plot_stringency_data <- function(dat, countries) {
     scale_y_continuous(
       sec.axis = sec_axis(~.*10, name = 'New Deaths per 10 Million'), limits = c(0, 100)
     ) +
-    facet_wrap(~ Country, ncol = num_cols()) +
+    facet_wrap(~ Country, ncol = nr_cols) +
     ylab('Stringency Index') +
     ggtitle('Stringency of Measures and New Deaths per 10 Million') +
     theme_bw() +

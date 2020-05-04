@@ -1,3 +1,6 @@
+library('shinydashboard')
+library('shinyWidgets')
+library('DT')
 source('helpers.R')
 
 
@@ -102,10 +105,10 @@ body <- dashboardBody(
       ),
       
       box(
-        title = 'How Countries are Lifting the Lockdown', status='primary', solidHeader = TRUE,
+        title = 'How Countries are Lifting the Lockdown', status = 'primary', solidHeader = TRUE,
         collapsible = TRUE, align = 'center', width = '100%',
         
-        DT::dataTableOutput('table'),
+        dataTableOutput('countries_table'),
         
         multiInput(
           inputId = 'countries_table',

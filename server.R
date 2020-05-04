@@ -1,3 +1,4 @@
+library('DT')
 source('helpers.R')
 
 
@@ -29,7 +30,7 @@ shinyServer(function(session, input, output) {
   
   
   output$lockdown_plot <- renderPlot({
-    plot_stringency_data(dat, selected_countries())
+    plot_stringency_data(dat, selected_countries(), num_cols())
   })
   
   
@@ -39,7 +40,9 @@ shinyServer(function(session, input, output) {
     p
   })
     
-  output$table <- renderDataTable({
-    prepare_country_table(dat, selected_countries_table())
+  output$countries_table <- renderDataTable({
+    tab <- prepare_country_table(dat, selected_countries_table())
+    print(tab)
+    tab
   })
 })
