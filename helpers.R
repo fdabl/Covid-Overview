@@ -3,6 +3,7 @@ library('readxl')
 library('jsonlite')
 library('tidyverse')
 library('lubridate')
+library("plotly")
 
 
 
@@ -183,46 +184,92 @@ prepare_country_table <- function(dat, countries) {
 #' @param sdat stringency data
 #' @param date date for the stringency index
 #' @param variable variable which should be shown
+#' @param measure type of measure that should be shown if StringencyIndex is selected as variable
 #' @returns ggplot object
-plot_world_data <- function(world, dat, date, variable) {
-  d <- left_join(world, filter(dat, Date == date), by = c('region' = 'Country'))
+plot_world_data <- function(dat, date, variable, measure) {
+  #d <- left_join(world, filter(dat, Date == date), by = c('region' = 'Country'))
+  d <- filter(dat, Date == date)
   
   if (variable == 'StringencyIndex') {
-    
-    title <- 'Stringency of Lockdown Across the World'
     legend_title <- 'Stringency Index'
-    d$variable <- d$StringencyIndexForDisplay
-    
+    if (measure == "Combined") {
+      title <- 'Stringency of Lockdown Across the World'
+      d$variable <- d$StringencyIndexForDisplay
+      limits <- c(0,100)
+    } else if(measure == "School") {
+      title <- "Stringency of School Closing around the World"
+      d$variable <- d$`C1_School closing`
+      limits <- c(0,3)
+    } else if(measure == "Workplace") {
+      title <- "Stringency of Workplace Closing around the World"
+      d$variable <- d$`C2_Workplace closing`
+      limits <- c(0,3)
+    } else if(measure == "PublicEvents") {
+      title <- "Stringency in Cancelling Public Events around the World"
+      d$variable <- d$`C3_Cancel public events`
+      limits <- c(0,2)
+    } else if(measure == "Gatherings") {
+      title <- "Stringency in Restricting Gatherings around the World"
+      d$variable <- d$`C4_Restrictions on gatherings`
+      limits <- c(0,4)
+    } else if(measure == "Transport") {
+      title <- "Stringency in Closing Public Transport around the World"
+      d$variable <- d$`C5_Close public transport`
+      limits <- c(0,2)
+    } else if(measure == "Home") {
+      title <- "Stringency of Stay at Home Requirements around the World"
+      d$variable <- d$`C6_Stay at home requirements`
+      limits <- c(0,3)
+    } else if(measure == "Movement") {
+      title <- "Stringency of Internal Movement Restrictions around the World"
+      d$variable <- d$`C7_Restrictions on internal movement`
+      limits <- c(0,2)
+    } else if(measure == "Travel") {
+      title <- "Stringency of International Travel Controls around the World"
+      d$variable <- d$`C8_International travel controls`
+      limits <- c(0,4)
+    } 
+      
   } else if (variable == 'Deaths') {
     
     title <- 'Confirmed Deaths per Million Across the World'
     legend_title <- 'Deaths per Million'
     d$variable <- d$DeathsPerMillion
+    limits = c(0, ceiling(quantile(dat$DeathsPerMillion, .99, na.rm = TRUE)*100)/100)
     
   } else if (variable == 'Cases') {
     
     title <- 'Confirmed Cases per Million Across the World'
     legend_title <- 'Cases per Million'
     d$variable <- d$CasesPerMillion
+    limits = c(0, ceiling(quantile(dat$CasesPerMillion, .99, na.rm = TRUE)*1000)/1000)
     
   }
+  plot_ly(data = d, type = "choropleth", locations = d$CountryCode, z = d$variable, stroke = I("black"), span = I(1),
+          text = paste0(d$CountryName)) %>%
+    colorbar(title = legend_title, limits = limits, y = 0.75) %>%#, x = 0.5, xanchor = "center", y = 1.5) %>%
+    layout(title = list(text = title), geo = list(lataxis = list(range = c(-55, 80))))
+  # layout(legend = list(orientation = "h",
+  #                      xanchor = "center",
+  #                      x = 0.5))
+  #add_trace(color = ~variable, type = "choropleth", locations = unique(CountryName))
   
-  ggplot(d, aes(x = long, y = lat)) +
-    geom_polygon(aes(group = group, fill = variable)) +
-    scale_fill_viridis_c(option = 'plasma', limits = c(0, 100), name = legend_title) + 
-    scale_x_continuous(expand = c(0, 0)) +
-    scale_y_continuous(expand = c(0, 0)) +
-    ggtitle(title) +
-    theme_bw() +
-    theme(
-      legend.position = 'top',
-      axis.title = element_blank(),
-      axis.text = element_blank(),
-      axis.ticks = element_blank(),
-      panel.grid.minor = element_blank(),
-      panel.grid.major = element_blank(),
-      plot.title = element_text(hjust = 0.5)
-    )
+  # ggplot(d, aes(x = long, y = lat)) +
+  #   geom_polygon(aes(group = group, fill = variable)) +
+  #   scale_fill_viridis_c(option = 'plasma', limits = c(0, 100), name = legend_title) + 
+  #   scale_x_continuous(expand = c(0, 0)) +
+  #   scale_y_continuous(expand = c(0, 0)) +
+  #   ggtitle(title) +
+  #   theme_bw() +
+  #   theme(
+  #     legend.position = 'top',
+  #     axis.title = element_blank(),
+  #     axis.text = element_blank(),
+  #     axis.ticks = element_blank(),
+  #     panel.grid.minor = element_blank(),
+  #     panel.grid.major = element_blank(),
+  #     plot.title = element_text(hjust = 0.5)
+  #   )
 }
 
 

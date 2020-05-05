@@ -63,7 +63,7 @@ body <- dashboardBody(
         solidHeader = TRUE, collapsible = TRUE, align = 'center',
         
         # plotlyOutput('heatmap', width = '75%'),
-        plotOutput('heatmap', width = '75%'),
+        plotlyOutput('heatmap', width = '75%'),
         
         sliderInput(
           inputId = 'mapdate', label = 'Date:', 
@@ -81,7 +81,20 @@ body <- dashboardBody(
             'Deaths' = 'Deaths',
             'Cases' = 'Cases'
           ), selected = 'StringencyIndex', inline = TRUE
-        )
+        ),
+        conditionalPanel(condition = "selected_infotype == StringencyIndexForDisplay",
+                         radioButtons(inputId = "index_type", label = "Type of measures:",
+                                      choices = c("Combined" = "Combined",
+                                                  "School closing" = "School",
+                                                  "Workplace closing" = "Workplace",
+                                                  "Cancellation of public events" = "PublicEvents",
+                                                  "Restrictions on gatherings" = "Gatherings",
+                                                  "Closing of public transport" = "Transport",
+                                                  "Stay at home requirements" = "Home",
+                                                  "Restrictions on internal movement" = "Movement",
+                                                  "International travel controls" = "Travel"),
+                                      selected = "Combined",
+                                      inline = TRUE)),
       ),
       
       box(

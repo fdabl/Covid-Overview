@@ -11,6 +11,7 @@ shinyServer(function(session, input, output) {
   # Reactive Elements for the Map
   selected_mapdate <- reactive({ input$mapdate })
   selected_variable <- reactive({ input$variable_type })
+  selected_measure <- reactive({ input$index_type })
   
   # Reactive Elements for the Stringency Plot
   selected_countries <- reactive({ input$countries_lockdown })
@@ -35,8 +36,8 @@ shinyServer(function(session, input, output) {
   
   
   # TODO: Make this a plotly figure
-  output$heatmap <- renderPlot({
-    p <- plot_world_data(world, dat, selected_mapdate(), selected_variable())
+  output$heatmap <- renderPlotly({
+    p <- plot_world_data(dat, selected_mapdate(), selected_variable(), selected_measure())
     p
   })
     
