@@ -23,6 +23,7 @@ get_stringency_csv <- function(force_download = FALSE) {
     # Preprocessing
     dat <- d %>% 
       left_join(country_data, by = c('CountryCode' = 'Code')) %>% 
+      group_by(Country) %>% 
       fill(
         ConfirmedCases,
         ConfirmedDeaths,
@@ -32,14 +33,11 @@ get_stringency_csv <- function(force_download = FALSE) {
         Country = CountryName,
         Date = as_date(as.character(Date)),
         
-        # Only first value is NA, replace with 0
         ConfirmedCases = replace_na(ConfirmedCases, 0),
         ConfirmedDeaths = replace_na(ConfirmedDeaths, 0),
         CasesPerMillion = (ConfirmedCases / Population) * 1e6,
-        DeathsPerMillion = (ConfirmedDeaths / Population) * 1e6
-      ) %>% 
-      group_by(Country) %>% 
-      mutate(
+        DeathsPerMillion = (ConfirmedDeaths / Population) * 1e6,
+        
         ConfirmedDailyCases = c(0, diff(ConfirmedCases)),
         ConfirmedDailyDeaths = c(0, diff(ConfirmedDeaths)),
         NewCasesPerMillion = (ConfirmedDailyCases / Population) * 1e6,
