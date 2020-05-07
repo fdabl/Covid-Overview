@@ -4,7 +4,7 @@ library('DT')
 source('helpers.R')
 
 
-world <- get_world_data()
+#world <- get_world_data()
 dat <- get_stringency_csv()
 
 eu_countries <- c(
@@ -62,16 +62,18 @@ body <- dashboardBody(
         title = 'The Lockdown Across the Globe', status = 'primary', width = '100%',
         solidHeader = TRUE, collapsible = TRUE, align = 'center',
         
-        # plotlyOutput('heatmap', width = '75%'),
-        plotlyOutput('heatmap', width = '75%'),
+        plotlyOutput('heatmap', width = "75%", inline = TRUE),
         
         sliderInput(
           inputId = 'mapdate', label = 'Date:', 
           min = MIN_DATE, 
           max = MAX_DATE,
           value = MAX_DATE,
-          step = 1, width = '75%'
+          step = 1, width = '75%',
+          animate = TRUE, animateOptions(interval = 100, loop = TRUE)
         ),
+        tags$head(tags$style(type='text/css', 
+                             ".slider-animate-button {font-size: 20pt !important;}")),
         
         radioButtons(
           inputId = 'variable_type',
@@ -82,7 +84,8 @@ body <- dashboardBody(
             'Cases' = 'Cases'
           ), selected = 'StringencyIndex', inline = TRUE
         ),
-        conditionalPanel(condition = "selected_infotype == StringencyIndexForDisplay",
+        
+        conditionalPanel(condition = "input.variable_type == 'StringencyIndex'",
                          radioButtons(inputId = "index_type", label = "Type of measures:",
                                       choices = c("Combined" = "Combined",
                                                   "School closing" = "School",
@@ -95,7 +98,22 @@ body <- dashboardBody(
                                                   "International travel controls" = "Travel"),
                                       selected = "Combined",
                                       inline = TRUE)),
+        
+        radioButtons(
+          inputId = 'continent',
+          label = 'Zoom in on:', 
+          choices = c(
+            'World' = 'World',
+            "Europe" = "Europe",
+            'North America' = 'NorthAmerica',
+            'South America' = 'SouthAmerica',
+            'Asia' = 'Asia',
+            'Africa' = 'Africa',
+            'Oceania' = 'Oceania'
+          ), selected = 'World', inline = TRUE
+        ),
       ),
+      
       
       box(
         title = 'Stringency Index and Daily Deaths', status = 'primary', solidHeader = TRUE,
@@ -111,10 +129,10 @@ body <- dashboardBody(
             enable_search = TRUE,
             non_selected_header = 'Choose between:',
             selected_header = 'You have selected:'
-           )
-         ),
+          )
+        ),
         
-       plotOutput('lockdown_plot')
+        plotOutput('lockdown_plot')
       ),
       
       box(
@@ -132,8 +150,8 @@ body <- dashboardBody(
             enable_search = TRUE,
             non_selected_header = 'Choose between:',
             selected_header = 'You have selected:'
-            )
-          ),
+          )
+        ),
         
         dataTableOutput('countries_table')
       )
@@ -143,17 +161,17 @@ body <- dashboardBody(
       tabName = 'about',
       fluidPage(
         box(width = 1000,
-          h3('About'),
-          p(
-           'This Web App was developed by Fabian Dablander, Alexandra Rusu, Aleksandar Tomasevic,
+            h3('About'),
+            p(
+              'This Web App was developed by Fabian Dablander, Alexandra Rusu, Aleksandar Tomasevic,
            and Marcel Raphael Schreiner on behalf of https://scienceversuscorona.com.' 
-          )
+            )
         )
       )
     )
   )
 )
-  
+
 
 header <- dashboardHeader(title = 'Lifting Lockdowns')  
 dashboardPage(header, sidebar, body, skin = 'blue') 

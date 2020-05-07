@@ -4,8 +4,8 @@ library('jsonlite')
 library('tidyverse')
 library('lubridate')
 library("plotly")
-
-
+library("countrycode")
+library("RColorBrewer")
 
 #' Gets the Stringency Index and Deaths / Confirmed from the Oxford as csv
 #' 
@@ -23,6 +23,7 @@ get_stringency_csv <- function(force_download = FALSE) {
     # Preprocessing
     dat <- d %>% 
       left_join(country_data, by = c('CountryCode' = 'Code')) %>% 
+      mutate(Country = CountryName) %>%
       group_by(Country) %>% 
       fill(
         ConfirmedCases,
@@ -30,18 +31,68 @@ get_stringency_csv <- function(force_download = FALSE) {
         StringencyIndexForDisplay # TODO: Discuss this
       ) %>% 
       mutate(
-        Country = CountryName,
         Date = as_date(as.character(Date)),
         
         ConfirmedCases = replace_na(ConfirmedCases, 0),
         ConfirmedDeaths = replace_na(ConfirmedDeaths, 0),
-        CasesPerMillion = (ConfirmedCases / Population) * 1e6,
-        DeathsPerMillion = (ConfirmedDeaths / Population) * 1e6,
+        CasesPerMillion = round((ConfirmedCases / Population) * 1e6, 2),
+        DeathsPerMillion = round((ConfirmedDeaths / Population) * 1e6, 2),
         
         ConfirmedDailyCases = c(0, diff(ConfirmedCases)),
         ConfirmedDailyDeaths = c(0, diff(ConfirmedDeaths)),
         NewCasesPerMillion = (ConfirmedDailyCases / Population) * 1e6,
         NewDeathsPerMillion = (ConfirmedDailyDeaths / Population) * 1e6
+      ) %>%
+      fill(CasesPerMillion,
+           DeathsPerMillion,
+           `C1_School closing`,
+           `C2_Workplace closing`,
+           `C3_Cancel public events`,
+           `C4_Restrictions on gatherings`,
+           `C5_Close public transport`,
+           `C6_Stay at home requirements`,
+           `C7_Restrictions on internal movement`,
+           `C8_International travel controls`
+      ) %>%
+      mutate(`rec_C1_School closing` = case_when(
+        `C1_School closing` == 0 ~ "No measures",
+        `C1_School closing` == 1 ~ "Recommend closing",
+        `C1_School closing` == 2 ~ "Require closing on some levels",
+        `C1_School closing` == 3 ~ "Require closing"),
+        `rec_C2_Workplace closing` = factor(case_when(
+          `C2_Workplace closing` == 0 ~ "No measures",
+          `C2_Workplace closing` == 1 ~ "Recommend closing or work from home",
+          `C2_Workplace closing` == 2 ~ "Require closing or work from home for some sectors",
+          `C2_Workplace closing` == 3 ~ "Require closing or work from home except essential workplaces")),
+        `rec_C3_Cancel public events` = case_when(
+          `C3_Cancel public events` == 0 ~ "No measures",
+          `C3_Cancel public events` == 1 ~ "Recommend cancelling",
+          `C3_Cancel public events` == 2 ~ "Require cancelling"),
+        `rec_C4_Restrictions on gatherings` = case_when(
+          `C4_Restrictions on gatherings` == 0 ~ "No restrictions",
+          `C4_Restrictions on gatherings` == 1 ~ "Restrictions on gatherings > 1000 people",
+          `C4_Restrictions on gatherings` == 2 ~ "Restrictions on gatherings > 100 people",
+          `C4_Restrictions on gatherings` == 3 ~ "Restrictions on gatherings > 10 people",
+          `C4_Restrictions on gatherings` == 4 ~ "Restrictions on gatherings < 10 people"),
+        `rec_C5_Close public transport` = case_when(
+          `C5_Close public transport` == 0 ~ "No measures",
+          `C5_Close public transport` == 1 ~ "Recommend closing or significantly reduce available transport",
+          `C5_Close public transport` == 2 ~ "Require closing or restrict use for most citizens"),
+        `rec_C6_Stay at home requirements` = case_when(
+          `C6_Stay at home requirements` == 0 ~ "No measures",
+          `C6_Stay at home requirements` == 1 ~ "Recommend not leaving house",
+          `C6_Stay at home requirements` == 2 ~ "Require not leaving house except for exercise and essential trips",
+          `C6_Stay at home requirements` == 3 ~ "Require not leaving house with minimal exceptions"),
+        `rec_C7_Restrictions on internal movement` = case_when(
+          `C7_Restrictions on internal movement` == 0 ~ "No measures",
+          `C7_Restrictions on internal movement` == 1 ~ "Recommend closing or significantly reduce available transport",
+          `C7_Restrictions on internal movement` == 2 ~ "Require closing or restrict use for most citizens"),
+        `rec_C8_International travel controls` = case_when(
+          `C8_International travel controls` == 0 ~ "No measures",
+          `C8_International travel controls` == 1 ~ "Screening",
+          `C8_International travel controls` == 2 ~ "Quarantine arrivals from high-risk regions",
+          `C8_International travel controls` == 3 ~ "Ban on high-risk regions",
+          `C8_International travel controls` == 4 ~ "Total border closure")
       )
     
     write.csv(dat, 'data/stringency_data.csv', row.names = FALSE)
@@ -53,36 +104,23 @@ get_stringency_csv <- function(force_download = FALSE) {
   dat
 }
 
-
-
-#' Prepares the world data
-#' 
-#' @returns prepared world data
-get_world_data <- function() {
+#' @returns country codes and continents
+get_country_codes <- function() {
   
-  if (!file.exists('data/world_data.csv')) {
-    world <- ggplot2::map_data('world') %>% 
-      filter(region != 'Antarctica') %>% 
-      mutate(
-        region = recode(
-          region, 'USA' = 'United States', 'UK' = 'United Kingdom',
-          'Democratic Republic of the Congo' = 'Democratic Republic of Congo',
-          'Kyrgyzstan' = 'Kyrgyz Republic', 'Slovakia' = 'Slovak Republic', 
-          'Swaziland' = 'Eswatini', 'Trinidad' = 'Trinidad and Tobago',
-          'Tobago' = 'Trinidad and Tobago'
-        )
-      )
+  if (!file.exists('data/country_codes.csv')) {
+    country_codes <- countrycode::codelist %>% 
+      select(continent, CountryName = country.name.en, CountryCode = iso3c) %>%
+      filter(!is.na(CountryCode))
     
-    write.csv(world, 'data/world_data.csv', row.names = FALSE)
+    write.csv(country_codes, 'data/country_codes.csv', row.names = FALSE)
     
   } else {
-    world <- read.csv('data/world_data.csv')
+    country_codes <- read.csv('data/country_codes.csv')
   }
   
-  world
+  country_codes
   
 }
-  
 
 #' Returns number of days since the intervention is in place
 #' TODO: Think about how to handle NAs
@@ -173,10 +211,16 @@ prepare_country_table <- function(dat, countries) {
   cbind(d[, 1], dat)
 }
 
+#' Returns breakpoints for discrete color map fill
+Z_Breaks = function(n){
+  CUTS = seq(0,1,length.out=n+1)
+  rep(CUTS,ifelse(CUTS %in% 0:1,1,2))
+}
 
 #' Returns ggplot of map filled according to variable
 #' TODO: Change this to a fast plotly implementation (instead of calling ggplotly on the result)
 #' TODO: Scale Deaths and Cases differently for sound visualisation
+#' 
 #' 
 #' @param world world data
 #' @param sdat stringency data
@@ -184,90 +228,164 @@ prepare_country_table <- function(dat, countries) {
 #' @param variable variable which should be shown
 #' @param measure type of measure that should be shown if StringencyIndex is selected as variable
 #' @returns ggplot object
-plot_world_data <- function(dat, date, variable, measure) {
+plot_world_data <- function(dat, date, variable, measure, continent) {
   #d <- left_join(world, filter(dat, Date == date), by = c('region' = 'Country'))
-  d <- filter(dat, Date == date)
-  
+  d <- dat %>%
+    filter(!(CountryName %in% c("San Marino", "Andorra", "Monaco"))) %>%
+    group_by(CountryCode) %>%
+    filter(Date == date | Date == max(dat$Date[which(dat$Date < date)]))
+
   if (variable == 'StringencyIndex') {
     legend_title <- 'Stringency Index'
     if (measure == "Combined") {
       title <- 'Stringency of Lockdown Across the World'
       d$variable <- d$StringencyIndexForDisplay
       limits <- c(0,100)
+      colorscale <- "Reds"
+      colorbar <- list(title = legend_title, limits = limits, y = 0.75, tickvals = seq(0, 100, 20))
     } else if(measure == "School") {
       title <- "Stringency of School Closing around the World"
       d$variable <- d$`C1_School closing`
-      limits <- c(0,3)
+      tags <- dat$`rec_C1_School closing` %>% factor() %>% fct_reorder(dat$`C1_School closing`) %>% levels()
+      nFactor <- length(tags)
+      colours <- brewer.pal(n = nFactor,name = "Reds")
+      names(colours) <- tags
+      colorscale <- data.frame(z=Z_Breaks(nFactor),
+                               col=rep(colours,each=2),stringsAsFactors=FALSE)
+      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours))
     } else if(measure == "Workplace") {
       title <- "Stringency of Workplace Closing around the World"
       d$variable <- d$`C2_Workplace closing`
-      limits <- c(0,3)
+      tags <- dat$`rec_C2_Workplace closing` %>% factor() %>% fct_reorder(dat$`C2_Workplace closing`) %>% levels()
+      nFactor <- length(tags)
+      colours <- brewer.pal(n = nFactor,name = "Reds")
+      names(colours) <- tags
+      colorscale <- data.frame(z=Z_Breaks(nFactor),
+                               col=rep(colours,each=2),stringsAsFactors=FALSE)
+      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours))
     } else if(measure == "PublicEvents") {
       title <- "Stringency in Cancelling Public Events around the World"
       d$variable <- d$`C3_Cancel public events`
-      limits <- c(0,2)
+      tags <- dat$`rec_C3_Cancel public events` %>% factor() %>% fct_reorder(dat$`C3_Cancel public events`) %>% levels()
+      nFactor <- length(tags)
+      colours <- brewer.pal(n = nFactor,name = "Reds")
+      names(colours) <- tags
+      colorscale <- data.frame(z=Z_Breaks(nFactor),
+                               col=rep(colours,each=2),stringsAsFactors=FALSE)
+      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours))
     } else if(measure == "Gatherings") {
       title <- "Stringency in Restricting Gatherings around the World"
       d$variable <- d$`C4_Restrictions on gatherings`
-      limits <- c(0,4)
+      tags <- dat$`rec_C4_Restrictions on gatherings` %>% factor() %>% fct_reorder(dat$`C4_Restrictions on gatherings`) %>% levels()
+      nFactor <- length(tags)
+      colours <- brewer.pal(n = nFactor,name = "Reds")
+      names(colours) <- tags
+      colorscale <- data.frame(z=Z_Breaks(nFactor),
+                               col=rep(colours,each=2),stringsAsFactors=FALSE)
+      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours))
     } else if(measure == "Transport") {
       title <- "Stringency in Closing Public Transport around the World"
       d$variable <- d$`C5_Close public transport`
-      limits <- c(0,2)
+      tags <- dat$`rec_C5_Close public transport` %>% factor() %>% fct_reorder(dat$`C5_Close public transport`) %>% levels()
+      nFactor <- length(tags)
+      colours <- brewer.pal(n = nFactor,name = "Reds")
+      names(colours) <- tags
+      colorscale <- data.frame(z=Z_Breaks(nFactor),
+                               col=rep(colours,each=2),stringsAsFactors=FALSE)
+      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours))
     } else if(measure == "Home") {
       title <- "Stringency of Stay at Home Requirements around the World"
       d$variable <- d$`C6_Stay at home requirements`
-      limits <- c(0,3)
+      tags <- dat$`rec_C6_Stay at home requirements` %>% factor() %>% fct_reorder(dat$`C6_Stay at home requirements`) %>% levels()
+      nFactor <- length(tags)
+      colours <- brewer.pal(n = nFactor,name = "Reds")
+      names(colours) <- tags
+      colorscale <- data.frame(z=Z_Breaks(nFactor),
+                               col=rep(colours,each=2),stringsAsFactors=FALSE)
+      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours))
     } else if(measure == "Movement") {
       title <- "Stringency of Internal Movement Restrictions around the World"
       d$variable <- d$`C7_Restrictions on internal movement`
-      limits <- c(0,2)
+      tags <- dat$`rec_C7_Restrictions on internal movement` %>% factor() %>% fct_reorder(dat$`C7_Restrictions on internal movement`) %>% levels()
+      nFactor <- length(tags)
+      colours <- brewer.pal(n = nFactor,name = "Reds")
+      names(colours) <- tags
+      colorscale <- data.frame(z=Z_Breaks(nFactor),
+                               col=rep(colours,each=2),stringsAsFactors=FALSE)
+      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours))
     } else if(measure == "Travel") {
       title <- "Stringency of International Travel Controls around the World"
       d$variable <- d$`C8_International travel controls`
-      limits <- c(0,4)
+      tags <- dat$`rec_C8_International travel controls` %>% factor() %>% fct_reorder(dat$`C8_International travel controls`) %>% levels()
+      nFactor <- length(tags)
+      colours <- brewer.pal(n = nFactor,name = "Reds")
+      names(colours) <- tags
+      colorscale <- data.frame(z=Z_Breaks(nFactor),
+                               col=rep(colours,each=2),stringsAsFactors=FALSE)
+      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours))
     } 
-      
+    
   } else if (variable == 'Deaths') {
     
     title <- 'Confirmed Deaths per Million Across the World'
     legend_title <- 'Deaths per Million'
     d$variable <- d$DeathsPerMillion
     limits = c(0, ceiling(quantile(dat$DeathsPerMillion, .99, na.rm = TRUE)*100)/100)
+    colorscale <- "Reds"
+    colorbar <- list(title = legend_title, limits = limits, y = 0.75)
     
   } else if (variable == 'Cases') {
     
     title <- 'Confirmed Cases per Million Across the World'
     legend_title <- 'Cases per Million'
     d$variable <- d$CasesPerMillion
-    limits = c(0, ceiling(quantile(dat$CasesPerMillion, .99, na.rm = TRUE)*1000)/1000)
+    limits <- c(0, ceiling(quantile(dat$CasesPerMillion, .99, na.rm = TRUE)*1000)/1000)
+    colorscale <- "Reds"
+    colorbar <- list(title = legend_title, limits = limits, y = 0.75)
     
   }
-  plot_ly(data = d, type = "choropleth", locations = d$CountryCode, z = d$variable, stroke = I("black"), span = I(1),
-          text = paste0(d$CountryName)) %>%
-    colorbar(title = legend_title, limits = limits, y = 0.75) %>%#, x = 0.5, xanchor = "center", y = 1.5) %>%
-    layout(title = list(text = title), geo = list(lataxis = list(range = c(-55, 80))))
-  # layout(legend = list(orientation = "h",
-  #                      xanchor = "center",
-  #                      x = 0.5))
-  #add_trace(color = ~variable, type = "choropleth", locations = unique(CountryName))
   
-  # ggplot(d, aes(x = long, y = lat)) +
-  #   geom_polygon(aes(group = group, fill = variable)) +
-  #   scale_fill_viridis_c(option = 'plasma', limits = c(0, 100), name = legend_title) + 
-  #   scale_x_continuous(expand = c(0, 0)) +
-  #   scale_y_continuous(expand = c(0, 0)) +
-  #   ggtitle(title) +
-  #   theme_bw() +
-  #   theme(
-  #     legend.position = 'top',
-  #     axis.title = element_blank(),
-  #     axis.text = element_blank(),
-  #     axis.ticks = element_blank(),
-  #     panel.grid.minor = element_blank(),
-  #     panel.grid.major = element_blank(),
-  #     plot.title = element_text(hjust = 0.5)
-  #   )
+  if (continent == "World") {
+    
+    lataxis <- list(range = (c(-60, 90)))
+    lonaxis <- list(range = (c(-180, 180)))
+    
+  } else if (continent == "Europe"){
+    
+    lataxis <- list(range = (c(30, 90)))
+    lonaxis <- list(range = (c(-30, 50)))
+    
+  }else if (continent == "NorthAmerica"){
+    
+    lataxis <- list(range = (c(10, 90)))
+    lonaxis <- list(range = (c(-180, -30)))
+    
+  } else if (continent == "SouthAmerica"){
+    
+    lataxis <- list(range = (c(-60, 15)))
+    lonaxis <- list(range = (c(-105, -30)))
+    
+  } else if (continent == "Asia"){
+    
+    lataxis <- list(range = (c(-20, 90)))
+    lonaxis <- list(range = (c(30, 180)))
+    
+  } else if (continent == "Africa"){
+    
+    lataxis <- list(range = (c(-40, 40)))
+    lonaxis <- list(range = (c(-20, 55)))
+    
+  } else if (continent == "Oceania"){
+    
+    lataxis <- list(range = (c(-60, 0)))
+    lonaxis <- list(range = (c(90, 180)))
+    
+  }
+  
+  
+  plot_ly(data = d, type = "choropleth", locations = d$CountryCode, z = d$variable, stroke = I("black"), span = I(1),
+          text = paste0(d$CountryName), colorscale = colorscale, colorbar = colorbar) %>%
+    layout(title = list(text = title), geo = list(showcountries = TRUE, lataxis = lataxis, lonaxis = lonaxis))
 }
 
 
