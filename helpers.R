@@ -303,7 +303,6 @@ plot_stringency_data <- function(dat, countries, nr_cols) {
     )
 }
 
-
 #' Currently not used: JSON API does not give us information about individual Stringency elements
 #' #' Gets the Stringency Index and Deaths / Confirmed from the Oxford API
 #' #' @param start Start date for data

@@ -94,14 +94,13 @@ body <- dashboardBody(
                                                   "Restrictions on internal movement" = "Movement",
                                                   "International travel controls" = "Travel"),
                                       selected = "Combined",
-                                      inline = TRUE)),
+                                      inline = TRUE))
       ),
       
       box(
         title = 'Stringency Index and Daily Deaths', status = 'primary', solidHeader = TRUE,
-        collapsible = TRUE, align = 'center', width = '100%',
+        collapsible = TRUE, align = 'center', width = '100%', height = "1000px",
         
-       plotOutput('lockdown_plot'),
         
         multiInput(
           inputId = 'countries_lockdown',
@@ -113,9 +112,25 @@ body <- dashboardBody(
             enable_search = TRUE,
             non_selected_header = 'Choose between:',
             selected_header = 'You have selected:'
-           )
-         )
-      ),
+          )
+        ),
+        
+        radioButtons(
+          "regions", "Regions", 
+          c("OECD", "Europe", "Americas", "Asia", "Africa", "Oceania"),
+          inline = TRUE
+        ),
+  
+        div(style="display:inline-block", 
+           actionButton("Countries", "Display by country")
+           ),
+       actionButton("Region", "Display by region"),
+       
+       plotOutput('lockdown_plot')
+       #height = '1000'  #textOutput("height")
+
+      ),        
+
       
       box(
         title = 'How Countries are Lifting the Lockdown', status = 'primary', solidHeader = TRUE,
