@@ -125,15 +125,11 @@ body <- dashboardBody(
        
         plotOutput('lockdown_plot')
         #height = '1000'  #textOutput("height")
-
-       )
-      )
+      ),
       
       box(
         title = 'How Countries are Lifting the Lockdown', status = 'primary', solidHeader = TRUE,
         collapsible = TRUE, align = 'center', width = '100%',
-        
-        
         multiInput(
           inputId = 'countries_table',
           label = 'Countries:',
