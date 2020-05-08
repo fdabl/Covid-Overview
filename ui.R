@@ -112,12 +112,13 @@ body <- dashboardBody(
             'Oceania' = 'Oceania'
           ), selected = 'World', inline = TRUE
         ),
+
       ),
       
       
       box(
         title = 'Stringency Index and Daily Deaths', status = 'primary', solidHeader = TRUE,
-        collapsible = TRUE, align = 'center', width = '100%',
+        collapsible = TRUE, align = 'center', width = '100%', height = "1000px",
         
         multiInput(
           inputId = 'countries_lockdown',
@@ -132,14 +133,22 @@ body <- dashboardBody(
           )
         ),
         
+        radioButtons(
+          "regions", "Regions", 
+          c("OECD", "Europe", "Americas", "Asia", "Africa", "Oceania"),
+          inline = TRUE
+        ),
+  
+        div(style="display:inline-block", actionButton("Countries", "Display by country")),
+        actionButton("Region", "Display by region"),
+       
         plotOutput('lockdown_plot')
+        #height = '1000'  #textOutput("height")
       ),
       
       box(
         title = 'How Countries are Lifting the Lockdown', status = 'primary', solidHeader = TRUE,
         collapsible = TRUE, align = 'center', width = '100%',
-        
-        
         multiInput(
           inputId = 'countries_table',
           label = 'Countries:',
