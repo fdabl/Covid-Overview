@@ -153,7 +153,7 @@ body <- dashboardBody(
           inputId = 'countries_table',
           label = 'Countries:',
           choices = COUNTRIES,
-          selected = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom'),
+          selected = c('Germany', 'Netherlands', 'Romania', 'United Kingdom'),
           width = '350px',
           options = list(
             enable_search = TRUE,
@@ -161,7 +161,20 @@ body <- dashboardBody(
             selected_header = 'You have selected:'
           )
         ),
-        
+        radioButtons(
+          inputId = 'continent_table',
+          label = 'Zoom in on:', 
+          choices = c(
+            'World' = 'World',
+            "Europe" = "Europe",
+            'North America' = 'NorthAmerica',
+            'South America' = 'SouthAmerica',
+            'Asia' = 'Asia',
+            'Africa' = 'Africa',
+            'Oceania' = 'Oceania'
+          ), selected = 'World', inline = TRUE
+        ),
+        actionButton("TableApply","Apply"),
         dataTableOutput('countries_table')
       )
     ),
