@@ -152,8 +152,8 @@ body <- dashboardBody(
         multiInput(
           inputId = 'countries_table',
           label = 'Countries:',
-          choices = COUNTRIES,
-          selected = c('Germany', 'Netherlands', 'Romania', 'United Kingdom'),
+          choices = unique(dat$CountryName),
+          selected = unique(dat$CountryName),
           width = '350px',
           options = list(
             enable_search = TRUE,
@@ -167,14 +167,15 @@ body <- dashboardBody(
           choices = c(
             'World' = 'World',
             "Europe" = "Europe",
-            'North America' = 'NorthAmerica',
-            'South America' = 'SouthAmerica',
+            'North & South America' = 'Americas',
             'Asia' = 'Asia',
             'Africa' = 'Africa',
             'Oceania' = 'Oceania'
           ), selected = 'World', inline = TRUE
         ),
-        actionButton("TableApply","Apply"),
+        div(style='display:inline-block', actionButton('TableApply','Apply')),
+        actionButton('TableAll', 'Select All'),
+        actionButton('TableClear', 'Clear Selection'),
         dataTableOutput('countries_table')
       )
     ),
