@@ -3,7 +3,7 @@ source('helpers.R')
 
 
 dat <- get_stringency_csv()
-country_codes <- get_country_codes()
+
 
 
 shinyServer(function(session, input, output) {
@@ -17,7 +17,10 @@ shinyServer(function(session, input, output) {
   # Reactive Elements for the Stringency Plot
   selected_countries <- reactive({ 
     input$Countries
-    isolate(input$countries_lockdown) })
+    isolate(input$countries_lockdown)
+    #input$Region
+    #isolate(input$regions)
+    })
   
   num_cols <- reactive({
     len <- length(selected_countries())
@@ -41,6 +44,15 @@ shinyServer(function(session, input, output) {
   
   output$lockdown_plot <- renderPlot({
     plot_stringency_data(dat, selected_countries(), num_cols())
+  }, height = how_high)
+  
+  output$lockdown_plot_lines <- renderPlot({
+    plot_stringency_data_lines(dat, selected_countries(), num_cols())
+  }, height = how_high)
+  
+
+  output$lockdown_plot_lines_scales <- renderPlot({
+    plot_stringency_data_lines_scales(dat, selected_countries(), num_cols())
   }, height = how_high)
   
   
