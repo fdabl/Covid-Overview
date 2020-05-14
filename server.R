@@ -69,8 +69,18 @@ shinyServer(function(session, input, output) {
   
   # TODO: Make this a plotly figure
   output$heatmap <- renderPlotly({
-    p <- plot_world_data(dat, selected_mapdate(), selected_variable(), selected_measure(), selected_continent())
-    p
+    
+    # maintain zoom level when changing dates (not working yet)
+    zoomer <- eventReactive(input$mapdate, {event_data("plotly_relayout", source = "heatmap")})
+    zoom <- zoomer()
+    lataxis <- list(range = c(zoom$`lataxis.range[0]`, zoom$`lataxis.range[1]`))
+    lonaxis <- list(range = c(zoom$`lonaxis.range[0]`, zoom$`lonaxis.range[1]`))
+
+    # create plot
+    p <- plot_world_data(dat, selected_mapdate(), selected_variable(), selected_measure(), selected_continent(),
+                         lataxis = lataxis, lonaxis = lonaxis)
+    p %>% 
+      event_register("plotly_relayout")
   })
   
   output$countries_table <- renderDataTable({
