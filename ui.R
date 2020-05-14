@@ -152,8 +152,8 @@ body <- dashboardBody(
         multiInput(
           inputId = 'countries_table',
           label = 'Countries:',
-          choices = COUNTRIES,
-          selected = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom'),
+          choices = unique(dat$CountryName),
+          selected = unique(dat$CountryName),
           width = '350px',
           options = list(
             enable_search = TRUE,
@@ -161,7 +161,21 @@ body <- dashboardBody(
             selected_header = 'You have selected:'
           )
         ),
-        
+        radioButtons(
+          inputId = 'continent_table',
+          label = 'Zoom in on:', 
+          choices = c(
+            'World' = 'World',
+            "Europe" = "Europe",
+            'North & South America' = 'Americas',
+            'Asia' = 'Asia',
+            'Africa' = 'Africa',
+            'Oceania' = 'Oceania'
+          ), selected = 'World', inline = TRUE
+        ),
+        div(style='display:inline-block', actionButton('TableApply','Apply')),
+        actionButton('TableAll', 'Select All'),
+        actionButton('TableClear', 'Clear Selection'),
         dataTableOutput('countries_table')
       )
     ),

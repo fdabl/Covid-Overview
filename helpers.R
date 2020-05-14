@@ -149,14 +149,14 @@ prepare_country_table <- function(dat, countries) {
   
   cnames <- c(
     'Country',
-    'Schools closed',                # 2 is on some level, 3 is all levels closed
-    'Workplaces closed',             # 2 is required for some, 3 is required for all but non-essential
-    'Public events cancelled',       # 1 is recommended, 2 is required
-    'Public transport closed',       # 1 is recommended, 2 is required
-    'Gatherings restricted',         # 0 are no restrictions, up to 4 in severity
-    'Stay at home',                  # 2 and 3 are restrictions
-    'Internal movement restricted',  # 1 recommended, 2 is required
-    'International travel controls'  # 1 screening, 2 is quarantine, 3 is ban on high-risk regions, 4 is border closures
+    'Mandatory school closing',                # 2 is on some level, 3 is all levels closed
+    'Mandatory workplace closing',             # 2 is required for some, 3 is required for all but non-essential
+    'Mandatory cancellation of public events',       # 1 is recommended, 2 is required
+    'Mandatory public transport closing',       # 1 is recommended, 2 is required
+    'Gatherings restricted below 100 people',         # 0 are no restrictions, up to 4 in severity
+    'Leaving home restricrted by law (with minimal exceptions)',                  # 2 and 3 are restrictions
+    'Mandatory restrictions of internal transport',  # 1 recommended, 2 is required
+    'Total border closure'  # 1 screening, 2 is quarantine, 3 is ban on high-risk regions, 4 is border closures
   )
   
   d <- dat %>% 
@@ -167,11 +167,11 @@ prepare_country_table <- function(dat, countries) {
       C1_schools_closed = `C1_School closing` > 2,
       C2_workplace_closed = `C2_Workplace closing` > 2,
       C3_public_events_cancelled = `C3_Cancel public events` > 1,
-      C4_gatherings_restricted = `C4_Restrictions on gatherings` > 0,
+      C4_gatherings_restricted = `C4_Restrictions on gatherings` > 2,
       C5_public_transport = `C5_Close public transport` > 1,
-      C6_stay_home = `C6_Stay at home requirements` > 1,
+      C6_stay_home = `C6_Stay at home requirements` > 2,
       C7_internal_movement = `C7_Restrictions on internal movement` > 1,
-      C8_international_travel = `C8_International travel controls` > 1,
+      C8_international_travel = `C8_International travel controls` > 3,
       
       # # Economic Measures
       # H1_info_campaigns = `H1_Public information campaigns`,
@@ -203,12 +203,8 @@ prepare_country_table <- function(dat, countries) {
     )
   
   colnames(d) <- cnames
-  
-  dat <- apply(d[, -1], c(1, 2), function(element) {
-    ifelse(is.na(element), 'Not Implemented', paste0('Since ', element, ' Days'))
-  })
-  
-  cbind(d[, 1], dat)
+  return(d)
+
 }
 
 #' Returns breakpoints for discrete color map fill
