@@ -41,26 +41,7 @@ get_stringency_csv <- function(force_download = FALSE) {
         ConfirmedDailyCases = c(0, diff(ConfirmedCases)),
         ConfirmedDailyDeaths = c(0, diff(ConfirmedDeaths)),
         NewCasesPerMillion = (ConfirmedDailyCases / Population) * 1e6,
-        NewDeathsPerMillion = (ConfirmedDailyDeaths / Population) * 1e6,
-        NewCasesPerMillionSmooth = (NewCasesPerMillion +
-                                      lag(NewCasesPerMillion,1) +
-                                      lag(NewCasesPerMillion,3) +
-                                      lag(NewCasesPerMillion,4) +
-                                      lag(NewCasesPerMillion,5) +
-                                      lag(NewCasesPerMillion,6) +
-                                      lag(NewCasesPerMillion,7) +
-                                      lag(NewCasesPerMillion,8) +
-                                      lag(NewCasesPerMillion,9)) /10,
-        NewDeathsPerMillionSmooth = (NewDeathsPerMillion +
-                                       lag(NewDeathsPerMillion, 1)+
-                                       lag(NewDeathsPerMillion, 2)+
-                                       lag(NewDeathsPerMillion, 3)+
-                                       lag(NewDeathsPerMillion, 4)+
-                                       lag(NewDeathsPerMillion, 5)+
-                                       lag(NewDeathsPerMillion, 6)+
-                                       lag(NewDeathsPerMillion, 7)+
-                                       lag(NewDeathsPerMillion, 8)+
-                                       lag(NewDeathsPerMillion, 9))/10
+        NewDeathsPerMillion = (ConfirmedDailyDeaths / Population) * 1e6
       ) %>%
       fill(CasesPerMillion,
            DeathsPerMillion,
@@ -481,104 +462,17 @@ plot_stringency_data <- function(dat, countries, nr_cols) {
   d <- filter(dat, Country %in% countries)
   
   ggplot(d, aes(x = Date)) +
-    geom_line(aes(y = StringencyIndexForDisplay, color = 'black')) +
-    geom_bar(
-      stat = 'identity',
-      aes(y = NewDeathsPerMillion * 10, color = 'red', fill = 'New Deaths per 10 Million')
-    ) +
-    #scale_colour_manual(values = c('#E41A1C', 'black')) +
-    scale_y_continuous(
-      # alx: removed the limits because they were the reason data wasn't displayed
-      sec.axis = sec_axis(~.*1, name = 'New Deaths per 10 Million')#, limits = c(0, 100)
-    ) +
-    facet_wrap(~ Country, ncol = nr_cols) +
-    ylab('Stringency Index') +
-    ggtitle('Stringency of Measures and New Deaths per 10 Million') +
-    theme_bw() +
-    theme(
-      legend.position = 'top',
-      plot.title = element_text(hjust = 0.5, size = 16)
-    ) +
-    scale_fill_manual(values="#E41A1C", name = " ") +
-    scale_colour_manual(name = ' ', 
-                        breaks = c('black'),
-                        values =c('black' = 'black',
-                                  'red' = '#E41A1C'), 
-                        labels = c('Stringency Index'))
-}
-
-plot_stringency_data_lines <- function(dat, countries, nr_cols) {
-  
-  d <- filter(dat, Country %in% countries)
-  
-  ggplot(d, aes(x = Date)) +
-    geom_line(aes(y = StringencyIndexForDisplay, color = 'Stringency Index')) +
-    geom_line(
-      stat = 'identity',
-      aes(y = NewDeathsPerMillionSmooth*10, color = 'New Deaths per 10 Million'),
-      size = 1
-    ) +
-    scale_colour_manual(values = c('#E41A1C', 'black')) +
-    scale_y_continuous(
-    # alx: removed the limits because they were the reason data wasn't displayed
-    sec.axis = sec_axis(~.*1, name = 'New Deaths per 10 Million')#, limits = c(0, 100)
-    ) +
-    facet_wrap(~ Country, ncol = nr_cols) +
-    ylab('Stringency Index') +
-    ggtitle('Stringency of Measures and New Deaths per 10 Million') +
-    theme_bw() +
-    theme(
-      legend.position = 'None',
-      plot.title = element_text(hjust = 0.5, size = 16)
-    )
-}
-
-plot_stringency_data_scales <- function(dat, countries, nr_cols) {
-  
-  d <- filter(dat, Country %in% countries)
-  
-  ggplot(d, aes(x = Date)) +
     geom_line(aes(y = StringencyIndexForDisplay, color = 'Stringency Index')) +
     geom_bar(
       stat = 'identity',
       aes(y = NewDeathsPerMillion*10, color = 'New Deaths per 10 Million')
     ) +
     scale_colour_manual(values = c('#E41A1C', 'black')) +
-  scale_y_continuous(
-    # alx: removed the limits because they were the reason data wasn't displayed
-    sec.axis = sec_axis(~.*1, name = 'New Deaths per 10 Million')#, limits = c(0, 100)
-  ) +
+    scale_y_continuous(
+      sec.axis = sec_axis(~.*10, name = 'New Deaths per 10 Million'), limits = c(0, 100)
+    ) +
     facet_wrap(~ Country, ncol = nr_cols) +
     ylab('Stringency Index') +
-    ggtitle('Stringency of Measures and New Deaths per 10 Million') +
-    theme_bw() +
-    theme(
-      legend.position = 'None',
-      plot.title = element_text(hjust = 0.5, size = 16)
-    )
-}
-
-plot_stringency_data_lines_scales <- function(dat, countries, nr_cols) {
-  
-  d <- filter(dat, Country %in% countries)
-  
-  ggplot(d, aes(x = Date)) +
-    geom_line(
-      stat = 'identity',
-      aes(y = NewDeathsPerMillionSmooth*10, color = 'New Deaths per 10 Million'),
-      size = 1
-    ) +
-    geom_line(aes(y = StringencyIndexForDisplay / 
-                    (10 / max(d$NewDeathsPerMillionSmooth, na.rm=T)),
-                  color = 'Stringency Index')) +
-    scale_colour_manual(values = c('#E41A1C', 'black')) +
-    scale_y_continuous(
-      # alx: removed the limits because they were the reason data wasn't displayed
-      sec.axis = sec_axis(~.*(10/max(d$NewDeathsPerMillionSmooth, na.rm=T)),
-                          name = 'Srtingency Index')#, limits = c(0, 100)
-    ) +
-    facet_wrap(~ Country, ncol = nr_cols) +
-    ylab('New Deaths per 10 Million') +
     ggtitle('Stringency of Measures and New Deaths per 10 Million') +
     theme_bw() +
     theme(
