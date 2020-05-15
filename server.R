@@ -62,7 +62,7 @@ shinyServer(function(session, input, output) {
     updateSelectInput(session,'countries_table', choices = sel_cont,selected = sel_cnt)
   })
   
-  output$lockdown_plot <- renderPlot({
+  output$lockdown_plot_lines_scales <- renderPlot({
     plot_stringency_data(dat, selected_countries(), num_cols())
   }, height = how_high)
   
