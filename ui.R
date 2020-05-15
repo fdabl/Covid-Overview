@@ -1,10 +1,11 @@
-library('shinydashboard')
-library('shinyWidgets')
 library('DT')
+library('shinyWidgets')
+library('shinydashboard')
+library('dashboardthemes')
 source('helpers.R')
 
 
-#world <- get_world_data()
+# world <- get_world_data()
 dat <- get_stringency_csv()
 
 eu_countries <- c(
@@ -34,15 +35,16 @@ sidebar <- dashboardSidebar(
 
 
 body <- dashboardBody(
+  shinyDashboardThemes(
+    theme = 'grey_light'
+  ),
+  
   tabItems(
     tabItem(
       tabName = 'welcome',
       box(
         title = ('Overview of Lockdown Measures'), status = 'primary',
         solidHeader = TRUE, collapsible = TRUE,
-        tags$br(),
-        tags$p(''),
-        tags$br(),
         tags$p(
           'This dashboard shows an overview of how different lockdown measures were
           implemented across different countries', style = 'font-size:150%', align = 'center'
@@ -204,10 +206,12 @@ body <- dashboardBody(
       tabName = 'about',
       fluidPage(
         box(width = 1000,
-            h3('About'),
-            p(
-              'This Web App was developed by Fabian Dablander, Alexandra Rusu, Aleksandar Tomasevic,
-           and Marcel Raphael Schreiner on behalf of https://scienceversuscorona.com.' 
+            HTML(
+              "<h3 style = 'text-align: center;'>About</h3>
+              <p style = 'font-size: 120%; text-align: center;'>
+              This Web App was developed by Fabian Dablander, Alexandra Rusu, Marcel Raphael Schreiner,
+              and Aleksandar Tomasevic as a <a href='http://scienceversuscorona.com/' target='_blank'>Science versus Corona</a> project
+              <p>"
             )
         )
       )

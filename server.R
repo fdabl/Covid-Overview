@@ -30,36 +30,41 @@ shinyServer(function(session, input, output) {
   })
   
   height_of_box = reactive({
-    
-    paste0(as.character(how_high()+500),"px")
-    
+    paste0(as.character(how_high() + 500),"px")
   })
   
+  
   # Reactive Elements for the Table
-
-  selected_countries_table <- eventReactive(input$TableApply, {input$countries_table}, ignoreNULL = FALSE )
+  selected_countries_table <- eventReactive(input$TableApply, { input$countries_table }, ignoreNULL = FALSE )
 
   observeEvent(input$TableClear, {
-    updateSelectInput(session,'countries_table',selected = "")
+    updateSelectInput(session, 'countries_table', selected = '')
   })
+  
   observeEvent(input$TableAll,{
     updateSelectInput(session,'countries_table',selected = unique(dat$CountryName))
   })
   
   observeEvent(input$continent_table, {
-    if (input$continent_table=='World')
-    {sel_cont<-unique(dat$CountryName)
-    sel_cnt<-input$countries_table
+    if (input$continent_table == 'World') {
+      
+      sel_cont <- unique(dat$CountryName)
+      sel_cnt <- input$countries_table
+    
      if(input$TableApply == 0){
       sel_cnt<-unique(dat$CountryName)
      }
+    
+    } else{
+      sel_cont <- country_codes %>% 
+        filter(continent == input$continent_table) %>% 
+        select(CountryName) %>% 
+        filter(CountryName %in% dat$CountryName)
+      
+      sel_cont <- sel_cont[,1]
+      sel_cnt <- input$countries_table
     }
-    else{
-      sel_cont <- country_codes %>% filter(continent==input$continent_table) %>% select(CountryName)                    %>% filter(CountryName %in% dat$CountryName)
-      sel_cont<-sel_cont[,1]
-      sel_cnt<-input$countries_table
-    }
-    updateSelectInput(session,'countries_table', choices = sel_cont,selected = sel_cnt)
+    updateSelectInput(session, 'countries_table', choices = sel_cont, selected = sel_cnt)
   })
   
   output$lockdown_plot_lines_scales <- renderPlot({

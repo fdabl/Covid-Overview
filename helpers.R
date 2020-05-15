@@ -7,6 +7,7 @@ library("plotly")
 library("countrycode")
 library("RColorBrewer")
 
+
 #' Gets the Stringency Index and Deaths / Confirmed from the Oxford as csv
 #' 
 #' @param force_download boolean indicating whether to force download new data
@@ -119,6 +120,7 @@ get_stringency_csv <- function(force_download = FALSE) {
   dat
 }
 
+
 #' @returns country codes and continents
 get_country_codes <- function() {
   
@@ -136,6 +138,7 @@ get_country_codes <- function() {
   country_codes
   
 }
+
 
 #' Returns number of days since the intervention is in place
 #' TODO: Think about how to handle NAs
@@ -222,11 +225,13 @@ prepare_country_table <- function(dat, countries) {
 
 }
 
+
 #' Returns breakpoints for discrete color map fill
 Z_Breaks = function(n){
   CUTS = seq(0,1,length.out=n+1)
   rep(CUTS,ifelse(CUTS %in% 0:1,1,2))
 }
+
 
 #' Returns ggplot of map filled according to variable
 #' TODO: Change this to a fast plotly implementation (instead of calling ggplotly on the result)
