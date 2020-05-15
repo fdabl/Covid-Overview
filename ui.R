@@ -161,7 +161,8 @@ body <- dashboardBody(
         div(style="display:inline-block", actionButton("Countries", "Display by country")),
         actionButton("Region", "Display by region"),
        
-        plotOutput('lockdown_plot')
+        plotOutput('lockdown_plot_lines_scales')
+
         #height = '1000'  #textOutput("height")
       ),
       
