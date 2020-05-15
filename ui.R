@@ -6,17 +6,6 @@ source('helpers.R')
 
 #world <- get_world_data()
 dat <- get_stringency_csv()
-country_codes <- get_country_codes() %>% 
-  select(-'CountryName')
-
-dat <- dat %>% 
-  left_join(country_codes, by = 'CountryCode')
-
-africa_list <- (dat %>% filter(continent == 'Africa'))$CountryName 
-americas_list <- (dat %>% filter(continent == 'Americas'))$CountryName 
-asia_list <- (dat %>% filter(continent == 'Asia'))$CountryName 
-europe_list <- (dat %>% filter(continent == 'Europe'))$CountryName 
-oceania_list <- (dat %>% filter(continent == 'Oceania'))$CountryName 
 
 
 eu_countries <- c(
@@ -160,22 +149,8 @@ body <- dashboardBody(
             actionButton('Countries', 'Display by country')),
         actionButton('Region', 'Display by region'),
        
-        plotOutput('lockdown_plot')
-        #height = '1000'  #textOutput("height")
-      ),
-      
-      box(
-        title = 'Stringency Index and Daily Deaths', status = 'primary', solidHeader = TRUE,
-        collapsible = TRUE, align = 'center', width = '100%', height = "1000px",
-        
-        plotOutput('lockdown_plot_lines')
-      ),
-        
-      box(
-        title = 'Stringency Index and Daily Deaths', status = 'primary', solidHeader = TRUE,
-        collapsible = TRUE, align = 'center', width = '100%', height = "1000px",
-        
         plotOutput('lockdown_plot_lines_scales')
+        #height = '1000'  #textOutput("height")
       ),
       
       box(
