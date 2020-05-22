@@ -5,6 +5,7 @@ library('dashboardthemes')
 source('helpers.R')
 
 
+
 # world <- get_world_data()
 dat <- get_stringency_csv()
 
@@ -132,7 +133,7 @@ body <- dashboardBody(
             'Africa' = 'Africa'
             #'Oceania' = 'Oceania'
           ), selected = 'World', inline = TRUE
-        ),
+        )
 
       ),
       
@@ -155,14 +156,25 @@ body <- dashboardBody(
         ),
         
         radioButtons(
-          "regions", "Regions", 
-          c("OECD", "Europe", "Americas", "Asia", "Africa", "Oceania"),
+          'regions', 'Regions', 
+          c('Africa', 'Asia', 'Americas', 'Europe', 'Oceania', 'OECD'),
           inline = TRUE
         ),
   
-        div(style="display:inline-block", actionButton("Countries", "Display by country")),
-        actionButton("Region", "Display by region"),
-       
+        #div(style="display:inline-block", actionButton("Countries", "Display by country")),
+        
+        prettySwitch(
+          'Region',
+          'Display by region',
+          value = FALSE,
+          status = 'default',
+          slim = FALSE,
+          fill = FALSE,
+          bigger = FALSE,
+          inline = FALSE,
+          width = NULL
+        ),
+        actionButton('Refresh', 'Refresh graph'),
         plotOutput('lockdown_plot_lines_scales')
 
         #height = '1000'  #textOutput("height")
