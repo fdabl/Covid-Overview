@@ -21,8 +21,8 @@ eu_countries <- c(
 # TODO:
 # Showing all countries slows the initial rendering of the app
 # down because it needs to generate all these html elements
-COUNTRIES <- eu_countries
-# COUNTRIES <- dat$Country # extremely slow
+#COUNTRIES <- eu_countries
+COUNTRIES <- dat$Country %>% unique() # extremely slow
 MIN_DATE <- min(dat$Date)
 MAX_DATE <- max(dat$Date)
 
