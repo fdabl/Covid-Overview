@@ -1,10 +1,11 @@
-library('shinydashboard')
-library('shinyWidgets')
 library('DT')
+library('shinyWidgets')
+library('shinydashboard')
+library('dashboardthemes')
 source('helpers.R')
 
 
-#world <- get_world_data()
+# world <- get_world_data()
 dat <- get_stringency_csv()
 
 eu_countries <- c(
@@ -34,15 +35,16 @@ sidebar <- dashboardSidebar(
 
 
 body <- dashboardBody(
+  shinyDashboardThemes(
+    theme = 'grey_light'
+  ),
+  
   tabItems(
     tabItem(
       tabName = 'welcome',
       box(
         title = ('Overview of Lockdown Measures'), status = 'primary',
         solidHeader = TRUE, collapsible = TRUE,
-        tags$br(),
-        tags$p(''),
-        tags$br(),
         tags$p(
           'This dashboard shows an overview of how different lockdown measures were
           implemented across different countries', style = 'font-size:150%', align = 'center'
@@ -68,9 +70,9 @@ body <- dashboardBody(
                              ".slider-animate-button {font-size: 20pt !important; position: absolute; left: 49.3%; margin-top: 20px}")),
         
         tags$style(type = "text/css", "
-          .irs-bar {width: 100%; height: 25px; background: black; border-top: 1px solid black; border-bottom: 1px solid black; }
-          .irs-bar-edge {background: black; border: 1px solid black; height: 25px; border-radius: 0px; width: 20px; }
-          .irs-line {border: 1px solid black; height: 25px; border-radius: 0px;}
+          .irs-bar {width: 100%; height: 25px; background: #3377ff; border-top: 1px #3377ff; border-bottom: 1px #3377ff; }
+          .irs-bar-edge {background: #3377ff; border: 1px #3377ff; height: 25px; border-radius: 0px; width: 20px; }
+          .irs-line {border: 1px #3377ff; height: 25px; border-radius: 0px;}
           .irs-grid-text {font-family: 'arial'; color: white; bottom: 17px; z-index: 1;}
           .irs-grid-pol {display: none;}
           .irs-max {font-family: 'arial'; color: black;}
@@ -105,22 +107,22 @@ body <- dashboardBody(
         ),
         
         conditionalPanel(condition = "input.variable_type == 'StringencyIndex'",
-                         radioButtons(inputId = "index_type", label = "Type of measures:",
-                                      choices = c("Combined" = "Combined",
-                                                  "School closing" = "School",
-                                                  "Workplace closing" = "Workplace",
-                                                  "Cancellation of public events" = "PublicEvents",
-                                                  "Restrictions on gatherings" = "Gatherings",
-                                                  "Closing of public transport" = "Transport",
-                                                  "Stay at home requirements" = "Home",
-                                                  "Restrictions on internal movement" = "Movement",
-                                                  "International travel controls" = "Travel"),
-                                      selected = "Combined",
-                                      inline = TRUE)),
+                         selectInput(inputId = "index_type", label = "Type of measures:",
+                                     choices = c("Combined" = "Combined",
+                                                 "School closing" = "School",
+                                                 "Workplace closing" = "Workplace",
+                                                 "Cancellation of public events" = "PublicEvents",
+                                                 "Restrictions on gatherings" = "Gatherings",
+                                                 "Closing of public transport" = "Transport",
+                                                 "Stay at home requirements" = "Home",
+                                                 "Restrictions on internal movement" = "Movement",
+                                                 "International travel controls" = "Travel"),
+                                     selected = "Combined",
+                                     width = "15%")),
         
-        radioButtons(
+        selectInput(
           inputId = 'continent',
-          label = 'Show:', 
+          label = 'Select area to display:', 
           choices = c(
             'World' = 'World',
             "Europe" = "Europe",
@@ -129,9 +131,9 @@ body <- dashboardBody(
             'Asia' = 'Asia',
             'Africa' = 'Africa'
             #'Oceania' = 'Oceania'
-          ), selected = 'World', inline = TRUE
+          ), selected = 'World', width = "15%"
         ),
-
+        
       ),
       
       
@@ -157,11 +159,12 @@ body <- dashboardBody(
           c("OECD", "Europe", "Americas", "Asia", "Africa", "Oceania"),
           inline = TRUE
         ),
-  
+        
         div(style="display:inline-block", actionButton("Countries", "Display by country")),
         actionButton("Region", "Display by region"),
-       
-        plotOutput('lockdown_plot')
+        
+        plotOutput('lockdown_plot_lines_scales')
+        
         #height = '1000'  #textOutput("height")
       ),
       
@@ -171,8 +174,8 @@ body <- dashboardBody(
         multiInput(
           inputId = 'countries_table',
           label = 'Countries:',
-          choices = COUNTRIES,
-          selected = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom'),
+          choices = unique(dat$CountryName),
+          selected = unique(dat$CountryName),
           width = '350px',
           options = list(
             enable_search = TRUE,
@@ -180,7 +183,21 @@ body <- dashboardBody(
             selected_header = 'You have selected:'
           )
         ),
-        
+        radioButtons(
+          inputId = 'continent_table',
+          label = 'Zoom in on:', 
+          choices = c(
+            'World' = 'World',
+            "Europe" = "Europe",
+            'North & South America' = 'Americas',
+            'Asia' = 'Asia',
+            'Africa' = 'Africa',
+            'Oceania' = 'Oceania'
+          ), selected = 'World', inline = TRUE
+        ),
+        div(style='display:inline-block', actionButton('TableApply','Apply')),
+        actionButton('TableAll', 'Select All'),
+        actionButton('TableClear', 'Clear Selection'),
         dataTableOutput('countries_table')
       )
     ),
@@ -189,10 +206,12 @@ body <- dashboardBody(
       tabName = 'about',
       fluidPage(
         box(width = 1000,
-            h3('About'),
-            p(
-              'This Web App was developed by Fabian Dablander, Alexandra Rusu, Aleksandar Tomasevic,
-           and Marcel Raphael Schreiner on behalf of https://scienceversuscorona.com.' 
+            HTML(
+              "<h3 style = 'text-align: center;'>About</h3>
+              <p style = 'font-size: 120%; text-align: center;'>
+              This Web App was developed by Fabian Dablander, Alexandra Rusu, Marcel Raphael Schreiner,
+              and Aleksandar Tomasevic as a <a href='http://scienceversuscorona.com/' target='_blank'>Science versus Corona</a> project
+              <p>"
             )
         )
       )
