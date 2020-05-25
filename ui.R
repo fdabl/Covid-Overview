@@ -138,44 +138,48 @@ body <- dashboardBody(
       ),
       
       
-      box(
-        title = 'Stringency Index and Daily Deaths', status = 'primary', solidHeader = TRUE,
-        collapsible = TRUE, align = 'center', width = '100%', height = "1000px",
+      box(title = 'Stringency Index and Daily Deaths', status = 'primary', solidHeader = TRUE,
+          collapsible = TRUE, align = 'center', width = '100%', #height = "1000px",
+                      
+        div(style='height:1000px; overflow-y: scroll',
+            
         
-        multiInput(
-          inputId = 'countries_lockdown',
-          label = 'Countries:',
-          choices = COUNTRIES,
-          selected = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom'),
-          width = '350px',
-          options = list(
-            enable_search = TRUE,
-            non_selected_header = 'Choose between:',
-            selected_header = 'You have selected:'
-          )
-        ),
-        
-        radioButtons(
-          'regions', 'Regions', 
-          c('Africa', 'Asia', 'Americas', 'Europe', 'Oceania', 'OECD'),
-          inline = TRUE
-        ),
-  
-        #div(style="display:inline-block", actionButton("Countries", "Display by country")),
-        
-        prettySwitch(
-          'Region',
-          'Display by region',
-          value = FALSE,
-          status = 'default',
-          slim = FALSE,
-          fill = FALSE,
-          bigger = FALSE,
-          inline = FALSE,
-          width = NULL
-        ),
-        actionButton('Refresh', 'Refresh graph'),
-        plotOutput('lockdown_plot_lines_scales')
+
+            multiInput(
+              inputId = 'countries_lockdown',
+              label = 'Countries:',
+              choices = COUNTRIES,
+              selected = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom'),
+              width = '350px',
+              options = list(
+                enable_search = TRUE,
+                non_selected_header = 'Choose between:',
+                selected_header = 'You have selected:'
+              )
+            ),
+            
+            radioButtons(
+              'regions', 'Regions', 
+              c('Africa', 'Asia', 'Americas', 'Europe', 'Oceania', 'OECD'),
+              inline = TRUE
+            ),
+            
+            #div(style="display:inline-block", actionButton("Countries", "Display by country")),
+            
+            prettySwitch(
+              'Region',
+              'Display by region',
+              value = FALSE,
+              status = 'default',
+              slim = FALSE,
+              fill = FALSE,
+              bigger = FALSE,
+              inline = FALSE,
+              width = NULL
+            ),
+            actionButton('Refresh', 'Refresh graph'),
+            plotOutput('lockdown_plot_lines_scales')
+        )
 
         #height = '1000'  #textOutput("height")
       ),
