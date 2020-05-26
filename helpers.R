@@ -78,16 +78,16 @@ get_stringency_csv <- function(force_download = FALSE) {
         `rec_C5_Close public transport` = case_when(
           `C5_Close public transport` == 0 ~ "None",
           `C5_Close public transport` == 1 ~ "Recommended or reduced availability",
-          `C5_Close public transport` == 2 ~ "Required or restricted for most citizens"),
+          `C5_Close public transport` == 2 ~ "Required or severely restricted"),
         `rec_C6_Stay at home requirements` = case_when(
           `C6_Stay at home requirements` == 0 ~ "None",
           `C6_Stay at home requirements` == 1 ~ "Recommended",
-          `C6_Stay at home requirements` == 2 ~ "Required, except exercise and essential trips",
+          `C6_Stay at home requirements` == 2 ~ "Required with some exceptions",
           `C6_Stay at home requirements` == 3 ~ "Required with minimal exceptions"),
         `rec_C7_Restrictions on internal movement` = case_when(
           `C7_Restrictions on internal movement` == 0 ~ "None",
           `C7_Restrictions on internal movement` == 1 ~ "Recommended or reduced availability",
-          `C7_Restrictions on internal movement` == 2 ~ "Required or restricted for most citizens"),
+          `C7_Restrictions on internal movement` == 2 ~ "Required or severely restricted"),
         `rec_C8_International travel controls` = case_when(
           `C8_International travel controls` == 0 ~ "No measures",
           `C8_International travel controls` == 1 ~ "Screening",
@@ -227,7 +227,7 @@ prepare_country_table <- function(dat, countries) {
 
 
 #' Returns breakpoints for discrete color map fill
-Z_Breaks = function(n){
+Z_Breaks <- function(n){
   CUTS = seq(0,1,length.out=n+1)
   rep(CUTS,ifelse(CUTS %in% 0:1,1,2))
 }
@@ -254,7 +254,7 @@ plot_world_data <- function(dat, date, variable, measure, continent, lataxis = l
            unique(dat$`rec_C5_Close public transport`), unique(dat$`rec_C6_Stay at home requirements`),
            unique(dat$`rec_C7_Restrictions on internal movement`), unique(dat$`rec_C8_International travel controls`))
   lev <- lev[!is.na(lev)]
-  lev <- tags <- gsub(" ", "\U2000", lev, fixed = TRUE)
+  lev <- gsub(" ", "\U2000", lev, fixed = TRUE)
   
   hoverinfo <- "text"
   tickfont <- list(family = "Droid Sans Mono")
@@ -274,7 +274,6 @@ plot_world_data <- function(dat, date, variable, measure, continent, lataxis = l
       colorbar <- list(title = legend_title, y = 0.75, tickvals = seq(0, 100, 20), ticktext = tags)
     } else if(measure == "School") {
       title <- "Stringency of School Closing around the World"
-      legend_title <- "School closing"
       text <- paste(d$`rec_C1_School closing`, d$CountryName, sep = "\n")
       hoverinfo <- "text"
       d$variable <- d$`C1_School closing`
@@ -288,10 +287,9 @@ plot_world_data <- function(dat, date, variable, measure, continent, lataxis = l
       names(colours) <- tags
       colorscale <- data.frame(z=Z_Breaks(nFactor),
                                col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
+      colorbar <- list(title = "", y = 0.75, tickvals = 0:nFactor, ticktext=names(colours), tickfont = tickfont)
     } else if(measure == "Workplace") {
       title <- "Stringency of Workplace Closing around the World"
-      legend_title <- "Workplace closing"
       text <- paste(d$`rec_C2_Workplace closing`, d$CountryName, sep = "\n")
       d$variable <- d$`C2_Workplace closing`
       tags <- dat$`rec_C2_Workplace closing` %>% factor() %>% fct_reorder(dat$`C2_Workplace closing`) %>% levels()
@@ -304,10 +302,9 @@ plot_world_data <- function(dat, date, variable, measure, continent, lataxis = l
       names(colours) <- tags
       colorscale <- data.frame(z=Z_Breaks(nFactor),
                                col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
+      colorbar <- list(title = "", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
     } else if(measure == "PublicEvents") {
       title <- "Stringency in Cancelling Public Events around the World"
-      legend_title <- "Cancellation of public events"
       text <- paste(d$`rec_C3_Cancel public events`, d$CountryName, sep = "\n")
       d$variable <- d$`C3_Cancel public events`
       tags <- dat$`rec_C3_Cancel public events` %>% factor() %>% fct_reorder(dat$`C3_Cancel public events`) %>% levels()
@@ -320,10 +317,9 @@ plot_world_data <- function(dat, date, variable, measure, continent, lataxis = l
       names(colours) <- tags
       colorscale <- data.frame(z=Z_Breaks(nFactor),
                                col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
+      colorbar <- list(title = "", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
     } else if(measure == "Gatherings") {
       title <- "Stringency in Restricting Gatherings around the World"
-      legend_title <- "Restrictions on gatherings"
       text <- paste(d$`rec_C4_Restrictions on gatherings`, d$CountryName, sep = "\n")
       d$variable <- d$`C4_Restrictions on gatherings`
       tags <- dat$`rec_C4_Restrictions on gatherings` %>% factor() %>% fct_reorder(dat$`C4_Restrictions on gatherings`) %>% levels()
@@ -336,10 +332,9 @@ plot_world_data <- function(dat, date, variable, measure, continent, lataxis = l
       names(colours) <- tags
       colorscale <- data.frame(z=Z_Breaks(nFactor),
                                col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
+      colorbar <- list(title = "", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
     } else if(measure == "Transport") {
       title <- "Stringency in Closing Public Transport around the World"
-      legend_title <- "Closing of public transport"
       text <- paste(d$`rec_C5_Close public transport`, d$CountryName, sep = "\n")
       d$variable <- d$`C5_Close public transport`
       tags <- dat$`rec_C5_Close public transport` %>% factor() %>% fct_reorder(dat$`C5_Close public transport`) %>% levels()
@@ -352,10 +347,9 @@ plot_world_data <- function(dat, date, variable, measure, continent, lataxis = l
       names(colours) <- tags
       colorscale <- data.frame(z=Z_Breaks(nFactor),
                                col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
+      colorbar <- list(title = "", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
     } else if(measure == "Home") {
       title <- "Stringency of Stay at Home Requirements around the World"
-      legend_title <- "Requirements to stay at home"
       text <- paste(d$`rec_C6_Stay at home requirements`, d$CountryName, sep = "\n")
       d$variable <- d$`C6_Stay at home requirements`
       tags <- dat$`rec_C6_Stay at home requirements` %>% factor() %>% fct_reorder(dat$`C6_Stay at home requirements`) %>% levels()
@@ -368,10 +362,9 @@ plot_world_data <- function(dat, date, variable, measure, continent, lataxis = l
       names(colours) <- tags
       colorscale <- data.frame(z=Z_Breaks(nFactor),
                                col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
+      colorbar <- list(title = "", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
     } else if(measure == "Movement") {
       title <- "Stringency of Internal Movement Restrictions around the World"
-      legend_title <- "Internal movement restrictions"
       text <- paste(d$`rec_C7_Restrictions on internal movement`, d$CountryName, sep = "\n")
       d$variable <- d$`C7_Restrictions on internal movement`
       tags <- dat$`rec_C7_Restrictions on internal movement` %>% factor() %>% fct_reorder(dat$`C7_Restrictions on internal movement`) %>% levels()
@@ -384,10 +377,9 @@ plot_world_data <- function(dat, date, variable, measure, continent, lataxis = l
       names(colours) <- tags
       colorscale <- data.frame(z=Z_Breaks(nFactor),
                                col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
+      colorbar <- list(title = "", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
     } else if(measure == "Travel") {
       title <- "Stringency of International Travel Controls around the World"
-      legend_title <- "Internal travel controls"
       text <- paste(d$`rec_C8_International travel controls`, d$CountryName, sep = "\n")
       d$variable <- d$`C8_International travel controls`
       tags <- dat$`rec_C8_International travel controls` %>% factor() %>% fct_reorder(dat$`C8_International travel controls`) %>% levels()
@@ -400,7 +392,7 @@ plot_world_data <- function(dat, date, variable, measure, continent, lataxis = l
       names(colours) <- tags
       colorscale <- data.frame(z=Z_Breaks(nFactor),
                                col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = "Measures", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
+      colorbar <- list(title = "", y = 0.75, tickvals=0:nFactor, ticktext=names(colours), tickfont = tickfont)
     } 
     
   } else if (variable == 'Deaths') {
@@ -485,12 +477,13 @@ plot_world_data <- function(dat, date, variable, measure, continent, lataxis = l
     
   }
   
-  plot_ly(data = d, type = "choropleth", locations = d$CountryCode, z = d$variable, 
+  plot_ly(data = d, type = "choropleth", locations = d$CountryCode, z = d$variable,
           zmin = zmin, zmax = zmax, stroke = I("black"), span = I(1),
           text = text, hoverinfo = hoverinfo, colorscale = colorscale, colorbar = colorbar, source =  "heatmap") %>%
     layout(title = list(text = title), geo = list(showcountries = TRUE, scope = scope, lataxis = lataxis, 
                                                   lonaxis = lonaxis),
-           dragmode = "zoom", uirevision = "date")
+           dragmode = "zoom", uirevision = "date", margin = list(l = 0, r = 0, b = 0, t = 30)) %>% # uirevision?
+    config(scrollZoom = FALSE)
 }
 
 

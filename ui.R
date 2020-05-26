@@ -64,22 +64,13 @@ body <- dashboardBody(
         title = "The Lockdown Across the Globe", status = "primary", width = "100%",
         solidHeader = TRUE, collapsible = TRUE, align = "center",
         
-        box(plotlyOutput("heatmap", width = "75%", inline = TRUE), width = "100%"),
+        plotlyOutput("heatmap", width = "100%", inline = TRUE),
+        
         
         tags$head(tags$style(type="text/css", 
                              ".slider-animate-button {font-size: 20pt !important; position: absolute; left: 49.3%; margin-top: 20px}")),
-        
-        tags$style(type = "text/css", "
-          .irs-bar {width: 100%; height: 25px; background: #3377ff; border-top: 1px #3377ff; border-bottom: 1px #3377ff; }
-          .irs-bar-edge {background: #3377ff; border: 1px #3377ff; height: 25px; border-radius: 0px; width: 20px; }
-          .irs-line {border: 1px #3377ff; height: 25px; border-radius: 0px;}
-          .irs-grid-text {font-family: 'arial'; color: white; bottom: 17px; z-index: 1;}
-          .irs-grid-pol {display: none;}
-          .irs-max {font-family: 'arial'; color: black;}
-          .irs-min {font-family: 'arial'; color: black;}
-          .irs-single {color:black; background:#6666ff;}
-          .irs-slider {width: 30px; height: 30px; top: 22px;}
-        "),
+
+        tags$br(),
         
         sliderInput(
           inputId = "mapdate", label = "Date:", 
@@ -89,7 +80,7 @@ body <- dashboardBody(
           ticks = FALSE,
           timeFormat = "%B %d",
           step = 1, width = "75%",
-          animate = TRUE, animateOptions(interval = 10, loop = TRUE)
+          animate = TRUE, animateOptions(interval = 30, loop = TRUE)
         ),
         
         tags$br(),

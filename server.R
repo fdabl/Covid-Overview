@@ -76,7 +76,7 @@ shinyServer(function(session, input, output) {
   output$heatmap <- renderPlotly({
     
     # maintain zoom level when changing dates (not working yet)
-    # zoomer <- eventReactive(input$mapdate, {event_data("plotly_relayout", "heatmap")})
+    #zoomer <- eventReactive(input$mapdate, {event_data("plotly_relayout", "heatmap")})
     # zoom <- zoomer()
     # lataxis <- list(range = c(zoom$lataxis$range[0], zoom$lataxis$range[1]))
     # lonaxis <- list(range = c(zoom$lonaxis$range[0], zoom$lonaxis$range[1]))
