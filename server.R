@@ -3,10 +3,10 @@ source('helpers.R')
 
 
 dat <- get_stringency_csv()
-country_codes <- get_country_codes() %>% 
-  select(-"CountryName")
+country_codes <- get_country_codes()# %>% 
+  # select(-"CountryName")
 
-dat <- dat %>% 
+dat <- dat %>% #select(-CountryName) %>% 
   left_join(country_codes, by = 'CountryCode')
 
 africa_list <- (dat %>% filter(continent == 'Africa'))$CountryName %>%
@@ -94,29 +94,31 @@ shinyServer(function(session, input, output) {
   })
   
   observeEvent(input$TableAll,{
-    updateSelectInput(session,'countries_table',selected = unique(dat$CountryName))
+    updateSelectInput(session,'countries_table',selected = unique(dat$Country))
   })
   
   observeEvent(input$continent_table, {
     if (input$continent_table == 'World') {
       
-      sel_cont <- unique(dat$CountryName)
+      sel_cont <- unique(dat$Country)
       sel_cnt <- input$countries_table
     
      if(input$TableApply == 0){
-      sel_cnt<-unique(dat$CountryName)
+      sel_cnt <- unique(dat$Country)
      }
     
     } else{
+      
       sel_cont <- country_codes %>% 
         filter(continent == input$continent_table) %>% 
-        select(CountryName) %>% 
-        filter(CountryName %in% dat$CountryName)
+        select(CountryName) %>%
+        filter(CountryName %in% dat$Country)
       
       sel_cont <- sel_cont[,1]
       sel_cnt <- input$countries_table
     }
-    updateSelectInput(session, 'countries_table', choices = sel_cont, selected = sel_cnt)
+    
+    updateSelectInput(session, 'countries_table', choices = sel_cont, selected = sel_cont)
   })
 
   output$lockdown_plot_lines_scales <- renderPlot({
