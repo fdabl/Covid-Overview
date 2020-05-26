@@ -138,7 +138,8 @@ get_country_codes <- function() {
 #' TODO: Think about how to handle NAs
 #' 
 #' @param indicator boolean vector indicating when the intervention was in place
-#' @returns number of days since when the last intervention is in place
+#' @returns number of days since when the last intervention is in place. Negative values indicate the number of days since measure was lifted.
+#' 
 days_active <- function(indicator) {
   nr_days <- length(indicator)
   
@@ -166,7 +167,7 @@ rollback <- function(dat,countries) {
       trace = (last(`H2_Testing policy`) + last(`H3_Contact tracing`)) / 5,
       risk = last(`C8_International travel controls`) / 4,
       comm = (last(`H1_Public information campaigns`) + last(H1_Flag))/3,
-      roll = sum(c(dnc_rate, dgr_down,trace,risk,comm),na.rm = TRUE)/5
+      roll = sum(c(dnc_rate, dgr_down,trace,risk,comm),na.rm = TRUE)/4
     ) %>% select(Country,roll)
   return(d)
 }
