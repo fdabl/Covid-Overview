@@ -42,7 +42,26 @@ get_stringency_csv <- function(force_download = FALSE) {
         ConfirmedDailyCases = c(0, diff(ConfirmedCases)),
         ConfirmedDailyDeaths = c(0, diff(ConfirmedDeaths)),
         NewCasesPerMillion = (ConfirmedDailyCases / Population) * 1e6,
-        NewDeathsPerMillion = (ConfirmedDailyDeaths / Population) * 1e6
+        NewDeathsPerMillion = (ConfirmedDailyDeaths / Population) * 1e6,
+        NewCasesPerMillionSmooth = (NewCasesPerMillion +
+                                      lag(NewCasesPerMillion,1) +
+                                      lag(NewCasesPerMillion,3) +
+                                      lag(NewCasesPerMillion,4) +
+                                      lag(NewCasesPerMillion,5) +
+                                      lag(NewCasesPerMillion,6) +
+                                      lag(NewCasesPerMillion,7) +
+                                      lag(NewCasesPerMillion,8) +
+                                      lag(NewCasesPerMillion,9)) /10,
+        NewDeathsPerMillionSmooth = (NewDeathsPerMillion +
+                                       lag(NewDeathsPerMillion, 1)+
+                                       lag(NewDeathsPerMillion, 2)+
+                                       lag(NewDeathsPerMillion, 3)+
+                                       lag(NewDeathsPerMillion, 4)+
+                                       lag(NewDeathsPerMillion, 5)+
+                                       lag(NewDeathsPerMillion, 6)+
+                                       lag(NewDeathsPerMillion, 7)+
+                                       lag(NewDeathsPerMillion, 8)+
+                                       lag(NewDeathsPerMillion, 9))/10
       ) %>%
       fill(CasesPerMillion,
            DeathsPerMillion,
@@ -222,7 +241,6 @@ prepare_country_table <- function(dat, countries) {
   
   colnames(d) <- cnames
   return(d)
-  
 }
 
 
@@ -498,23 +516,33 @@ plot_stringency_data <- function(dat, countries, nr_cols) {
   d <- filter(dat, Country %in% countries)
   
   ggplot(d, aes(x = Date)) +
-    geom_line(aes(y = StringencyIndexForDisplay, color = 'Stringency Index')) +
-    geom_bar(
+    geom_line(
       stat = 'identity',
-      aes(y = NewDeathsPerMillion*10, color = 'New Deaths per 10 Million')
+      aes(y = NewDeathsPerMillionSmooth*10, color = 'New Deaths per 10 Million'),
+      size = 1
     ) +
-    scale_colour_manual(values = c('#E41A1C', 'black')) +
+    geom_line(aes(y = StringencyIndexForDisplay / 
+                    (10 / max(d$NewDeathsPerMillionSmooth, na.rm=T)),
+                  color = 'Stringency Index')) +
+    #scale_colour_manual(values = c('#E41A1C', 'black')) +
     scale_y_continuous(
-      sec.axis = sec_axis(~.*10, name = 'New Deaths per 10 Million'), limits = c(0, 100)
+      # alx: removed the limits because they were the reason data wasn't displayed
+      sec.axis = sec_axis(~.*(10/max(d$NewDeathsPerMillionSmooth, na.rm=T)),
+                          name = 'Srtingency Index')#, limits = c(0, 100)
     ) +
     facet_wrap(~ Country, ncol = nr_cols) +
-    ylab('Stringency Index') +
+    ylab('New Deaths per 10 Million') +
     ggtitle('Stringency of Measures and New Deaths per 10 Million') +
     theme_bw() +
     theme(
-      legend.position = 'None',
+      legend.position = 'top',
       plot.title = element_text(hjust = 0.5, size = 16)
-    )
+    ) +
+    scale_colour_manual(name = ' ', 
+                        #breaks = c('black', 'red'),
+                        values =c('Stringency Index' = 'black',
+                                  'New Deaths per 10 Million' = '#E41A1C')
+                        )
 }
 
 #' Currently not used: JSON API does not give us information about individual Stringency elements
