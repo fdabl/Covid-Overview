@@ -87,7 +87,7 @@ shinyServer(function(session, input, output) {
   
   
   # Reactive Elements for the Table
-  selected_countries_table <- eventReactive(input$TableApply, { input$countries_table }, ignoreNULL = FALSE )
+  selected_countries_table <- eventReactive(input$TableApply, { input$countries_table }, ignoreNULL = FALSE)
 
   observeEvent(input$TableClear, {
     updateSelectInput(session, 'countries_table', selected = '')
@@ -118,7 +118,7 @@ shinyServer(function(session, input, output) {
     }
     updateSelectInput(session, 'countries_table', choices = sel_cont, selected = sel_cnt)
   })
-  
+
   output$lockdown_plot_lines_scales <- renderPlot({
     plot_stringency_data(dat, selected_countries(), num_cols())
   }, height = how_high)
@@ -128,16 +128,16 @@ shinyServer(function(session, input, output) {
   output$heatmap <- renderPlotly({
     
     # maintain zoom level when changing dates (not working yet)
-    zoomer <- eventReactive(input$mapdate, {event_data("plotly_relayout", source = "heatmap")})
-    zoom <- zoomer()
-    lataxis <- list(range = c(zoom$`lataxis.range[0]`, zoom$`lataxis.range[1]`))
-    lonaxis <- list(range = c(zoom$`lonaxis.range[0]`, zoom$`lonaxis.range[1]`))
-
+    # zoomer <- eventReactive(input$mapdate, {event_data("plotly_relayout", "heatmap")})
+    # zoom <- zoomer()
+    # lataxis <- list(range = c(zoom$lataxis$range[0], zoom$lataxis$range[1]))
+    # lonaxis <- list(range = c(zoom$lonaxis$range[0], zoom$lonaxis$range[1]))
+    
     # create plot
-    p <- plot_world_data(dat, selected_mapdate(), selected_variable(), selected_measure(), selected_continent(),
-                         lataxis = lataxis, lonaxis = lonaxis)
-    p %>% 
-      event_register("plotly_relayout")
+    p <- plot_world_data(dat, selected_mapdate(), selected_variable(), selected_measure(), selected_continent())
+    #lataxis = lataxis, lonaxis = lonaxis)
+    
+    p
   })
   
   output$countries_table <- renderDataTable({

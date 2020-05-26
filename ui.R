@@ -5,7 +5,6 @@ library('dashboardthemes')
 source('helpers.R')
 
 
-
 # world <- get_world_data()
 dat <- get_stringency_csv()
 
@@ -71,9 +70,9 @@ body <- dashboardBody(
                              ".slider-animate-button {font-size: 20pt !important; position: absolute; left: 49.3%; margin-top: 20px}")),
         
         tags$style(type = "text/css", "
-          .irs-bar {width: 100%; height: 25px; background: black; border-top: 1px solid black; border-bottom: 1px solid black; }
-          .irs-bar-edge {background: black; border: 1px solid black; height: 25px; border-radius: 0px; width: 20px; }
-          .irs-line {border: 1px solid black; height: 25px; border-radius: 0px;}
+          .irs-bar {width: 100%; height: 25px; background: #3377ff; border-top: 1px #3377ff; border-bottom: 1px #3377ff; }
+          .irs-bar-edge {background: #3377ff; border: 1px #3377ff; height: 25px; border-radius: 0px; width: 20px; }
+          .irs-line {border: 1px #3377ff; height: 25px; border-radius: 0px;}
           .irs-grid-text {font-family: 'arial'; color: white; bottom: 17px; z-index: 1;}
           .irs-grid-pol {display: none;}
           .irs-max {font-family: 'arial'; color: black;}
@@ -108,22 +107,22 @@ body <- dashboardBody(
         ),
         
         conditionalPanel(condition = "input.variable_type == 'StringencyIndex'",
-                         radioButtons(inputId = "index_type", label = "Type of measures:",
-                                      choices = c("Combined" = "Combined",
-                                                  "School closing" = "School",
-                                                  "Workplace closing" = "Workplace",
-                                                  "Cancellation of public events" = "PublicEvents",
-                                                  "Restrictions on gatherings" = "Gatherings",
-                                                  "Closing of public transport" = "Transport",
-                                                  "Stay at home requirements" = "Home",
-                                                  "Restrictions on internal movement" = "Movement",
-                                                  "International travel controls" = "Travel"),
-                                      selected = "Combined",
-                                      inline = TRUE)),
+                         selectInput(inputId = "index_type", label = "Type of measures:",
+                                     choices = c("Combined" = "Combined",
+                                                 "School closing" = "School",
+                                                 "Workplace closing" = "Workplace",
+                                                 "Cancellation of public events" = "PublicEvents",
+                                                 "Restrictions on gatherings" = "Gatherings",
+                                                 "Closing of public transport" = "Transport",
+                                                 "Stay at home requirements" = "Home",
+                                                 "Restrictions on internal movement" = "Movement",
+                                                 "International travel controls" = "Travel"),
+                                     selected = "Combined",
+                                     width = "15%")),
         
-        radioButtons(
+        selectInput(
           inputId = 'continent',
-          label = 'Show:', 
+          label = 'Select area to display:', 
           choices = c(
             'World' = 'World',
             "Europe" = "Europe",
@@ -142,8 +141,7 @@ body <- dashboardBody(
           collapsible = TRUE, align = 'center', width = '100%', #height = "1000px",
                       
         div(style='height:1000px; overflow-y: scroll',
-            
-        
+           
 
             multiInput(
               inputId = 'countries_lockdown',
