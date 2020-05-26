@@ -122,7 +122,7 @@ body <- dashboardBody(
             'Asia' = 'Asia',
             'Africa' = 'Africa'
             #'Oceania' = 'Oceania'
-          ), selected = 'World', inline = TRUE
+          ), selected = 'World'#, inline = TRUE
         )
 
       ),
