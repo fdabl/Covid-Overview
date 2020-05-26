@@ -3,11 +3,13 @@ source('helpers.R')
 
 
 dat <- get_stringency_csv()
-country_codes <- get_country_codes()# %>% 
-  # select(-"CountryName")
+country_codes <- get_country_codes() %>% 
+  select(-"CountryName")
 
 dat <- dat %>% #select(-CountryName) %>% 
   left_join(country_codes, by = 'CountryCode')
+
+country_codes <- get_country_codes()
 
 africa_list <- (dat %>% filter(continent == 'Africa'))$CountryName %>%
   unique()
