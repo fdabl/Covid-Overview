@@ -37,7 +37,7 @@ shinyServer(function(session, input, output) {
   selected_mapdate <- reactive({ input$mapdate })
   selected_variable <- reactive({ input$variable_type })
   selected_measure <- reactive({ input$index_type })
-  selected_continent <- reactive({ input$continent })
+  selected_region <- reactive({ input$region })
   
   # Reactive Elements for the Stringency Plot
   
@@ -128,17 +128,19 @@ shinyServer(function(session, input, output) {
   }, height = how_high)
   
   
-  # TODO: Make this a plotly figure
   output$heatmap <- renderPlotly({
     
     # maintain zoom level when changing dates (not working yet)
+    # observeEvent(input$mapdate, {
+    #   zoom <- event_data("plotly_relayout", source = "M")
+    # })
     #zoomer <- eventReactive(input$mapdate, {event_data("plotly_relayout", "heatmap")})
     # zoom <- zoomer()
-    # lataxis <- list(range = c(zoom$lataxis$range[0], zoom$lataxis$range[1]))
-    # lonaxis <- list(range = c(zoom$lonaxis$range[0], zoom$lonaxis$range[1]))
+    #lataxis <- list(range = c(zoom$lataxis$range[0], zoom$lataxis$range[1]))
+    #lonaxis <- list(range = c(zoom$lonaxis$range[0], zoom$lonaxis$range[1]))
     
     # create plot
-    p <- plot_world_data(dat, selected_mapdate(), selected_variable(), selected_measure(), selected_continent())
+    p <- plot_world_data(dat, selected_mapdate(), selected_variable(), selected_measure(), selected_region())
     #lataxis = lataxis, lonaxis = lonaxis)
     
     p
