@@ -13,8 +13,15 @@ country_codes <- get_country_codes()
 
 africa_list <- (dat %>% filter(continent == 'Africa'))$CountryName %>%
   unique()
-americas_list <- (dat %>% filter(continent == 'Americas'))$CountryName %>%
-  unique()
+north_america_list <- c('Barbados', 'Belize', 'Canada', 'Costa Rica', 'Cuba',
+                        'Dominica', 'Dominican Republic', 'El Salvador', 
+                        'Greenland', 'Guatemala', 'Honduras', 'Jamaica', 'Mexico',
+                        'Nicaragua', 'Panama', 'Trinidad and Tobago',
+                        'United States')
+south_america_list <- c('Argentina', 'Aruba', 'Bermuda', 'Bolivia', 'Brazil',
+                        'Chile', 'Colombia', 'Ecuador', 'Guyana', 'Paraguay',
+                        'Peru', 'Puerto Rico', 'Suriname', 'Uruguay', 
+                        'Venezuela')
 asia_list <- (dat %>% filter(continent == 'Asia'))$CountryName %>%
   unique()
 europe_list <- (dat %>% filter(continent == 'Europe'))$CountryName %>%
@@ -44,8 +51,10 @@ shinyServer(function(session, input, output) {
   countries_region <- reactive({
     if (input$regions == 'Africa'){
       country_ls = africa_list
-    } else if (input$regions == 'Americas'){
-      country_ls = americas_list
+    } else if (input$regions == 'North America'){
+      country_ls = north_america_list
+    } else if (input$regions == 'South America'){
+      country_ls = south_america_list
     } else if (input$regions == 'Asia'){
       country_ls = asia_list
     } else if (input$regions == 'Europe'){
@@ -60,8 +69,20 @@ shinyServer(function(session, input, output) {
 
   })
   
+  # for drop down:
+  # country_list <- reactive({
+  #   if (input$grouping == 'show selected group') {
+  #     country_ls = countries_region()
+  #   } else {
+  #     country_ls = input$countries_lockdown
+  #   }
+  #   country_ls
+  # })
+  # 
+  
+  # more intuitive:
   country_list <- reactive({
-    if (input$Region == TRUE) {
+    if (input$grouping == 'TRUE') {
       country_ls = countries_region()
     } else {
       country_ls = input$countries_lockdown
@@ -78,6 +99,31 @@ shinyServer(function(session, input, output) {
     ifelse(len > 10, 5, ifelse(len > 4, 4, len))
   })
   
+  selected_plot <- reactive({
+    if (input$graph == 'Daily deaths per 10 Million') {
+      plt <- plot_stringency_data_deaths_relative(dat,
+                                                  selected_countries(),
+                                                  num_cols())
+    } else if (input$graph == 'Daily deaths (absolute value)') {
+      plt <- plot_stringency_data_deaths_total(dat,
+                                               selected_countries(),
+                                               num_cols())
+    } else if (input$graph == 'New Cases per Million') {
+      plt <- plot_stringency_data_cases_relative(dat,
+                                                 selected_countries(),
+                                                 num_cols())
+    } else {
+      plt <- plot_stringency_data_cases_total(dat,
+                                              selected_countries(),
+                                              num_cols())
+    }
+    
+    plt
+               
+  })
+  
+
+  
   how_high <- reactive({
     len <- length(selected_countries())
     (((len - 1) %/% num_cols()) + 1) * 200
@@ -86,6 +132,11 @@ shinyServer(function(session, input, output) {
   height_of_box = reactive({
     paste0(as.character(how_high() + 500),"px")
   })
+  
+  output$lockdown_plot_lines_scales <- renderPlot({
+    input$Refresh
+    isolate(selected_plot())
+  }, height = how_high)
   
   
   # Reactive Elements for the Table
@@ -123,10 +174,7 @@ shinyServer(function(session, input, output) {
     updateSelectInput(session, 'countries_table', choices = sel_cont, selected = sel_cont)
   })
 
-  output$lockdown_plot_lines_scales <- renderPlot({
-    plot_stringency_data(dat, selected_countries(), num_cols())
-  }, height = how_high)
-  
+
   
   # TODO: Make this a plotly figure
   output$heatmap <- renderPlotly({

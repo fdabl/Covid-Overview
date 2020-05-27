@@ -20,8 +20,9 @@ eu_countries <- c(
 # TODO:
 # Showing all countries slows the initial rendering of the app
 # down because it needs to generate all these html elements
-#COUNTRIES <- eu_countries
-COUNTRIES <- dat$Country %>% unique() # extremely slow
+# alx: solved by using unique()
+#COUNTRIES <- eu_countries # alx: not necessary anymore
+COUNTRIES <- dat$Country %>% unique() 
 MIN_DATE <- min(dat$Date)
 MAX_DATE <- max(dat$Date)
 
@@ -136,7 +137,7 @@ body <- dashboardBody(
 
             multiInput(
               inputId = 'countries_lockdown',
-              label = 'Countries:',
+              label = 'Select countries:',
               choices = COUNTRIES,
               selected = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom'),
               width = '350px',
@@ -147,16 +148,32 @@ body <- dashboardBody(
               )
             ),
             
-            radioButtons(
-              'regions', 'Regions', 
-              c('Africa', 'Asia', 'Americas', 'Europe', 'Oceania', 'OECD'),
-              inline = TRUE
+            selectInput(
+              'regions', 'or select a group of countries:', 
+              c('Africa', 'Asia', 'Europe', 'Oceania', 'North America', 'South America', 'OECD'),
+              width = '250px'
             ),
             
             #div(style="display:inline-block", actionButton("Countries", "Display by country")),
             
+            
+            
+            
+            selectInput(
+              'graph', 'Select the indicator:', 
+              c('Daily deaths per 10 Million', 'Daily deaths (absolute value)',
+                'New Cases per Million', 'New Cases (absolute value)'),
+              width = '250px'
+            ),
+            
+            # selectInput(
+            #   'grouping', '', 
+            #   c('show selected countries', 'show selected group'),
+            #   width = '250px'
+            # ),
+            
             prettySwitch(
-              'Region',
+              'grouping',
               'Display by region',
               value = FALSE,
               status = 'default',
@@ -166,6 +183,7 @@ body <- dashboardBody(
               inline = FALSE,
               width = NULL
             ),
+            
             actionButton('Refresh', 'Refresh graph'),
             plotOutput('lockdown_plot_lines_scales')
         )
