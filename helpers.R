@@ -144,9 +144,9 @@ days_active <- function(indicator) {
   nr_days <- length(indicator)
   
   # indicator is boolean, so this yields 1 when FALSE switches to TRUE (or vice versa)
-  last_change <- last(which(diff(indicator) == 1))
-  lift_change <- last(which(diff(indicator) == -1))
-  if_else(is.na(lift_change), nr_days - last_change, -(nr_days - lift_change))
+  last_change <- last(which(diff(indicator) == 1)) # last_change refers to implementation of measures
+  lift_change <- last(which(diff(indicator) == -1)) # lift_change referes to lifting the measures
+  if_else(is.na(lift_change), nr_days - last_change, -(nr_days - lift_change)) #return negative value if the measure is lifted
 }
 
 #' Calculates the rollback readiness for all countries
@@ -155,20 +155,29 @@ days_active <- function(indicator) {
 #' @param countries selected countries
 #' @returns data frame
 
-rollback <- function(dat,countries) {
-  d <- dat %>% filter(Country %in% countries) %>% group_by(Country) %>%
-    filter(Date %in% (last(Date)-7):last(Date)) %>%
-    mutate(
-      dgr = ifelse((lag(ConfirmedDailyCases) != 0), (ConfirmedDailyCases-lag(ConfirmedDailyCases))/lag(ConfirmedDailyCases),0)
-    ) %>%
+
+rollback <- function(dat, countries) {
+  d <-
+    dat %>% filter(Country %in% countries) %>% group_by(Country) %>%
+    filter(Date %in% (last(Date) - 7):last(Date)) %>%
+    mutate(dgr = ifelse((lag(ConfirmedDailyCases) != 0),
+                        (ConfirmedDailyCases - lag(ConfirmedDailyCases)) / lag(ConfirmedDailyCases),
+                        0
+    )) %>%
     summarise(
-      dnc_rate = if_else(last(ConfirmedDailyCases) >= 50, 0, 0.5 - last(ConfirmedDailyCases) / 50), # Ratio of daily cases / 50 scaled to 0 - 0.5
-      dgr_down = if_else(last(dgr) < nth(dgr,2),0.5,0), # Is daily growth rate less than week ago?
+      dnc_rate = if_else(
+        last(ConfirmedDailyCases) >= 50,
+        0,
+        0.5 - last(ConfirmedDailyCases) / 50
+      ), # Ratio of daily cases / 50 scaled to 0 - 0.5
+      dgr_down = if_else(last(dgr) < nth(dgr, 2), 0.5, 0), # Is daily growth rate less than week ago?
       trace = (last(`H2_Testing policy`) + last(`H3_Contact tracing`)) / 5,
       risk = last(`C8_International travel controls`) / 4,
-      comm = (last(`H1_Public information campaigns`) + last(H1_Flag))/3,
-      roll = sum(c(dnc_rate, dgr_down,trace,risk,comm),na.rm = TRUE)/4
-    ) %>% select(Country,roll)
+      comm = (last(`H1_Public information campaigns`) + last(H1_Flag)) /
+        3,
+      roll = sum(c(dnc_rate, dgr_down, trace, risk, comm), na.rm = TRUE) /
+        4
+    ) %>% select(Country, roll)
   return(d)
 }
 
