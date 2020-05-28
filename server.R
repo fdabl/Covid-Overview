@@ -197,16 +197,30 @@ shinyServer(function(session, input, output) {
   output$countries_table <- renderDataTable({
     rowCallback <- c(
       "function(row, data){",
-      "  for(var i=0; i<data.length; i++){",
+      "  for(var i=2; i<data.length; i++){",
       "    if(data[i] === null){",
       "      $('td:eq('+i+')', row).html('Not Implemented')",
-      "        .css({'color': 'rgb(151,151,151)', 'font-style': 'italic'});",
-      "    }",
+      "        .css({'color': 'rgb(0,0,0)', 'font-style': 'italic'});",
+      "    } else if(data[i] < 0){",
+      "      $('td:eq('+i+')', row).html('Lifted '+ Math.abs(data[i]) + ' Days Ago')",
+      "        .css({'font-style': 'normal'});",
       "  }",
-      "}"  
+      "}",
+      "}"
     )
+    
     tab <- prepare_country_table(dat, selected_countries_table())
-    tab <- datatable(tab, options = list(rowCallback = JS(rowCallback))) %>% formatString(2:9,"Since "," Days")
+    tab <- datatable(tab, options = list(columnDefs = list(list(targets = 10:17, visible = FALSE)), rowCallback = JS(rowCallback))) %>% formatString(2:9,"Since "," Days") %>%
+      formatStyle('roll',target='row',
+                  backgroundColor = styleInterval(seq(0,0.8,length.out = 7),
+                  sequential_hcl(n = 8, h = c(140, 80), c = c(63, NA, 33), l = c(40, 97), power = c(1.05, 1.65), rev = TRUE, register = ))) %>%
+      formatStyle('Mandatory school closing',valueColumns = 'C1_Flag', fontWeight = styleEqual(1,"bold")) %>%
+      formatStyle('Mandatory workplace closing',valueColumns = 'C2_Flag', fontWeight = styleEqual(1,"bold")) %>%
+      formatStyle('Mandatory cancellation of public events',valueColumns = 'C3_Flag', fontWeight = styleEqual(1,"bold")) %>%
+      formatStyle('Mandatory public transport closing',valueColumns = 'C4_Flag', fontWeight = styleEqual(1,"bold")) %>%
+      formatStyle('Gatherings restricted below 100 people',valueColumns = 'C5_Flag', fontWeight = styleEqual(1,"bold")) %>%
+      formatStyle('Leaving home restricrted by law (with minimal exceptions)',valueColumns = 'C6_Flag', fontWeight = styleEqual(1,"bold")) %>%
+      formatStyle('Mandatory restrictions of internal transport',valueColumns = 'C7_Flag', fontWeight = styleEqual(1,"bold"))
     tab
   })
 })

@@ -6,6 +6,7 @@ library('lubridate')
 library("plotly")
 library("countrycode")
 library("RColorBrewer")
+library("colorspace")
 
 
 #' Gets the Stringency Index and Deaths / Confirmed from the Oxford as csv
@@ -66,13 +67,24 @@ get_stringency_csv <- function(force_download = FALSE) {
       fill(CasesPerMillion,
            DeathsPerMillion,
            `C1_School closing`,
+           `C1_Flag`,
            `C2_Workplace closing`,
+           `C2_Flag`,
            `C3_Cancel public events`,
+           `C3_Flag`,
            `C4_Restrictions on gatherings`,
+           `C4_Flag`,
            `C5_Close public transport`,
+           `C5_Flag`,
            `C6_Stay at home requirements`,
+           `C7_Flag`,
            `C7_Restrictions on internal movement`,
-           `C8_International travel controls`
+           `C7_Flag`,
+           `C8_International travel controls`,
+           `H1_Public information campaigns`,
+           `H1_Flag`,
+           `H2_Testing policy`,
+           `H3_Contact tracing`
       ) %>%
       mutate(`rec_C1_School closing` = case_when(
         `C1_School closing` == 0 ~ "None",
@@ -163,16 +175,48 @@ get_country_codes <- function() {
 #' TODO: Think about how to handle NAs
 #' 
 #' @param indicator boolean vector indicating when the intervention was in place
-#' @returns number of days since when the last intervention is in place
+#' @returns number of days since when the last intervention is in place. Negative values indicate the number of days since measure was lifted.
+#' 
 days_active <- function(indicator) {
   nr_days <- length(indicator)
   
   # indicator is boolean, so this yields 1 when FALSE switches to TRUE (or vice versa)
-  last_change <- last(which(diff(indicator) == 1))
-  
-  nr_days - last_change
+  last_change <- last(which(diff(indicator) == 1)) # last_change refers to implementation of measures
+  lift_change <- last(which(diff(indicator) == -1)) # lift_change referes to lifting the measures
+  if_else(is.na(lift_change), nr_days - last_change, -(nr_days - lift_change)) #return negative value if the measure is lifted
 }
 
+#' Calculates the rollback readiness for all countries
+#' 
+#' @param dat stringency data
+#' @param countries selected countries
+#' @returns data frame
+
+
+rollback <- function(dat, countries) {
+  d <-
+    dat %>% filter(Country %in% countries) %>% group_by(Country) %>%
+    filter(Date %in% (last(Date) - 7):last(Date)) %>%
+    mutate(dgr = ifelse((lag(ConfirmedDailyCases) != 0),
+                        (ConfirmedDailyCases - lag(ConfirmedDailyCases)) / lag(ConfirmedDailyCases),
+                        0
+    )) %>%
+    summarise(
+      dnc_rate = if_else(
+        last(ConfirmedDailyCases) >= 50,
+        0,
+        0.5 - last(ConfirmedDailyCases) / 50
+      ), # Ratio of daily cases / 50 scaled to 0 - 0.5
+      dgr_down = if_else(last(dgr) < nth(dgr, 2), 0.5, 0), # Is daily growth rate less than week ago?
+      trace = (last(`H2_Testing policy`) + last(`H3_Contact tracing`)) / 5,
+      risk = last(`C8_International travel controls`) / 4,
+      comm = (last(`H1_Public information campaigns`) + last(H1_Flag)) /
+        3,
+      roll = sum(c(dnc_rate, dgr_down, trace, risk, comm), na.rm = TRUE) /
+        4
+    ) %>% select(Country, roll)
+  return(d)
+}
 
 #' Prepares the table of lockdown lifts
 #' 
@@ -236,10 +280,19 @@ prepare_country_table <- function(dat, countries) {
       C5_days = days_active(C5_public_transport),
       C6_days = days_active(C6_stay_home),
       C7_days = days_active(C7_internal_movement),
-      C8_days = days_active(C8_international_travel)
+      C8_days = days_active(C8_international_travel),
+      C1_Flag = if_else(C1_days > 0,last(C1_Flag),0),
+      C2_Flag = if_else(C2_days > 0,last(C2_Flag),0),
+      C3_Flag = if_else(C3_days > 0,last(C3_Flag),0),
+      C4_Flag = if_else(C4_days > 0,last(C4_Flag),0),
+      C5_Flag = if_else(C5_days > 0,last(C5_Flag),0),
+      C6_Flag = if_else(C6_days > 0,last(C6_Flag),0),
+      C7_Flag = if_else(C7_days > 0,last(C7_Flag),0),
     )
   
-  colnames(d) <- cnames
+  colnames(d)[1:9] <- cnames
+  r <- rollback(dat,countries)
+  d <- left_join(d,r)
   return(d)
 }
 
