@@ -255,8 +255,8 @@ prepare_country_table <- function(dat, countries) {
   
   colnames(d)[1:9] <- cnames
   r <- rollback(dat,countries)
-  dr <- left_join(d,r)
-  return(dr)
+  d <- left_join(d,r)
+  return(d)
 
 }
 
