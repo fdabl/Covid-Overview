@@ -137,10 +137,10 @@ body <- dashboardBody(
             div(style = 'display:inline-block; vertical-align:top',
                 multiInput(
                   inputId = 'countries_lockdown',
-                  label = 'Select specific countries:',
+                  label = 'Select specific countries...',
                   choices = COUNTRIES,
                   selected = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom'),
-                  width = '300px',
+                  width = '400px',
                   options = list(
                     enable_search = TRUE,
                     non_selected_header = 'Choose between:',
@@ -151,9 +151,9 @@ body <- dashboardBody(
             
             div(style = 'display:inline-block; vertical-align:top',
                 selectInput(
-                  'regions', 'or select a group of countries:', 
-                  c('Africa', 'Asia', 'Europe', 'Oceania', 'North America', 'South America', 'OECD'),
-                  width = '250px'
+                  'regions', 'or select a group of countries?', 
+                  c('I want to make my own selection', 'Africa', 'Asia', 'Europe', 'Oceania', 'North America', 'South America', 'OECD'),
+                  width = '300px'
                 ),
                 
                 
@@ -161,7 +161,7 @@ body <- dashboardBody(
                   'graph', 'Select the indicator:', 
                   c('Daily deaths per 10 Million', 'Daily deaths (absolute value)',
                     'New Cases per Million', 'New Cases (absolute value)'),
-                  width = '250px'
+                  width = '300px'
                 ),
                 
                 # selectInput(
@@ -170,17 +170,17 @@ body <- dashboardBody(
                 #   width = '250px'
                 # ),
                 
-                prettySwitch(
-                  'grouping',
-                  'Display by region',
-                  value = FALSE,
-                  status = 'default',
-                  slim = FALSE,
-                  fill = FALSE,
-                  bigger = FALSE,
-                  inline = FALSE,
-                  width = NULL
-                ),
+                # prettySwitch(
+                #   'grouping',
+                #   'Select specific countries:',
+                #   value = TRUE,
+                #   status = 'default',
+                #   slim = FALSE,
+                #   fill = FALSE,
+                #   bigger = FALSE,
+                #   inline = FALSE,
+                #   width = NULL
+                # ),
                 
                 actionButton('Refresh', 'Refresh graph')
             ),

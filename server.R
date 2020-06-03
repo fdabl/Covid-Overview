@@ -48,27 +48,57 @@ shinyServer(function(session, input, output) {
   
   # Reactive Elements for the Stringency Plot
   
-  countries_region <- reactive({
-    if (input$regions == 'Africa'){
+  # countries_region <- reactive({
+  #   if (input$regions == 'Africa'){
+  #     country_ls = africa_list
+  #   } else if (input$regions == 'North America'){
+  #     country_ls = north_america_list
+  #   } else if (input$regions == 'South America'){
+  #     country_ls = south_america_list
+  #   } else if (input$regions == 'Asia'){
+  #     country_ls = asia_list
+  #   } else if (input$regions == 'Europe'){
+  #     country_ls = europe_list
+  #   } else if (input$regions == 'Oceania'){
+  #     country_ls = oceania_list
+  #   } else if (input$regions == 'OECD'){
+  #     country_ls = oecd_list
+  #   }
+  # 
+  #   country_ls
+  # 
+  # })
+  
+  observeEvent(input$regions, {
+    if (input$regions == 'I want to make my own selection'){
+      country_ls = c('Germany', 'Netherlands', 'Romania',
+                     'Serbia', 'United Kingdom')
+      country_choices = dat$Country %>% unique()
+    } else if (input$regions == 'Africa') {
       country_ls = africa_list
+      country_choices = africa_list
     } else if (input$regions == 'North America'){
       country_ls = north_america_list
+      country_choices = north_america_list
     } else if (input$regions == 'South America'){
       country_ls = south_america_list
+      country_choices = south_america_list
     } else if (input$regions == 'Asia'){
       country_ls = asia_list
+      country_choices = asia_list
     } else if (input$regions == 'Europe'){
       country_ls = europe_list
+      country_choices = europe_list
     } else if (input$regions == 'Oceania'){
       country_ls = oceania_list
+      country_choices = oceania_list
     } else if (input$regions == 'OECD'){
       country_ls = oecd_list
+      country_choices = oecd_list
     }
     
-    country_ls
-
+    updateSelectInput(session, 'countries_lockdown', choices = country_choices, selected = country_ls)
   })
-  
   # for drop down:
   # country_list <- reactive({
   #   if (input$grouping == 'show selected group') {
@@ -82,12 +112,13 @@ shinyServer(function(session, input, output) {
   
   # more intuitive:
   country_list <- reactive({
-    if (input$grouping == 'TRUE') {
-      country_ls = countries_region()
-    } else {
-      country_ls = input$countries_lockdown
-    }
-    country_ls
+    # if (input$grouping == 'FALSE') {
+    #   country_ls = countries_region()
+    # } else {
+    #   country_ls = 
+        input$countries_lockdown
+    # }
+    # country_ls
   })
   
   selected_countries <- reactive({ 

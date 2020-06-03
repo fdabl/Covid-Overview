@@ -6,6 +6,7 @@ library('lubridate')
 library("plotly")
 library("countrycode")
 library("RColorBrewer")
+library('lemon')
 
 
 #' Gets the Stringency Index and Deaths / Confirmed from the Oxford as csv
@@ -528,7 +529,8 @@ plot_stringency_data_deaths_relative <- function(dat, countries, nr_cols) {
       sec.axis = sec_axis(~.*(10/max(d$NewDeathsPerMillionSmooth, na.rm=T)),
                           name = 'Stringency Index')
     ) +
-    facet_wrap(~ Country, ncol = nr_cols) +
+    facet_rep_wrap(~ Country, ncol = nr_cols, 
+                   repeat.tick.labels = 'TRUE') +
     ylab('New Deaths per 10 Million') +
     ggtitle('Stringency of Measures and New Deaths per 10 Million') +
     theme_bw() +
@@ -561,7 +563,8 @@ plot_stringency_data_deaths_total<- function(dat, countries, nr_cols) {
       sec.axis = sec_axis(~.*(100/max(d$ConfirmedDailyDeaths, na.rm=T)),
                           name = 'Stringency Index')#, limits = c(0, 100)
     ) +
-    facet_wrap(~ Country, ncol = nr_cols) +
+    facet_rep_wrap(~ Country, ncol = nr_cols, 
+                   repeat.tick.labels = 'bottom') +
     ylab('New Deaths ') +
     ggtitle('Stringency of Measures and New Deaths (absolute value)') +
     theme_bw() +
@@ -595,7 +598,8 @@ plot_stringency_data_cases_relative <- function(dat, countries, nr_cols) {
       sec.axis = sec_axis(~.*(100/max(d$NewCasesPerMillionSmooth, na.rm=T)),
                           name = 'Stringency Index')#, limits = c(0, 100)
     ) +
-    facet_wrap(~ Country, ncol = nr_cols) +
+    facet_rep_wrap(~ Country, ncol = nr_cols, 
+                   repeat.tick.labels = c('right', 'left')) +
     ylab('New Cases per  Million') +
     ggtitle('Stringency of Measures and New Cases per Million') +
     theme_bw() +
