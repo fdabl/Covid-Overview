@@ -7,6 +7,7 @@ library("plotly")
 library("countrycode")
 library("RColorBrewer")
 library("colorspace")
+library("stringi")
 
 
 #' Gets the Stringency Index and Deaths / Confirmed from the Oxford as csv
@@ -308,19 +309,28 @@ tickpos <- function(nFactor) {
   pos <- unique((head(Z_Breaks(nFactor), -1)) + head(Z_Breaks(nFactor))[2]/2)*(nFactor-1)
 }
 
+#' breaks tick labels into lines, each line being width characters long
+ticklab <- function(tags, width = 25) {
+  x <- gsub(paste0("(.{1,", width, "})(\\s|$)"), "\\1\n", tags) %>%
+    str_split("\n")
+  for(i in 1:length(x)) {
+    x[[i]] <- stri_remove_empty(x[[i]])
+    x[[i]] <- gsub("\\s", " ", format(x[[i]], width = width)) %>%
+      paste(collapse = "\n")
+  }
+  x <- unlist(x)
+  x <- gsub(" ", "\U2000", x, fixed = TRUE)
+  return(x)
+}
 
-#' Returns ggplot of map filled according to variable
-#' TODO: Change this to a fast plotly implementation (instead of calling ggplotly on the result)
-#' TODO: Scale Deaths and Cases differently for sound visualisation
-#' 
-#' 
 #' @param world world data
-#' @param sdat stringency data
+#' @param dat stringency data
 #' @param date date for the stringency index
 #' @param variable variable which should be shown
 #' @param measure type of measure that should be shown if StringencyIndex is selected as variable
-#' @returns ggplot object
-plot_world_data <- function(dat, date, variable, measure, region, lataxis = list(range = (c(-60, 90))), lonaxis = lonaxis <- list(range = (c(-180, 180)))) {
+#' @param region region which should be shown
+#' @returns plotly object
+plot_world_data <- function(dat, date, variable, measure, region, lataxis = NULL, lonaxis = NULL) {
   d <- dat %>%
     group_by(CountryCode) %>%
     filter(Date == date | Date == max(dat$Date[which(dat$Date < date)]))
@@ -335,15 +345,17 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = list
                                       "Poland", "Portugal", "Slovak Republic", "Slovenia","Spain", 
                                       "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"))
     scope <- "world"
+    lataxis <- list(range = (c(-60, 90))) 
+    lonaxis <- list(range = (c(-180, 180)))
     
   }
   
-  lev <- c(unique(dat$`rec_C1_School closing`), unique(dat$`rec_C2_Workplace closing`), 
-           unique(dat$`rec_C3_Cancel public events`), unique(dat$`rec_C4_Restrictions on gatherings`),
-           unique(dat$`rec_C5_Close public transport`), unique(dat$`rec_C6_Stay at home requirements`),
-           unique(dat$`rec_C7_Restrictions on internal movement`), unique(dat$`rec_C8_International travel controls`))
-  lev <- lev[!is.na(lev)]
-  lev <- gsub(" ", "\U2000", lev, fixed = TRUE)
+  # lev <- c(unique(dat$`rec_C1_School closing`), unique(dat$`rec_C2_Workplace closing`), 
+  #          unique(dat$`rec_C3_Cancel public events`), unique(dat$`rec_C4_Restrictions on gatherings`),
+  #          unique(dat$`rec_C5_Close public transport`), unique(dat$`rec_C6_Stay at home requirements`),
+  #          unique(dat$`rec_C7_Restrictions on internal movement`), unique(dat$`rec_C8_International travel controls`))
+  # lev <- lev[!is.na(lev)]
+  # lev <- gsub(" ", "\U2000", lev, fixed = TRUE)
   
   locations <- d$CountryCode
   locationmode <- NULL
@@ -360,17 +372,17 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = list
       zmax <- 100
       tags <- as.character(seq(0, 100, 20))
       tags <- gsub(" ", "\U2000", tags, fixed = TRUE)
-      tags <- gsub("\\s", "\U2000", format(tags, width=max(nchar(lev, type = "width")+1, na.rm = TRUE)))
+      tags <- ticklab(tags)
+      #tags <- gsub("\\s", "\U2000", format(tags, width = max(nchar(lev, type = "width"), na.rm = TRUE)))
       colorscale <- "Reds"
-      colorbar <- list(title = legend_title, y = 0.75, tickvals = seq(0, 100, 20), ticktext = tags)
+      colorbar <- list(title = legend_title, y = 0.75, tickvals = seq(0, 100, 20), ticktext = tags, tickfont = tickfont)
     } else if(measure == "School") {
       title <- "Stringency of School Closing around the World"
       text <- paste(d$`rec_C1_School closing`, d$CountryName, sep = "\n")
       hoverinfo <- "text"
       d$variable <- d$`C1_School closing`
       tags <- dat$`rec_C1_School closing` %>% factor() %>% fct_reorder(dat$`C1_School closing`) %>% levels()
-      tags <- gsub(" ", "\U2000", tags, fixed = TRUE)
-      tags <- gsub("\\s", "\U2000", format(tags, width=max(nchar(lev, type = "width"), na.rm = TRUE)))
+      tags <- ticklab(tags)
       nFactor <- length(tags)
       zmin <- 0
       zmax <- nFactor-1
@@ -384,8 +396,7 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = list
       text <- paste(d$`rec_C2_Workplace closing`, d$CountryName, sep = "\n")
       d$variable <- d$`C2_Workplace closing`
       tags <- dat$`rec_C2_Workplace closing` %>% factor() %>% fct_reorder(dat$`C2_Workplace closing`) %>% levels()
-      tags <- gsub(" ", "\U2000", tags, fixed = TRUE)
-      tags <- gsub("\\s", "\U2000", format(tags, width = max(nchar(lev, type = "width"), na.rm = TRUE)))
+      tags <- ticklab(tags)
       nFactor <- length(tags)
       zmin <- 0
       zmax <- nFactor-1
@@ -399,8 +410,7 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = list
       text <- paste(d$`rec_C3_Cancel public events`, d$CountryName, sep = "\n")
       d$variable <- d$`C3_Cancel public events`
       tags <- dat$`rec_C3_Cancel public events` %>% factor() %>% fct_reorder(dat$`C3_Cancel public events`) %>% levels()
-      tags <- gsub(" ", "\U2000", tags, fixed = TRUE)
-      tags <- gsub("\\s", "\U2000", format(tags, width = max(nchar(lev, type = "width"), na.rm = TRUE)))
+      tags <- ticklab(tags)
       nFactor <- length(tags)
       zmin <- 0
       zmax <- nFactor-1
@@ -414,8 +424,7 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = list
       text <- paste(d$`rec_C4_Restrictions on gatherings`, d$CountryName, sep = "\n")
       d$variable <- d$`C4_Restrictions on gatherings`
       tags <- dat$`rec_C4_Restrictions on gatherings` %>% factor() %>% fct_reorder(dat$`C4_Restrictions on gatherings`) %>% levels()
-      tags <- gsub(" ", "\U2000", tags, fixed = TRUE)
-      tags <- gsub("\\s", "\U2000", format(tags, width = max(nchar(lev, type = "width"), na.rm = TRUE)))
+      tags <- ticklab(tags)
       nFactor <- length(tags)
       zmin <- 0
       zmax <- nFactor-1
@@ -429,8 +438,7 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = list
       text <- paste(d$`rec_C5_Close public transport`, d$CountryName, sep = "\n")
       d$variable <- d$`C5_Close public transport`
       tags <- dat$`rec_C5_Close public transport` %>% factor() %>% fct_reorder(dat$`C5_Close public transport`) %>% levels()
-      tags <- gsub(" ", "\U2000", tags, fixed = TRUE)
-      tags <- gsub("\\s", "\U2000", format(tags, width = max(nchar(lev, type = "width"), na.rm = TRUE)))
+      tags <- ticklab(tags)
       nFactor <- length(tags)
       zmin <- 0
       zmax <- nFactor-1
@@ -444,8 +452,7 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = list
       text <- paste(d$`rec_C6_Stay at home requirements`, d$CountryName, sep = "\n")
       d$variable <- d$`C6_Stay at home requirements`
       tags <- dat$`rec_C6_Stay at home requirements` %>% factor() %>% fct_reorder(dat$`C6_Stay at home requirements`) %>% levels()
-      tags <- gsub(" ", "\U2000", tags, fixed = TRUE)
-      tags <- gsub("\\s", "\U2000", format(tags, width = max(nchar(lev, type = "width"), na.rm = TRUE)))
+      tags <- ticklab(tags)
       nFactor <- length(tags)
       zmin <- 0
       zmax <- nFactor-1
@@ -459,8 +466,7 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = list
       text <- paste(d$`rec_C7_Restrictions on internal movement`, d$CountryName, sep = "\n")
       d$variable <- d$`C7_Restrictions on internal movement`
       tags <- dat$`rec_C7_Restrictions on internal movement` %>% factor() %>% fct_reorder(dat$`C7_Restrictions on internal movement`) %>% levels()
-      tags <- gsub(" ", "\U2000", tags, fixed = TRUE)
-      tags <- gsub("\\s", "\U2000", format(tags, width = max(nchar(lev, type = "width"), na.rm = TRUE)))
+      tags <- ticklab(tags)
       nFactor <- length(tags)
       zmin <- 0
       zmax <- nFactor-1
@@ -474,8 +480,7 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = list
       text <- paste(d$`rec_C8_International travel controls`, d$CountryName, sep = "\n")
       d$variable <- d$`C8_International travel controls`
       tags <- dat$`rec_C8_International travel controls` %>% factor() %>% fct_reorder(dat$`C8_International travel controls`) %>% levels()
-      tags <- gsub(" ", "\U2000", tags, fixed = TRUE)
-      tags <- gsub("\\s", "\U2000", format(tags, width = max(nchar(lev, type = "width"), na.rm = TRUE)))
+      tags <- ticklab(tags)
       nFactor <- length(tags)
       zmin <- 0
       zmax <- nFactor-1
@@ -493,8 +498,7 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = list
     text <- paste(d$DeathsPerMillion, d$CountryName, sep = "\n")
     d$variable <- d$group_DeathsPerMillion
     tags <- c("0", "> 1", "> 10", "> 100", "> 1000")
-    tags <- gsub(" ", "\U2000", tags, fixed = TRUE)
-    tags <- gsub("\\s", "\U2000", format(tags, width = max(nchar(lev, type = "width"), na.rm = TRUE)))
+    tags <- ticklab(tags)
     nFactor <- length(tags)
     zmin <- 0
     zmax <- nFactor-1
@@ -512,8 +516,7 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = list
     text <- paste(d$CasesPerMillion, d$CountryName, sep = "\n")
     d$variable <- d$group_CasesPerMillion
     tags <- c("0", "> 1", "> 10", "> 100", "> 1000", "> 10000")
-    tags <- gsub(" ", "\U2000", tags, fixed = TRUE)
-    tags <- gsub("\\s", "\U2000", format(tags, width=max(nchar(lev, type = "width"), na.rm = TRUE)))
+    tags <- ticklab(tags)
     nFactor <- length(tags)
     zmin <- 0
     zmax <- nFactor-1
@@ -528,6 +531,8 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = list
   
   if (region == "World") {
     scope <- "world"
+    lataxis <- list(range = (c(-60, 90))) 
+    lonaxis <- list(range = (c(-180, 180)))
     
   } else if (region == "Europe") {
     scope <- "europe"

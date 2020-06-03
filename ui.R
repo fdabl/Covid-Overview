@@ -80,7 +80,7 @@ body <- dashboardBody(
           value = MAX_DATE,
           ticks = FALSE,
           timeFormat = "%B %d",
-          step = 1, width = "75%",
+          step = 1, width = "100%",
           animate = TRUE, animateOptions(interval = 30, loop = TRUE)
         ),
         
@@ -88,14 +88,16 @@ body <- dashboardBody(
         tags$br(),
         tags$br(),
         
-        radioButtons(
-          inputId = 'variable_type',
-          label = 'Information displayed:', 
-          choices = c(
-            'Stringency' = 'StringencyIndex',
-            'Deaths' = 'Deaths',
-            'Cases' = 'Cases'
-          ), selected = 'StringencyIndex', inline = TRUE
+        div(style="display:inline-block; width:25%; margin-right:2%",
+          selectInput(
+            inputId = 'variable_type',
+            label = 'Information displayed:', 
+            choices = c(
+              'Stringency' = 'StringencyIndex',
+              'Deaths' = 'Deaths',
+              'Cases' = 'Cases'
+            ), selected = 'StringencyIndex'
+          )
         ),
         
         conditionalPanel(condition = "input.variable_type == 'StringencyIndex'",
@@ -109,25 +111,27 @@ body <- dashboardBody(
                                                  "Stay at home requirements" = "Home",
                                                  "Restrictions on internal movement" = "Movement",
                                                  "International travel controls" = "Travel"),
-                                     selected = "Combined",
-                                     width = "15%")),
+                                     selected = "Combined"),
+                         style = "display:inline-block; width:25%"
+        ),
         
-        selectInput(
-          inputId = "region",
-          label = "Region:", 
-          choices = c(
-            "World" = "World",
-            "Europe" = "Europe",
-            "North America" = "NorthAmerica",
-            "South America" = "SouthAmerica",
-            "Asia" = "Asia",
-            "Africa" = "Africa",
-            "OECD" = "OECD",
-            "USA (States)" = "USA"
-          ), 
-          selected = "World", width = "15%"
+        div(style="display:inline-block; width:25%; margin-left:2%",
+          selectInput(
+            inputId = "region",
+            label = "Region:", 
+            choices = c(
+              "World" = "World",
+              "Europe" = "Europe",
+              "North America" = "NorthAmerica",
+              "South America" = "SouthAmerica",
+              "Asia" = "Asia",
+              "Africa" = "Africa",
+              "OECD" = "OECD",
+              "USA (States)" = "USA"
+            ), 
+            selected = "World"
+          )
         )
-        
       ),
       
       
