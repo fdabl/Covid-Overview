@@ -171,6 +171,72 @@ get_country_codes <- function() {
   
 }
 
+#' @returns US-specific data
+get_us_data <- function() {
+  
+  if(!file.exists("data/us_data.csv")) {
+    cases <- read.csv("data/cases_usa.csv")
+    cases <- pivot_longer(cases, cols = starts_with("X"), 
+                          names_to = "Date", values_to = "ConfirmedCases")
+    cases$Date <- gsub("X", "", cases$Date)
+    cases$Date <- gsub("\\.", "/", cases$Date)
+    cases$Date <- mdy(cases$Date)
+    cases <- cases %>%
+      group_by(State, Date) %>%
+      mutate(ConfirmedCases = sum(ConfirmedCases)) %>%
+      select(State, Date, ConfirmedCases)
+    
+    deaths <- read.csv("data/deaths_usa.csv")
+    deaths <- pivot_longer(deaths, cols = starts_with("X"), 
+                          names_to = "Date", values_to = "ConfirmedDeaths")
+    deaths$Date <- gsub("X", "", deaths$Date)
+    deaths$Date <- gsub("\\.", "/", deaths$Date)
+    deaths$Date <- mdy(deaths$Date)
+    deaths <- deaths %>%
+      group_by(State, Date) %>%
+      mutate(ConfirmedDeaths = sum(ConfirmedDeaths)) %>%
+      select(State, Date, ConfirmedDeaths)
+    
+    pop <- read.csv("data/population_usa.csv") %>%
+      group_by(State) %>%
+      mutate(population = sum(population)) %>%
+      select(State, population)
+    pop <- pop[!duplicated(pop),]
+    
+    us_data <- cases
+    us_data$ConfirmedDeaths <- deaths$ConfirmedDeaths
+    us_data <- full_join(us_data, pop, by = "State") %>%
+      mutate(CasesPerMillion = round((ConfirmedCases / population) * 1e6, 2),
+             DeathsPerMillion = round((ConfirmedDeaths / population) * 1e6, 2)) %>%
+      mutate(group_DeathsPerMillion = case_when(
+        DeathsPerMillion >= 0 & DeathsPerMillion <= 1 ~ 0,
+        DeathsPerMillion > 1 & DeathsPerMillion <= 10 ~ 1,
+        DeathsPerMillion > 10 & DeathsPerMillion <= 100 ~ 2,
+        DeathsPerMillion > 100 & DeathsPerMillion <= 1000 ~ 3,
+        DeathsPerMillion > 1000 ~ 4)
+      ) %>%
+      mutate(group_CasesPerMillion = case_when(
+        CasesPerMillion >= 0 & CasesPerMillion <= 1 ~ 0,
+        CasesPerMillion > 1 & CasesPerMillion <= 10 ~ 1,
+        CasesPerMillion > 10 & CasesPerMillion <= 100 ~ 2,
+        CasesPerMillion > 100 & CasesPerMillion <= 1000 ~ 3,
+        CasesPerMillion > 1000 & CasesPerMillion <= 10000 ~ 4,
+        CasesPerMillion > 10000 ~ 5)
+      )
+      
+    
+    write.csv(us_data, 'data/us_data.csv', row.names = FALSE)
+    
+  } else {
+    
+    us_data <- read.csv("data/us_data.csv")
+    
+  }
+  
+  us_data
+  
+}
+
 
 #' Returns number of days since the intervention is in place
 #' TODO: Think about how to handle NAs
@@ -330,7 +396,7 @@ ticklab <- function(tags, width = 25) {
 #' @param measure type of measure that should be shown if StringencyIndex is selected as variable
 #' @param region region which should be shown
 #' @returns plotly object
-plot_world_data <- function(dat, date, variable, measure, region, lataxis = NULL, lonaxis = NULL) {
+plot_world_data <- function(dat, date, variable, measure, region, us_data = NULL, lataxis = NULL, lonaxis = NULL) {
   d <- dat %>%
     group_by(CountryCode) %>%
     filter(Date == date | Date == max(dat$Date[which(dat$Date < date)]))
@@ -350,6 +416,19 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = NULL
     
   }
   
+  locations <- d$CountryCode
+  locationmode <- NULL
+  
+  if (region == "USA") {
+    us_data$Date <- as.Date(us_data$Date)
+    d <- us_data %>%
+      group_by(State) %>%
+      filter(Date == date | Date == max(us_data$Date[which(us_data$Date < date)]))
+    scope <- "usa"
+    locationmode <- "USA-states"
+    locations <- d$State
+  }
+  
   # lev <- c(unique(dat$`rec_C1_School closing`), unique(dat$`rec_C2_Workplace closing`), 
   #          unique(dat$`rec_C3_Cancel public events`), unique(dat$`rec_C4_Restrictions on gatherings`),
   #          unique(dat$`rec_C5_Close public transport`), unique(dat$`rec_C6_Stay at home requirements`),
@@ -357,8 +436,6 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = NULL
   # lev <- lev[!is.na(lev)]
   # lev <- gsub(" ", "\U2000", lev, fixed = TRUE)
   
-  locations <- d$CountryCode
-  locationmode <- NULL
   hoverinfo <- "text"
   tickfont <- list(family = "Droid Sans Mono")
   
@@ -493,9 +570,14 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = NULL
     
   } else if (variable == 'Deaths') {
     
-    title <- "Confirmed Deaths per Million Across the World"
     legend_title <- "Deaths per Million"
-    text <- paste(d$DeathsPerMillion, d$CountryName, sep = "\n")
+    if(region != "USA") {
+      title <- "Confirmed Deaths per Million Across the World"
+      text <- paste(d$DeathsPerMillion, d$CountryName, sep = "\n")
+    } else {
+      title <- "Confirmed Deaths per Million in the USA"
+      text <- paste(d$DeathsPerMillion, d$State, sep = "\n")
+    }
     d$variable <- d$group_DeathsPerMillion
     tags <- c("0", "> 1", "> 10", "> 100", "> 1000")
     tags <- ticklab(tags)
@@ -511,9 +593,14 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = NULL
     
   } else if (variable == 'Cases') {
     
-    title <- "Confirmed Cases per Million Across the World"
     legend_title <- "Cases per Million"
-    text <- paste(d$CasesPerMillion, d$CountryName, sep = "\n")
+    if(region != "USA") {
+      title <- "Confirmed Cases per Million Across the World"
+      text <- paste(d$CasesPerMillion, d$CountryName, sep = "\n")
+    } else {
+      title <- "Confirmed Cases per Million in the USA"
+      text <- paste(d$CasesPerMillion, d$State, sep = "\n")
+    }
     d$variable <- d$group_CasesPerMillion
     tags <- c("0", "> 1", "> 10", "> 100", "> 1000", "> 10000")
     tags <- ticklab(tags)
@@ -549,9 +636,6 @@ plot_world_data <- function(dat, date, variable, measure, region, lataxis = NULL
   } else if (region == "Africa") {
     scope <- "africa"
     
-  } else if (region == "USA") {
-    scope <- "usa"
-    locationmode <- "USA-states"
   }
   
   plot_ly(data = d, type = "choropleth", locations = locations, locationmode = locationmode, z = d$variable,

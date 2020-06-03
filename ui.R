@@ -90,13 +90,13 @@ body <- dashboardBody(
         
         div(style="display:inline-block; width:25%; margin-right:2%",
           selectInput(
-            inputId = 'variable_type',
-            label = 'Information displayed:', 
+            inputId = "variable_type",
+            label = "Information displayed:", 
             choices = c(
-              'Stringency' = 'StringencyIndex',
-              'Deaths' = 'Deaths',
-              'Cases' = 'Cases'
-            ), selected = 'StringencyIndex'
+              "Stringency" = "StringencyIndex",
+              "Deaths" = "Deaths",
+              "Cases" = "Cases"
+            ), selected = "StringencyIndex"
           )
         ),
         

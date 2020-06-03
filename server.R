@@ -38,6 +38,8 @@ oecd_list <- c('Australia', 'Austria', 'Belgium', 'Canada', 'Chile', 'Colombia',
                'Poland', 'Portugal', 'Slovak Republic', 'Slovenia','Spain', 
                'Sweden', 'Switzerland', 'Turkey', 'United Kingdom', 'United States')
 
+us_data <- get_us_data()
+
 shinyServer(function(session, input, output) {
   
   # Reactive Elements for the Map
@@ -45,6 +47,53 @@ shinyServer(function(session, input, output) {
   selected_variable <- reactive({ input$variable_type })
   selected_measure <- reactive({ input$index_type })
   selected_region <- reactive({ input$region })
+  
+  # adjust selectInput options for USA and Stringency selections
+  observe({
+    region <- input$region
+    var <- input$variable_type
+
+    if(region == "USA") {
+      updateSelectInput(session, "variable_type",
+                        choices = c(
+                          "Deaths" = "Deaths",
+                          "Cases" = "Cases"
+                        ), selected = selected_variable())
+    } else {
+      updateSelectInput(session, "variable_type",
+                        choices = c(
+                          "Stringency Index" = "StringencyIndex",
+                          "Deaths" = "Deaths",
+                          "Cases" = "Cases"
+                        ), selected = selected_variable())
+    }
+
+    if(var == "StringencyIndex") {
+      updateSelectInput(session, "region",
+                        choices = c(
+                          "World" = "World",
+                          "Europe" = "Europe",
+                          "North America" = "NorthAmerica",
+                          "South America" = "SouthAmerica",
+                          "Asia" = "Asia",
+                          "Africa" = "Africa",
+                          "OECD" = "OECD"
+                        ), selected = selected_region())
+    } else {
+      updateSelectInput(session, "region",
+                        choices = c(
+                          "World" = "World",
+                          "Europe" = "Europe",
+                          "North America" = "NorthAmerica",
+                          "South America" = "SouthAmerica",
+                          "Asia" = "Asia",
+                          "Africa" = "Africa",
+                          "OECD" = "OECD",
+                          "USA (States)" = "USA"
+                        ), selected = selected_region())
+    }
+
+  })
   
   # Reactive Elements for the Stringency Plot
   
@@ -188,7 +237,7 @@ shinyServer(function(session, input, output) {
     #lonaxis <- list(range = c(zoom$lonaxis$range[0], zoom$lonaxis$range[1]))
     
     # create plot
-    p <- plot_world_data(dat, selected_mapdate(), selected_variable(), selected_measure(), selected_region())
+    p <- plot_world_data(dat, selected_mapdate(), selected_variable(), selected_measure(), selected_region(), us_data)
     #lataxis = lataxis, lonaxis = lonaxis)
     
     p
