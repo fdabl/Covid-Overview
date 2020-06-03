@@ -16,6 +16,23 @@ eu_countries <- c(
   'Sweden','United Kingdom'
 )
 
+NA_countries <- c(
+  'United States', 'Mexico', 'Canada', 'Guatemala',
+  'Cuba', 'Haiti', 'Dominican Republic', 'Honduras',
+  'El Salvador', 'Nicaragua', 'Costa Rica', 'Panama',
+  'Puerto Rico', 'Jamaica', 'Trinidad & Tobago', 'Guadeloupe',
+  'Martinique', 'Bahamas', 'Belize', 'Barbados', 'St. Lucia',
+  'St. Vincent & Grenadines', 'U.S. Virgin Islands',
+  'Antigua & Barbuda', 'Dominica', 'Bermuda', 'Greenland',
+  'St. Kitts & Nevis','Turks & Caicos Islands','Saint Martin (French part)',
+  'British Virgin Islands', 'Caribbean Netherlands',
+  'Anguilla', 'St. Barthélemy', 'St. Pierre & Miquelon',
+  'Montserrat'
+  
+)
+
+
+
 # TODO:
 # Showing all countries slows the initial rendering of the app
 # down because it needs to generate all these html elements
@@ -161,18 +178,18 @@ body <- dashboardBody(
             selected_header = 'You have selected:'
           )
         ),
-        radioButtons(
-          inputId = 'continent_table',
-          label = 'Zoom in on:', 
-          choices = c(
-            'World' = 'World',
-            "Europe" = "Europe",
-            'North & South America' = 'Americas',
-            'Asia' = 'Asia',
-            'Africa' = 'Africa',
-            'Oceania' = 'Oceania'
-          ), selected = 'World', inline = TRUE
-        ),
+        selectInput('continent_table',
+                    'Choose Continent:',
+                    c(
+                      'World' = 'World',
+                      "Europe" = "Europe",
+                      'North America' = 'North America',
+                      'South America' = 'South America',
+                      'Asia' = 'Asia',
+                      'Africa' = 'Africa',
+                      'Oceania' = 'Oceania'
+                    ), selected = 'World', width = '175px',
+        ) ,
         div(style='display:inline-block', actionButton('TableApply','Apply')),
         actionButton('TableAll', 'Select All'),
         actionButton('TableClear', 'Clear Selection'),

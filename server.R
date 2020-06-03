@@ -2,8 +2,13 @@ library('DT')
 source('helpers.R')
 
 
+
 dat <- get_stringency_csv()
 country_codes <- get_country_codes()
+continent_list <- case_when(
+  country_codes$CountryName %in% NA_countries ~ 'North America', 
+ (country_codes$continent=='Americas')&(!country_codes$CountryName %in% NA_countries ) ~ 'South America', 
+ TRUE ~ as.character(country_codes$continent))
 
 
 shinyServer(function(session, input, output) {
@@ -47,7 +52,7 @@ shinyServer(function(session, input, output) {
   })
   
   observeEvent(input$continent_table, {
-    if (input$continent_table=='World')
+    if (input$continent_table == 'World')
     {sel_cont<-unique(dat$CountryName)
     sel_cnt<-input$countries_table
      if(input$TableApply == 0){
@@ -55,7 +60,9 @@ shinyServer(function(session, input, output) {
      }
     }
     else{
-      sel_cont <- country_codes %>% filter(continent==input$continent_table) %>% select(CountryName)                    %>% filter(CountryName %in% dat$CountryName)
+      sel_cont <- country_codes %>% mutate(continent=continent_list) %>% 
+                  filter(continent==input$continent_table) %>% select(CountryName) %>% 
+                  filter(CountryName %in% dat$CountryName)
       sel_cont<-sel_cont[,1]
       sel_cnt<-input$countries_table
     }
@@ -89,7 +96,7 @@ shinyServer(function(session, input, output) {
     )
     
     tab <- prepare_country_table(dat, selected_countries_table())
-    tab <- datatable(tab, options = list(columnDefs = list(list(targets = 10:17, visible = FALSE)), rowCallback = JS(rowCallback))) %>% formatString(2:9,"Since "," Days") %>%
+    tab <- datatable(tab, options = list(columnDefs = list(list(targets = 10:17, visible = FALSE)), rowCallback = JS(rowCallback))) %>% formatString(2:9,"In PLace for "," Days") %>%
       formatStyle('roll',target='row',
                   backgroundColor = styleInterval(seq(0,0.8,length.out = 7),
                   sequential_hcl(n = 8, h = c(140, 80), c = c(63, NA, 33), l = c(40, 97), power = c(1.05, 1.65), rev = TRUE, register = ))) %>%
