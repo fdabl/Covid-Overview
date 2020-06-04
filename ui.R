@@ -17,6 +17,9 @@ eu_countries <- c(
   'Sweden','United Kingdom'
 )
 
+
+
+
 # TODO:
 # Showing all countries slows the initial rendering of the app
 # down because it needs to generate all these html elements
@@ -212,22 +215,24 @@ body <- dashboardBody(
             selected_header = 'You have selected:'
           )
         ),
-        radioButtons(
-          inputId = 'continent_table',
-          label = 'Zoom in on:', 
-          choices = c(
-            'World' = 'World',
-            "Europe" = "Europe",
-            'North & South America' = 'Americas',
-            'Asia' = 'Asia',
-            'Africa' = 'Africa',
-            'Oceania' = 'Oceania'
-          ), selected = 'World', inline = TRUE
-        ),
+        selectInput('continent_table',
+                    'Choose Continent:',
+                    c(
+                      'World' = 'World',
+                      "Europe" = "Europe",
+                      'North America' = 'North America',
+                      'South America' = 'South America',
+                      'Asia' = 'Asia',
+                      'Africa' = 'Africa',
+                      'Oceania' = 'Oceania'
+                    ), selected = 'World', width = '175px',
+        ) ,
         div(style='display:inline-block', actionButton('TableApply','Apply')),
         actionButton('TableAll', 'Select All'),
         actionButton('TableClear', 'Clear Selection'),
-        dataTableOutput('countries_table')
+        dataTableOutput('countries_table'),
+        plotOutput('table_legend', inline = FALSE,height = '250px'),
+        
       )
     ),
     
