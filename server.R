@@ -95,7 +95,7 @@ shinyServer(function(session, input, output) {
   })
   
   output$table_legend <- renderPlot({
-    swatchplot("Table \n legend" = sequential_hcl(n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE, register = ),font=3,cex=0.9,line=3)
+    swatchplot('Table \nlegend' = sequential_hcl(n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE, register = ),font=3,cex=0.9,line=3)
   })
   
   output$countries_table <- renderDataTable({
