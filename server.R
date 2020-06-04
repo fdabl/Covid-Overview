@@ -114,7 +114,7 @@ shinyServer(function(session, input, output) {
     )
     
     tab <- prepare_country_table(dat, selected_countries_table())
-    tab <- datatable(tab, options = list(columnDefs = list(list(targets = 10:17, visible = FALSE)), rowCallback = JS(rowCallback))) %>% formatString(2:9,"In PLace for "," Days") %>%
+    tab <- datatable(tab, options = list(columnDefs = list(list(targets = 10:17, visible = FALSE)), rowCallback = JS(rowCallback))) %>% formatString(2:9,"In Place for "," Days") %>%
       formatStyle('roll',target='row',
                   backgroundColor = styleInterval(seq(0,1.1,length.out = 9),
                   sequential_hcl(n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE, register = )
