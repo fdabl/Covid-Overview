@@ -16,20 +16,6 @@ eu_countries <- c(
   'Sweden','United Kingdom'
 )
 
-NA_countries <- c(
-  'United States', 'Mexico', 'Canada', 'Guatemala',
-  'Cuba', 'Haiti', 'Dominican Republic', 'Honduras',
-  'El Salvador', 'Nicaragua', 'Costa Rica', 'Panama',
-  'Puerto Rico', 'Jamaica', 'Trinidad & Tobago', 'Guadeloupe',
-  'Martinique', 'Bahamas', 'Belize', 'Barbados', 'St. Lucia',
-  'St. Vincent & Grenadines', 'U.S. Virgin Islands',
-  'Antigua & Barbuda', 'Dominica', 'Bermuda', 'Greenland',
-  'St. Kitts & Nevis','Turks & Caicos Islands','Saint Martin (French part)',
-  'British Virgin Islands', 'Caribbean Netherlands',
-  'Anguilla', 'St. Barthélemy', 'St. Pierre & Miquelon',
-  'Montserrat'
-  
-)
 
 
 
@@ -193,7 +179,9 @@ body <- dashboardBody(
         div(style='display:inline-block', actionButton('TableApply','Apply')),
         actionButton('TableAll', 'Select All'),
         actionButton('TableClear', 'Clear Selection'),
-        dataTableOutput('countries_table')
+        dataTableOutput('countries_table'),
+        plotOutput('table_legend', inline = FALSE,height = '250px'),
+        
       )
     ),
     

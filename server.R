@@ -2,6 +2,20 @@ library('DT')
 source('helpers.R')
 
 
+NA_countries <- c(
+  'United States', 'Mexico', 'Canada', 'Guatemala',
+  'Cuba', 'Haiti', 'Dominican Republic', 'Honduras',
+  'El Salvador', 'Nicaragua', 'Costa Rica', 'Panama',
+  'Puerto Rico', 'Jamaica', 'Trinidad & Tobago', 'Guadeloupe',
+  'Martinique', 'Bahamas', 'Belize', 'Barbados', 'St. Lucia',
+  'St. Vincent & Grenadines', 'U.S. Virgin Islands',
+  'Antigua & Barbuda', 'Dominica', 'Bermuda', 'Greenland',
+  'St. Kitts & Nevis','Turks & Caicos Islands','Saint Martin (French part)',
+  'British Virgin Islands', 'Caribbean Netherlands',
+  'Anguilla', 'St. Barthélemy', 'St. Pierre & Miquelon',
+  'Montserrat'
+  
+)
 
 dat <- get_stringency_csv()
 country_codes <- get_country_codes()
@@ -80,6 +94,10 @@ shinyServer(function(session, input, output) {
     p
   })
   
+  output$table_legend <- renderPlot({
+    swatchplot("Table \n legend" = sequential_hcl(n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE, register = ),font=3,cex=0.9,line=3)
+  })
+  
   output$countries_table <- renderDataTable({
     rowCallback <- c(
       "function(row, data){",
@@ -98,8 +116,9 @@ shinyServer(function(session, input, output) {
     tab <- prepare_country_table(dat, selected_countries_table())
     tab <- datatable(tab, options = list(columnDefs = list(list(targets = 10:17, visible = FALSE)), rowCallback = JS(rowCallback))) %>% formatString(2:9,"In PLace for "," Days") %>%
       formatStyle('roll',target='row',
-                  backgroundColor = styleInterval(seq(0,0.8,length.out = 7),
-                  sequential_hcl(n = 8, h = c(140, 80), c = c(63, NA, 33), l = c(40, 97), power = c(1.05, 1.65), rev = TRUE, register = ))) %>%
+                  backgroundColor = styleInterval(seq(0,1.1,length.out = 9),
+                  sequential_hcl(n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE, register = )
+                  )) %>%
       formatStyle('Mandatory school closing',valueColumns = 'C1_Flag', fontWeight = styleEqual(1,"bold")) %>%
       formatStyle('Mandatory workplace closing',valueColumns = 'C2_Flag', fontWeight = styleEqual(1,"bold")) %>%
       formatStyle('Mandatory cancellation of public events',valueColumns = 'C3_Flag', fontWeight = styleEqual(1,"bold")) %>%
@@ -109,4 +128,7 @@ shinyServer(function(session, input, output) {
       formatStyle('Mandatory restrictions of internal transport',valueColumns = 'C7_Flag', fontWeight = styleEqual(1,"bold"))
     tab
   })
+  
+  
+  
 })
