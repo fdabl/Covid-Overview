@@ -2,7 +2,42 @@ library('DT')
 source('helpers.R')
 
 
-NA_countries <- c(
+# dats <- get_stringency_csv()
+country_codes <- get_country_codes()
+
+dat <- get_stringency_data(verbose = FALSE) %>% 
+  left_join(
+    country_codes, by = 'country_code'
+  )
+
+dat_us <- get_us_data()
+
+continent_list <- case_when(
+  country_codes$country_name %in% NA_COUNTRIES ~ 'North America',
+  country_codes$continent == 'Americas' & !country_codes$country_name %in% NA_COUNTRIES ~ 'South America',
+  TRUE ~ as.character(country_codes$continent)
+)
+
+get_countries <- function(dat, continent) {
+  unique(dat[dat$continent == continent, ]$country_name)
+}
+
+AFRICA <- get_countries(dat, 'Africa')
+ASIA <- get_countries(dat, 'Asia')
+EUROPE <- get_countries(dat, 'Europe')
+OCEANIA <- get_countries(dat, 'Oceania')
+
+OECD <- c(
+  'Australia', 'Austria', 'Belgium', 'Canada', 'Chile', 'Colombia',
+  'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France', 
+  'Germany','Greece', 'Hungary', 'Iceland', 'Ireland', 'Israel',
+  'Italy', 'Japan', 'South Korea', # 'Latvia', -> not in the database
+  'Lithuania', 'Luxembourg', 'Mexico', 'Netherlands', 'New Zealand', 'Norway',
+   'Poland', 'Portugal', 'Slovak Republic', 'Slovenia','Spain',  'Sweden',
+  'Switzerland', 'Turkey', 'United Kingdom', 'United States'
+)
+
+NA_COUNTRIES <- c(
   'United States', 'Mexico', 'Canada', 'Guatemala',
   'Cuba', 'Haiti', 'Dominican Republic', 'Honduras',
   'El Salvador', 'Nicaragua', 'Costa Rica', 'Panama',
@@ -14,50 +49,20 @@ NA_countries <- c(
   'British Virgin Islands', 'Caribbean Netherlands',
   'Anguilla', 'St. Barthélemy', 'St. Pierre & Miquelon',
   'Montserrat'
-  
 )
 
-dat <- get_stringency_csv()
-country_codes <- get_country_codes() %>% 
-  select(-"CountryName")
+NORTH_AMERICA <- c(
+  'Barbados', 'Belize', 'Canada', 'Costa Rica', 'Cuba',
+  'Dominica', 'Dominican Republic', 'El Salvador', 
+  'Greenland', 'Guatemala', 'Honduras', 'Jamaica', 'Mexico',
+  'Nicaragua', 'Panama', 'Trinidad and Tobago', 'United States'
+)
 
-dat <- dat %>% #select(-CountryName) %>% 
-  left_join(country_codes, by = 'CountryCode')
-
-country_codes <- get_country_codes()
-continent_list <- case_when(
-  country_codes$CountryName %in% NA_countries ~ 'North America', 
- (country_codes$continent=='Americas')&(!country_codes$CountryName %in% NA_countries ) ~ 'South America', 
- TRUE ~ as.character(country_codes$continent))
-
-africa_list <- (dat %>% filter(continent == 'Africa'))$CountryName %>%
-  unique()
-north_america_list <- c('Barbados', 'Belize', 'Canada', 'Costa Rica', 'Cuba',
-                        'Dominica', 'Dominican Republic', 'El Salvador', 
-                        'Greenland', 'Guatemala', 'Honduras', 'Jamaica', 'Mexico',
-                        'Nicaragua', 'Panama', 'Trinidad and Tobago',
-                        'United States')
-south_america_list <- c('Argentina', 'Aruba', 'Bermuda', 'Bolivia', 'Brazil',
-                        'Chile', 'Colombia', 'Ecuador', 'Guyana', 'Paraguay',
-                        'Peru', 'Puerto Rico', 'Suriname', 'Uruguay', 
-                        'Venezuela')
-asia_list <- (dat %>% filter(continent == 'Asia'))$CountryName %>%
-  unique()
-europe_list <- (dat %>% filter(continent == 'Europe'))$CountryName %>%
-  unique()
-oceania_list <- (dat %>% filter(continent == 'Oceania'))$CountryName %>%
-  unique()
-
-oecd_list <- c('Australia', 'Austria', 'Belgium', 'Canada', 'Chile', 'Colombia',
-               'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France', 
-               'Germany','Greece', 'Hungary', 'Iceland', 'Ireland', 'Israel',
-               'Italy', 'Japan', 'South Korea', # 'Latvia', -> not in the database
-               'Lithuania', 
-               'Luxembourg', 'Mexico', 'Netherlands', 'New Zealand', 'Norway',
-               'Poland', 'Portugal', 'Slovak Republic', 'Slovenia','Spain', 
-               'Sweden', 'Switzerland', 'Turkey', 'United Kingdom', 'United States')
-
-us_data <- get_us_data()
+SOUTH_AMERICA <- c(
+  'Argentina', 'Aruba', 'Bermuda', 'Bolivia', 'Brazil',
+  'Chile', 'Colombia', 'Ecuador', 'Guyana', 'Paraguay',
+  'Peru', 'Puerto Rico', 'Suriname', 'Uruguay', 'Venezuela'
+)
 
 shinyServer(function(session, input, output) {
   
@@ -72,44 +77,58 @@ shinyServer(function(session, input, output) {
     region <- input$region
     var <- input$variable_type
 
-    if(region == "USA") {
-      updateSelectInput(session, "variable_type",
-                        choices = c(
-                          "Deaths" = "Deaths",
-                          "Cases" = "Cases"
-                        ), selected = selected_variable())
+    if(region == 'USA') {
+      
+      updateSelectInput(
+        session, 'variable_type',
+        choices = c(
+          'Deaths' = 'Deaths',
+          'Cases' = 'Cases'
+          ), selected = selected_variable()
+      )
+      
     } else {
-      updateSelectInput(session, "variable_type",
-                        choices = c(
-                          "Stringency Index" = "StringencyIndex",
-                          "Deaths" = "Deaths",
-                          "Cases" = "Cases"
-                        ), selected = selected_variable())
+      
+      updateSelectInput(
+        session, 'variable_type',
+        choices = c(
+          'Stringency Index' = 'StringencyIndex',
+          'Deaths' = 'Deaths',
+          'Cases' = 'Cases'
+        ), selected = selected_variable()
+      )
     }
 
-    if(var == "StringencyIndex") {
-      updateSelectInput(session, "region",
-                        choices = c(
-                          "World" = "World",
-                          "Europe" = "Europe",
-                          "North America" = "NorthAmerica",
-                          "South America" = "SouthAmerica",
-                          "Asia" = "Asia",
-                          "Africa" = "Africa",
-                          "OECD" = "OECD"
-                        ), selected = selected_region())
+    if(var == 'StringencyIndex') {
+      
+      updateSelectInput(
+        session, 'region',
+        choices = c(
+          'World' = 'World',
+          'Europe' = 'Europe',
+          'North America' = 'NorthAmerica',
+          'South America' = 'SouthAmerica',
+          'Asia' = 'Asia',
+          'Africa' = 'Africa',
+          'OECD' = 'OECD'),
+        selected = selected_region()
+      )
+      
     } else {
-      updateSelectInput(session, "region",
-                        choices = c(
-                          "World" = "World",
-                          "Europe" = "Europe",
-                          "North America" = "NorthAmerica",
-                          "South America" = "SouthAmerica",
-                          "Asia" = "Asia",
-                          "Africa" = "Africa",
-                          "OECD" = "OECD",
-                          "USA (States)" = "USA"
-                        ), selected = selected_region())
+      
+      updateSelectInput(
+        session, 'region',
+        choices = c(
+          'World' = 'World',
+          'Europe' = 'Europe',
+          'North America' = 'NorthAmerica',
+          'South America' = 'SouthAmerica',
+          'Asia' = 'Asia',
+          'Africa' = 'Africa',
+          'OECD' = 'OECD',
+          'USA (States)' = 'USA'
+        ), selected = selected_region()
+      )
     }
 
   })
@@ -118,19 +137,19 @@ shinyServer(function(session, input, output) {
   
   # countries_region <- reactive({
   #   if (input$regions == 'Africa'){
-  #     country_ls = africa_list
+  #     country_ls = AFRICA
   #   } else if (input$regions == 'North America'){
-  #     country_ls = north_america_list
+  #     country_ls = NORTH_AMERICA
   #   } else if (input$regions == 'South America'){
-  #     country_ls = south_america_list
+  #     country_ls = SOUTH_AMERICA
   #   } else if (input$regions == 'Asia'){
-  #     country_ls = asia_list
+  #     country_ls = ASIA
   #   } else if (input$regions == 'Europe'){
-  #     country_ls = europe_list
+  #     country_ls = EUROPE
   #   } else if (input$regions == 'Oceania'){
-  #     country_ls = oceania_list
+  #     country_ls = OCEANIA
   #   } else if (input$regions == 'OECD'){
-  #     country_ls = oecd_list
+  #     country_ls = OECD
   #   }
   # 
   #   country_ls
@@ -139,34 +158,41 @@ shinyServer(function(session, input, output) {
   
   observeEvent(input$regions, {
     if (input$regions == 'I want to make my own selection'){
-      country_ls = c('Germany', 'Netherlands', 'Romania',
-                     'Serbia', 'United Kingdom')
-      country_choices = dat$Country %>% unique()
+      country_ls = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom')
+      country_choices = dat$country_name %>% unique()
+      
     } else if (input$regions == 'Africa') {
-      country_ls = africa_list
-      country_choices = africa_list
+      country_ls = AFRICA
+      country_choices = AFRICA
+      
     } else if (input$regions == 'North America'){
-      country_ls = north_america_list
-      country_choices = north_america_list
+      country_ls = NORTH_AMERICA
+      country_choices = NORTH_AMERICA
+      
     } else if (input$regions == 'South America'){
-      country_ls = south_america_list
-      country_choices = south_america_list
+      country_ls = SOUTH_AMERICA
+      country_choices = SOUTH_AMERICA
+      
     } else if (input$regions == 'Asia'){
-      country_ls = asia_list
-      country_choices = asia_list
+      country_ls = ASIA
+      country_choices = ASIA
+      
     } else if (input$regions == 'Europe'){
-      country_ls = europe_list
-      country_choices = europe_list
+      country_ls = EUROPE
+      country_choices = EUROPE
+      
     } else if (input$regions == 'Oceania'){
-      country_ls = oceania_list
-      country_choices = oceania_list
+      country_ls = OCEANIA
+      country_choices = OCEANIA
+      
     } else if (input$regions == 'OECD'){
-      country_ls = oecd_list
-      country_choices = oecd_list
+      country_ls = OECD
+      country_choices = OECD
     }
     
     updateSelectInput(session, 'countries_lockdown', choices = country_choices, selected = country_ls)
   })
+  
   # for drop down:
   # country_list <- reactive({
   #   if (input$grouping == 'show selected group') {
@@ -191,7 +217,8 @@ shinyServer(function(session, input, output) {
   
   selected_countries <- reactive({ 
     input$Refresh
-    isolate(country_list()) })
+    isolate(country_list())
+  })
   
   num_cols <- reactive({
     len <- length(selected_countries())
@@ -200,43 +227,35 @@ shinyServer(function(session, input, output) {
   
   selected_plot <- reactive({
     if (input$graph == 'Daily deaths per 10 Million') {
-      plt <- plot_stringency_data_deaths_relative(dat,
-                                                  selected_countries(),
-                                                  num_cols())
+      plt <- plot_stringency_data_deaths_relative(dat, selected_countries(), num_cols())
+      
     } else if (input$graph == 'Daily deaths (absolute value)') {
-      plt <- plot_stringency_data_deaths_total(dat,
-                                               selected_countries(),
-                                               num_cols())
+      plt <- plot_stringency_data_deaths_total(dat, selected_countries(), num_cols())
+      
     } else if (input$graph == 'New Cases per Million') {
-      plt <- plot_stringency_data_cases_relative(dat,
-                                                 selected_countries(),
-                                                 num_cols())
+      plt <- plot_stringency_data_cases_relative(dat, selected_countries(), num_cols())
+      
     } else {
-      plt <- plot_stringency_data_cases_total(dat,
-                                              selected_countries(),
-                                              num_cols())
+      plt <- plot_stringency_data_cases_total(dat, selected_countries(), num_cols())
     }
     
     plt
                
   })
   
-
-  
   how_high <- reactive({
     len <- length(selected_countries())
     (((len - 1) %/% num_cols()) + 1) * 200
   })
   
-  height_of_box = reactive({
-    paste0(as.character(how_high() + 500),"px")
+  height_of_box <- reactive({
+    paste0(as.character(how_high() + 500),'px')
   })
   
   output$lockdown_plot_lines_scales <- renderPlot({
     input$Refresh
     isolate(selected_plot())
   }, height = how_high)
-  
   
   # Reactive Elements for the Table
   selected_countries_table <- eventReactive(input$TableApply, { input$countries_table }, ignoreNULL = FALSE)
@@ -246,89 +265,132 @@ shinyServer(function(session, input, output) {
   })
   
   observeEvent(input$TableAll,{
-    updateSelectInput(session,'countries_table',selected = unique(dat$Country))
+    updateSelectInput(session, 'countries_table', selected = unique(dat$country_name))
   })
   
   observeEvent(input$continent_table, {
     if (input$continent_table == 'World'){
       
-      sel_cont <- unique(dat$CountryName)
+      sel_cont <- unique(dat$country_name)
       sel_cnt <- input$countries_table
 
      if (input$TableApply == 0){
-      sel_cnt <- unique(dat$Country)
+      sel_cnt <- unique(dat$country_name)
      }
     
-    } else{
+    } else {
       
       sel_cont <- country_codes %>%
         mutate(continent = continent_list) %>% 
         filter(continent == input$continent_table) %>%
-        select(CountryName) %>% 
-        filter(CountryName %in% dat$CountryName)
+        select(country_name) %>% 
+        filter(country_name %in% dat$country_name)
       
       sel_cont <- sel_cont[,1]
       sel_cnt <- input$countries_table
     }
     
-    updateSelectInput(session,'countries_table', choices = sel_cont,selected = sel_cnt)
+    updateSelectInput(session, 'countries_table', choices = sel_cont, selected = sel_cnt)
   })
 
 
-  
   output$heatmap <- renderPlotly({
-    
+
     # maintain zoom level when changing dates (not working yet)
     # observeEvent(input$mapdate, {
-    #   zoom <- event_data("plotly_relayout", source = "M")
+    #   zoom <- event_data('plotly_relayout', source = 'M')
     # })
-    #zoomer <- eventReactive(input$mapdate, {event_data("plotly_relayout", "heatmap")})
+    #zoomer <- eventReactive(input$mapdate, {event_data('plotly_relayout', 'heatmap')})
     # zoom <- zoomer()
     #lataxis <- list(range = c(zoom$lataxis$range[0], zoom$lataxis$range[1]))
     #lonaxis <- list(range = c(zoom$lonaxis$range[0], zoom$lonaxis$range[1]))
-    
+
     # create plot
-    p <- plot_world_data(dat, selected_mapdate(), selected_variable(), selected_measure(), selected_region(), us_data)
+    p <- plot_world_data(dat, selected_mapdate(), selected_variable(), selected_measure(), selected_region(), dat_us)
     #lataxis = lataxis, lonaxis = lonaxis)
-    
+
     p
   })
   
   output$table_legend <- renderPlot({
-    swatchplot('Table \nlegend' = sequential_hcl(n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE, register = ),font=3,cex=0.9,line=3)
+    swatchplot(
+      'Table \nlegend' = sequential_hcl(
+        n = 10, h = c(250, 90), c = c(40, NA, 22),
+        l = c(68, 100), power = c(3, 3), rev = TRUE#, register =
+      ), font = 3,cex = 0.9, line = 3
+    )
   })
-  
-  output$countries_table <- renderDataTable({
+
+  output$countries_table <- DT::renderDT({
     rowCallback <- c(
-      "function(row, data){",
-      "  for(var i=2; i<data.length; i++){",
-      "    if(data[i] === null){",
+      'function(row, data){',
+      '  for(var i=2; i<data.length; i++){',
+      '    if(data[i] === null){',
       "      $('td:eq('+i+')', row).html('Not Implemented')",
       "        .css({'color': 'rgb(0,0,0)', 'font-style': 'italic'});",
-      "    } else if(data[i] < 0){",
+      '    } else if(data[i] < 0){',
       "      $('td:eq('+i+')', row).html('Lifted '+ Math.abs(data[i]) + ' Days Ago')",
       "        .css({'font-style': 'normal'});",
-      "  }",
-      "}",
-      "}"
+      '  }',
+      '}',
+      '}'
     )
-    
+
     tab <- prepare_country_table(dat, selected_countries_table())
-    tab <- datatable(tab, options = list(columnDefs = list(list(targets = 10:17, visible = FALSE)), rowCallback = JS(rowCallback))) %>% formatString(2:9,"In Place for "," Days") %>%
-      formatStyle('roll',target='row',
-                  backgroundColor = styleInterval(seq(0,1.1,length.out = 9),
-                  sequential_hcl(n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE, register = )
-                  )) %>%
-      formatStyle('Mandatory school closing',valueColumns = 'C1_Flag', fontWeight = styleEqual(1,"bold")) %>%
-      formatStyle('Mandatory workplace closing',valueColumns = 'C2_Flag', fontWeight = styleEqual(1,"bold")) %>%
-      formatStyle('Mandatory cancellation of public events',valueColumns = 'C3_Flag', fontWeight = styleEqual(1,"bold")) %>%
-      formatStyle('Mandatory public transport closing',valueColumns = 'C4_Flag', fontWeight = styleEqual(1,"bold")) %>%
-      formatStyle('Gatherings restricted below 100 people',valueColumns = 'C5_Flag', fontWeight = styleEqual(1,"bold")) %>%
-      formatStyle('Leaving home restricrted by law (with minimal exceptions)',valueColumns = 'C6_Flag', fontWeight = styleEqual(1,"bold")) %>%
-      formatStyle('Mandatory restrictions of internal transport',valueColumns = 'C7_Flag', fontWeight = styleEqual(1,"bold"))
-    tab
+    tab <- datatable(
+      tab, options = list(
+        columnDefs = list(list(targets = 10, visible = FALSE)), rowCallback = JS(rowCallback)
+        # columnDefs = list(list(targets = 10:17, visible = FALSE)), rowCallback = JS(rowCallback)
+        )
+      ) %>%
+      formatString(2:9, 'In Place for ',' Days') %>%
+      formatStyle(
+        'roll', target = 'row',
+        backgroundColor = styleInterval(
+          seq(0, 1.1, length.out = 9),
+          sequential_hcl(
+            n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE#, register =
+          )
+        )
+      )
+    
+    return(tab)
   })
   
-  
-  
+    
+    # TODO: add this when we have the flag variable for the stringency index!
+      # formatStyle(
+      #   'Mandatory school closing', valueColumns = 'school_closing_flag',
+      #   fontWeight = styleEqual(1, 'bold')
+      # ) %>%
+      # formatStyle(
+      #   'Mandatory workplace closing',
+      #   valueColumns = 'workplace_closing_flag',
+      #   fontWeight = styleEqual(1, 'bold')
+      # ) %>%
+      # formatStyle(
+      #   'Mandatory cancellation of public events',
+      #   valueColumns = 'cancel_events_flag',
+      #   fontWeight = styleEqual(1, 'bold')
+      # ) %>%
+      # formatStyle(
+      #   'Mandatory public transport closing',
+      #   valueColumns = 'transport_closing_flag',
+      #   fontWeight = styleEqual(1, 'bold')
+      # ) %>%
+      # formatStyle(
+      #   'Gatherings restricted below 100 people',
+      #   valueColumns = 'gatherings_restrictions_flag',
+      #   fontWeight = styleEqual(1, 'bold')
+      # ) %>%
+      # formatStyle(
+      #   'Leaving home restricted by law (with minimal exceptions)',
+      #   valueColumns = 'internal_movement_restrictions_flag',
+      #   fontWeight = styleEqual(1, 'bold')
+      # ) %>%
+      # formatStyle(
+      #   'Mandatory restrictions of internal transport',
+      #   valueColumns = 'international_movement_restrictions_flag',
+      #   fontWeight = styleEqual(1, 'bold')
+      # )
 })

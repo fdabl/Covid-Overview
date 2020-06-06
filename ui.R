@@ -65,25 +65,25 @@ body <- dashboardBody(
       ),
       
       box(
-        title = "The Lockdown Across the Globe", status = "primary", width = "100%",
-        solidHeader = TRUE, collapsible = TRUE, align = "center",
+        title = 'The Lockdown Across the Globe', status = 'primary', width = '100%',
+        solidHeader = TRUE, collapsible = TRUE, align = 'center',
         
-        plotlyOutput("heatmap", inline = TRUE),
+        plotlyOutput('heatmap', inline = TRUE),
         
         
-        tags$head(tags$style(type="text/css", 
-                             ".slider-animate-button {font-size: 20pt !important; position: absolute; left: 49.3%; margin-top: 20px}")),
+        tags$head(tags$style(type='text/css', 
+                             '.slider-animate-button {font-size: 20pt !important; position: absolute; left: 49.3%; margin-top: 20px}')),
         
         tags$br(),
         
         sliderInput(
-          inputId = "mapdate", label = "Date:", 
+          inputId = 'mapdate', label = 'Date:', 
           min = MIN_DATE, 
           max = MAX_DATE,
           value = MAX_DATE,
           ticks = FALSE,
-          timeFormat = "%B %d",
-          step = 1, width = "100%",
+          timeFormat = '%B %d',
+          step = 1, width = '100%',
           animate = TRUE, animateOptions(interval = 30, loop = TRUE)
         ),
         
@@ -91,55 +91,55 @@ body <- dashboardBody(
         tags$br(),
         tags$br(),
         
-        div(style="display:inline-block; width:25%; margin-right:2%",
+        div(style='display:inline-block; width:25%; margin-right:2%',
           selectInput(
-            inputId = "variable_type",
-            label = "Information displayed:", 
+            inputId = 'variable_type',
+            label = 'Information displayed:', 
             choices = c(
-              "Stringency" = "StringencyIndex",
-              "Deaths" = "Deaths",
-              "Cases" = "Cases"
-            ), selected = "StringencyIndex"
+              'Stringency' = 'StringencyIndex',
+              'Deaths' = 'Deaths',
+              'Cases' = 'Cases'
+            ), selected = 'StringencyIndex'
           )
         ),
         
-        conditionalPanel(condition = "input.variable_type == 'StringencyIndex'",
-                         selectInput(inputId = "index_type", label = "Type of measures:",
-                                     choices = c("Combined" = "Combined",
-                                                 "School closing" = "School",
-                                                 "Workplace closing" = "Workplace",
-                                                 "Cancellation of public events" = "PublicEvents",
-                                                 "Restrictions on gatherings" = "Gatherings",
-                                                 "Closing of public transport" = "Transport",
-                                                 "Stay at home requirements" = "Home",
-                                                 "Restrictions on internal movement" = "Movement",
-                                                 "International travel controls" = "Travel"),
-                                     selected = "Combined"),
-                         style = "display:inline-block; width:25%"
+        conditionalPanel(condition = 'input.variable_type == \'StringencyIndex\'',
+                         selectInput(inputId = 'index_type', label = 'Type of measures:',
+                                     choices = c('Combined' = 'Combined',
+                                                 'School closing' = 'School',
+                                                 'Workplace closing' = 'Workplace',
+                                                 'Cancellation of public events' = 'PublicEvents',
+                                                 'Restrictions on gatherings' = 'Gatherings',
+                                                 'Closing of public transport' = 'Transport',
+                                                 'Stay at home requirements' = 'Home',
+                                                 'Restrictions on internal movement' = 'Movement',
+                                                 'International travel controls' = 'Travel'),
+                                     selected = 'Combined'),
+                         style = 'display:inline-block; width:25%'
         ),
         
-        div(style="display:inline-block; width:25%; margin-left:2%",
+        div(style='display:inline-block; width:25%; margin-left:2%',
           selectInput(
-            inputId = "region",
-            label = "Region:", 
+            inputId = 'region',
+            label = 'Region:', 
             choices = c(
-              "World" = "World",
-              "Europe" = "Europe",
-              "North America" = "NorthAmerica",
-              "South America" = "SouthAmerica",
-              "Asia" = "Asia",
-              "Africa" = "Africa",
-              "OECD" = "OECD",
-              "USA (States)" = "USA"
+              'World' = 'World',
+              'Europe' = 'Europe',
+              'North America' = 'NorthAmerica',
+              'South America' = 'SouthAmerica',
+              'Asia' = 'Asia',
+              'Africa' = 'Africa',
+              'OECD' = 'OECD',
+              'USA (States)' = 'USA'
             ), 
-            selected = "World"
+            selected = 'World'
           )
         )
       ),
       
       
       box(title = 'Stringency Index and Daily Deaths', status = 'primary', solidHeader = TRUE,
-          collapsible = TRUE, align = 'center', width = '100%', #height = "1000px",
+          collapsible = TRUE, align = 'center', width = '100%', #height = '1000px',
 
         div(style = 'height:1000px; overflow-y: scroll',
            
@@ -197,7 +197,7 @@ body <- dashboardBody(
             
         )
 
-        #height = '1000'  #textOutput("height")
+        #height = '1000'  #textOutput('height')
       ),
       
       box(
@@ -219,7 +219,7 @@ body <- dashboardBody(
                     'Choose Continent:',
                     c(
                       'World' = 'World',
-                      "Europe" = "Europe",
+                      'Europe' = 'Europe',
                       'North America' = 'North America',
                       'South America' = 'South America',
                       'Asia' = 'Asia',
@@ -230,9 +230,8 @@ body <- dashboardBody(
         div(style='display:inline-block', actionButton('TableApply','Apply')),
         actionButton('TableAll', 'Select All'),
         actionButton('TableClear', 'Clear Selection'),
-        dataTableOutput('countries_table'),
-        plotOutput('table_legend', inline = FALSE,height = '250px'),
-        
+        plotOutput('table_legend', width = '40%', inline = FALSE, height = '150px'),
+        DT::dataTableOutput('countries_table')
       )
     ),
     
@@ -241,11 +240,11 @@ body <- dashboardBody(
       fluidPage(
         box(width = 1000,
             HTML(
-              "<h3 style = 'text-align: center;'>About</h3>
-              <p style = 'font-size: 120%; text-align: center;'>
+              '<h3 style = \'text-align: center;\'>About</h3>
+              <p style = \'font-size: 120%; text-align: center;\'>
               This Web App was developed by Fabian Dablander, Alexandra Rusu, Marcel Raphael Schreiner,
-              and Aleksandar Tomasevic as a <a href='http://scienceversuscorona.com/' target='_blank'>Science versus Corona</a> project
-              <p>"
+              and Aleksandar Tomasevic as a <a href=\'http://scienceversuscorona.com/\' target=\'_blank\'>Science versus Corona</a> project
+              <p>'
             )
         )
       )
