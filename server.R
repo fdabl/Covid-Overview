@@ -10,14 +10,6 @@ dat <- get_stringency_data(verbose = FALSE) %>%
     country_codes, by = 'country_code'
   )
 
-dat_us <- get_us_data()
-
-continent_list <- case_when(
-  country_codes$country_name %in% NA_COUNTRIES ~ 'North America',
-  country_codes$continent == 'Americas' & !country_codes$country_name %in% NA_COUNTRIES ~ 'South America',
-  TRUE ~ as.character(country_codes$continent)
-)
-
 get_countries <- function(dat, continent) {
   unique(dat[dat$continent == continent, ]$country_name)
 }
@@ -33,7 +25,7 @@ OECD <- c(
   'Germany','Greece', 'Hungary', 'Iceland', 'Ireland', 'Israel',
   'Italy', 'Japan', 'South Korea', # 'Latvia', -> not in the database
   'Lithuania', 'Luxembourg', 'Mexico', 'Netherlands', 'New Zealand', 'Norway',
-   'Poland', 'Portugal', 'Slovak Republic', 'Slovenia','Spain',  'Sweden',
+  'Poland', 'Portugal', 'Slovak Republic', 'Slovenia','Spain',  'Sweden',
   'Switzerland', 'Turkey', 'United Kingdom', 'United States'
 )
 
@@ -62,6 +54,14 @@ SOUTH_AMERICA <- c(
   'Argentina', 'Aruba', 'Bermuda', 'Bolivia', 'Brazil',
   'Chile', 'Colombia', 'Ecuador', 'Guyana', 'Paraguay',
   'Peru', 'Puerto Rico', 'Suriname', 'Uruguay', 'Venezuela'
+)
+
+dat_us <- get_us_data()
+
+continent_list <- case_when(
+  country_codes$country_name %in% NA_COUNTRIES ~ 'North America',
+  country_codes$continent == 'Americas' & !country_codes$country_name %in% NA_COUNTRIES ~ 'South America',
+  TRUE ~ as.character(country_codes$continent)
 )
 
 shinyServer(function(session, input, output) {

@@ -5,8 +5,11 @@ library('dashboardthemes')
 source('helpers.R')
 
 
-# world <- get_world_data()
-dat <- get_stringency_csv()
+country_codes <- get_country_codes()
+dat <- get_stringency_data(verbose = FALSE) %>% 
+  left_join(
+    country_codes, by = 'country_code'
+  )
 
 eu_countries <- c(
   'Austria','Belgium','Bulgaria','Croatia','Cyprus',
@@ -17,17 +20,13 @@ eu_countries <- c(
   'Sweden','United Kingdom'
 )
 
-
-
-
-# TODO:
 # Showing all countries slows the initial rendering of the app
 # down because it needs to generate all these html elements
 # alx: solved by using unique()
 #COUNTRIES <- eu_countries # alx: not necessary anymore
-COUNTRIES <- dat$Country %>% unique() 
-MIN_DATE <- min(dat$Date)
-MAX_DATE <- max(dat$Date)
+COUNTRIES <- dat$country_name %>% unique() 
+MIN_DATE <- min(dat$date)
+MAX_DATE <- max(dat$date)
 
 
 sidebar <- dashboardSidebar(
@@ -206,8 +205,8 @@ body <- dashboardBody(
         multiInput(
           inputId = 'countries_table',
           label = 'Countries:',
-          choices = unique(dat$CountryName),
-          selected = unique(dat$CountryName),
+          choices = unique(dat$country_name),
+          selected = unique(dat$country_name),
           width = '350px',
           options = list(
             enable_search = TRUE,
