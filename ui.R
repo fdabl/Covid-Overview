@@ -229,7 +229,7 @@ body <- dashboardBody(
         div(style='display:inline-block', actionButton('TableApply','Apply')),
         actionButton('TableAll', 'Select All'),
         actionButton('TableClear', 'Clear Selection'),
-        plotOutput('table_legend', width = '40%', inline = FALSE, height = '150px'),
+        # plotOutput('table_legend', width = '40%', inline = FALSE, height = '150px'),
         DT::dataTableOutput('countries_table')
       )
     ),

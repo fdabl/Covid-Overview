@@ -130,24 +130,13 @@ get_stringency_data <- function(...) {
 
 #' Get data from US states
 get_us_data <- function() {
-  
-  # Alphabetical order
-  states <- c(
-    'AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
-    'GU', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME',
-    'MI', 'MN', 'MO', 'MP', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ',
-    'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC',
-    'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI', 'WV', 'WY'
-  )
-  
-  # Does not return state names, so add them manually, assumes alphabetical ordering
   dat <- covid19(country = 'USA', level = 2)
-  #dat$state <- rep(states, table(dat$id))
   
   dat <- dat %>% 
-    rename(state_name = administrative_area_level_2,
-           state = key_alpha_2) %>%
-    
+    rename(
+      state_name = administrative_area_level_2,
+      state = key_alpha_2
+    ) %>%
     mutate(
       cases_per_million = round((confirmed / population) * 1e6, 2),
       deaths_per_million = round((deaths / population) * 1e6, 2),
