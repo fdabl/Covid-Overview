@@ -97,6 +97,7 @@ shinyServer(function(session, input, output) {
           'Cases' = 'Cases'
         ), selected = selected_variable()
       )
+      
     }
 
     if(var == 'StringencyIndex') {
@@ -129,6 +130,7 @@ shinyServer(function(session, input, output) {
           'USA (States)' = 'USA'
         ), selected = selected_region()
       )
+      
     }
 
   })
@@ -269,13 +271,15 @@ shinyServer(function(session, input, output) {
   })
   
   observeEvent(input$continent_table, {
+    
     if (input$continent_table == 'World'){
       
       sel_cont <- unique(dat$country_name)
       sel_cnt <- input$countries_table
 
-     if (input$TableApply == 0){
+     if (input$TableApply == 0) {
       sel_cnt <- unique(dat$country_name)
+      
      }
     
     } else {
@@ -288,6 +292,7 @@ shinyServer(function(session, input, output) {
       
       sel_cont <- sel_cont[,1]
       sel_cnt <- input$countries_table
+      
     }
     
     updateSelectInput(session, 'countries_table', choices = sel_cont, selected = sel_cnt)
@@ -296,20 +301,11 @@ shinyServer(function(session, input, output) {
 
   output$heatmap <- renderPlotly({
 
-    # maintain zoom level when changing dates (not working yet)
-    # observeEvent(input$mapdate, {
-    #   zoom <- event_data('plotly_relayout', source = 'M')
-    # })
-    #zoomer <- eventReactive(input$mapdate, {event_data('plotly_relayout', 'heatmap')})
-    # zoom <- zoomer()
-    #lataxis <- list(range = c(zoom$lataxis$range[0], zoom$lataxis$range[1]))
-    #lonaxis <- list(range = c(zoom$lonaxis$range[0], zoom$lonaxis$range[1]))
-
     # create plot
     p <- plot_world_data(dat, selected_mapdate(), selected_variable(), selected_measure(), selected_region(), dat_us)
-    #lataxis = lataxis, lonaxis = lonaxis)
 
     p
+    
   })
   
   output$table_legend <- renderPlot({

@@ -50,8 +50,8 @@ get_stringency_data <- function(...) {
   )
   
   gatherings_labels <- list(
-    '0' = 'None', '1' = '>1000 people',
-    '2' = '>100 people', '3' = '>10 people', '4' = '< 10 people'
+    '0' = 'None', '1' = '> 1000 people',
+    '2' = '> 100 people', '3' = '> 10 people', '4' = '< 10 people'
   )
   
   transport_labels <- list(
@@ -142,9 +142,12 @@ get_us_data <- function() {
   
   # Does not return state names, so add them manually, assumes alphabetical ordering
   dat <- covid19(country = 'USA', level = 2)
-  dat$state <- rep(states, table(dat$id))
+  #dat$state <- rep(states, table(dat$id))
   
   dat <- dat %>% 
+    rename(state_name = administrative_area_level_2,
+           state = key_alpha_2) %>%
+    
     mutate(
       cases_per_million = round((confirmed / population) * 1e6, 2),
       deaths_per_million = round((deaths / population) * 1e6, 2),
@@ -326,9 +329,8 @@ tickpos <- function(nFactor) {
   pos <- unique((head(Z_Breaks(nFactor), -1)) + head(Z_Breaks(nFactor))[2]/2)*(nFactor-1)
 }
 
-
 #' breaks tick labels into lines, each line being width characters long
-ticklab <- function(tags, width = 25) {
+ticklab <- function(tags, width = 30) {
   x <- gsub(paste0('(.{1,', width, '})(\\s|$)'), '\\1\n', tags) %>%
     str_split('\n')
   for(i in 1:length(x)) {
@@ -341,10 +343,6 @@ ticklab <- function(tags, width = 25) {
   
   x
 }
-
-
-
-# Fabian: Marcel, this function needs some cleaning ;-)
 
 #' @param world world data
 #' @param dat stringency data
@@ -377,220 +375,180 @@ plot_world_data <- function(dat, selected_date, variable, measure, region, us_da
   locationmode <- NULL
   
   if (region == 'USA') {
-    us_data$date <- as.Date(us_data$date)
+    
     d <- us_data %>%
       group_by(state) %>%
       filter(date == selected_date | date == max(us_data$date[which(us_data$date < selected_date)]))
     scope <- 'usa'
     locationmode <- 'USA-states'
     locations <- d$state
+    
   }
-  
-  # lev <- c(unique(dat$`school_closing_labels`), unique(dat$`workplace_closing_labels`), 
-  #          unique(dat$cancel_events_labels), unique(dat$gatherings_restrictions_labels),
-  #          unique(dat$transport_closing_labels), unique(dat$stay_home_restrictions_labels),
-  #          unique(dat$internal_movement_restrictions_labels), unique(dat$international_movement_restrictions_labels))
-  # lev <- lev[!is.na(lev)]
-  # lev <- gsub(' ', '\U2000', lev, fixed = TRUE)
   
   hoverinfo <- 'text'
   tickfont <- list(family = 'Droid Sans Mono')
+  zmin <- 0
   
   if (variable == 'StringencyIndex') {
+    
     if (measure == 'Combined') {
+      
       title <- 'Stringency of Lockdown Across the World'
       legend_title <- 'Stringency Index'
       text <- paste(d$stringency_index, d$country_name, sep = '\n')
       d$variable <- d$stringency_index
-      zmin <- 0
       zmax <- 100
       tags <- as.character(seq(0, 100, 20))
       tags <- gsub(' ', '\U2000', tags, fixed = TRUE)
       tags <- ticklab(tags)
-      #tags <- gsub('\\s', '\U2000', format(tags, width = max(nchar(lev, type = 'width'), na.rm = TRUE)))
       colorscale <- 'Reds'
       colorbar <- list(title = legend_title, y = 0.75, tickvals = seq(0, 100, 20), ticktext = tags, tickfont = tickfont)
-    } else if(measure == 'School') {
+      
+    } else if (measure == 'School') {
+      
       title <- 'Stringency of School Closing around the World'
+      legend_title <- 'School closing'
       text <- paste(d$school_closing_labels, d$country_name, sep = '\n')
-      hoverinfo <- 'text'
       d$variable <- d$school_closing
       tags <- dat$school_closing_labels %>% factor() %>% fct_reorder(dat$school_closing) %>% levels()
-      tags <- ticklab(tags)
-      nFactor <- length(tags)
-      zmin <- 0
-      zmax <- nFactor-1
-      colours <- brewer.pal(n = nFactor, name = 'Reds')
-      names(colours) <- tags
-      colorscale <- data.frame(z=Z_Breaks(nFactor),
-                               col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = '', y = 0.75, tickvals = tickpos(nFactor),  ticktext=names(colours), tickfont = tickfont)
-    } else if(measure == 'Workplace') {
+
+    } else if (measure == 'Workplace') {
+      
       title <- 'Stringency of Workplace Closing around the World'
+      legend_title <- 'Workplace closing'
       text <- paste(d$workplace_closing_labels, d$country_name, sep = '\n')
       d$variable <- d$workplace_closing
       tags <- dat$workplace_closing_labels %>% factor() %>% fct_reorder(dat$workplace_closing) %>% levels()
-      tags <- ticklab(tags)
-      nFactor <- length(tags)
-      zmin <- 0
-      zmax <- nFactor-1
-      colours <- brewer.pal(n = nFactor, name = 'Reds')
-      names(colours) <- tags
-      colorscale <- data.frame(z=Z_Breaks(nFactor),
-                               col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = '', y = 0.75, tickvals = tickpos(nFactor), ticktext = names(colours), tickfont = tickfont)
-    } else if(measure == 'PublicEvents') {
+
+    } else if (measure == 'PublicEvents') {
+      
       title <- 'Stringency in Cancelling Public Events around the World'
+      legend_title <- 'Cancellation of public events'
       text <- paste(d$cancel_events_labels, d$country_name, sep = '\n')
       d$variable <- d$cancel_events
       tags <- dat$cancel_events_labels %>% factor() %>% fct_reorder(dat$cancel_events) %>% levels()
-      tags <- ticklab(tags)
-      nFactor <- length(tags)
-      zmin <- 0
-      zmax <- nFactor-1
-      colours <- brewer.pal(n = nFactor, name = 'Reds')
-      names(colours) <- tags
-      colorscale <- data.frame(z=Z_Breaks(nFactor),
-                               col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = '', y = 0.75, tickvals = tickpos(nFactor), ticktext = names(colours), tickfont = tickfont)
-    } else if(measure == 'Gatherings') {
+
+    } else if (measure == 'Gatherings') {
+      
       title <- 'Stringency in Restricting Gatherings around the World'
+      legend_title <- 'Restrictions on gatherings'
       text <- paste(d$gatherings_restrictions_labels, d$country_name, sep = '\n')
       d$variable <- d$gatherings_restrictions
       tags <- dat$gatherings_restrictions_labels %>% factor() %>% fct_reorder(dat$gatherings_restrictions) %>% levels()
-      tags <- ticklab(tags)
-      nFactor <- length(tags)
-      zmin <- 0
-      zmax <- nFactor-1
-      colours <- brewer.pal(n = nFactor, name = 'Reds')
-      names(colours) <- tags
-      colorscale <- data.frame(z=Z_Breaks(nFactor),
-                               col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = '', y = 0.75, tickvals = tickpos(nFactor), ticktext = names(colours), tickfont = tickfont)
-    } else if(measure == 'Transport') {
+
+    } else if (measure == 'Transport') {
+      
       title <- 'Stringency in Closing Public Transport around the World'
+      legend_title <- 'Closing of public transport'
       text <- paste(d$transport_closing_labels, d$country_name, sep = '\n')
       d$variable <- d$transport_closing
       tags <- dat$transport_closing_labels %>% factor() %>% fct_reorder(dat$transport_closing) %>% levels()
-      tags <- ticklab(tags)
-      nFactor <- length(tags)
-      zmin <- 0
-      zmax <- nFactor-1
-      colours <- brewer.pal(n = nFactor, name = 'Reds')
-      names(colours) <- tags
-      colorscale <- data.frame(z=Z_Breaks(nFactor),
-                               col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = '', y = 0.75, tickvals = tickpos(nFactor), ticktext = names(colours), tickfont = tickfont)
-    } else if(measure == 'Home') {
+
+    } else if (measure == 'Home') {
+      
       title <- 'Stringency of Stay at Home Requirements around the World'
+      legend_title <- 'Stay at home requirements'
       text <- paste(d$stay_home_restrictions_labels, d$country_name, sep = '\n')
       d$variable <- d$stay_home_restrictions
       tags <- dat$stay_home_restrictions_labels %>% factor() %>% fct_reorder(dat$stay_home_restrictions) %>% levels()
-      tags <- ticklab(tags)
-      nFactor <- length(tags)
-      zmin <- 0
-      zmax <- nFactor-1
-      colours <- brewer.pal(n = nFactor, name = 'Reds')
-      names(colours) <- tags
-      colorscale <- data.frame(z=Z_Breaks(nFactor),
-                               col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = '', y = 0.75, tickvals = tickpos(nFactor), ticktext = names(colours), tickfont = tickfont)
-    } else if(measure == 'Movement') {
+
+    } else if (measure == 'Movement') {
+      
       title <- 'Stringency of Internal Movement Restrictions around the World'
+      legend_title <- 'Restrictions on internal movement'
       text <- paste(d$internal_movement_restrictions_labels, d$country_name, sep = '\n')
       d$variable <- d$internal_movement_restrictions
       tags <- dat$internal_movement_restrictions_labels %>% factor() %>% fct_reorder(dat$internal_movement_restrictions) %>% levels()
-      tags <- ticklab(tags)
-      nFactor <- length(tags)
-      zmin <- 0
-      zmax <- nFactor-1
-      colours <- brewer.pal(n = nFactor, name = 'Reds')
-      names(colours) <- tags
-      colorscale <- data.frame(z=Z_Breaks(nFactor),
-                               col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = '', y = 0.75, tickvals = tickpos(nFactor), ticktext = names(colours), tickfont = tickfont)
-    } else if(measure == 'Travel') {
+
+    } else if (measure == 'Travel') {
+      
       title <- 'Stringency of International Travel Controls around the World'
+      legend_title <- 'International travel controls'
       text <- paste(d$international_movement_restrictions_labels, d$country_name, sep = '\n')
       d$variable <- d$international_movement_restrictions
       tags <- dat$international_movement_restrictions_labels %>% factor() %>% fct_reorder(dat$international_movement_restrictions) %>% levels()
-      tags <- ticklab(tags)
-      nFactor <- length(tags)
-      zmin <- 0
-      zmax <- nFactor-1
-      colours <- brewer.pal(n = nFactor, name = 'Reds')
-      names(colours) <- tags
-      colorscale <- data.frame(z=Z_Breaks(nFactor),
-                               col=rep(colours,each=2),stringsAsFactors=FALSE)
-      colorbar <- list(title = '', y = 0.75, tickvals = tickpos(nFactor), ticktext = names(colours), tickfont = tickfont)
+
     } 
     
   } else if (variable == 'Deaths') {
     
     legend_title <- 'Deaths per Million'
-    if(region != 'USA') {
+    
+    if (region != 'USA') {
+      
       title <- 'Confirmed Deaths per Million Across the World'
       text <- paste(d$deaths_per_million, d$country_name, sep = '\n')
+      
     } else {
+      
       title <- 'Confirmed Deaths per Million in the USA'
-      text <- paste(d$deaths_per_million, d$state, sep = '\n')
+      text <- paste(d$deaths_per_million, d$state_name, sep = '\n')
+      
     }
+    
     d$variable <- d$group_deaths_per_million
     tags <- c('0', '> 1', '> 10', '> 100', '> 1000')
-    tags <- ticklab(tags)
-    nFactor <- length(tags)
-    zmin <- 0
-    zmax <- nFactor-1
-    colours <- brewer.pal(n = nFactor, name = 'Reds')
-    names(colours) <- tags
-    colorscale <- data.frame(z=Z_Breaks(nFactor),
-                             col=rep(colours,each=2),stringsAsFactors=FALSE)
-    colorbar <- list(title = legend_title, y = 0.75, tickvals = tickpos(nFactor), ticktext = names(colours), 
-                     tickfont = tickfont)
     
   } else if (variable == 'Cases') {
     
     legend_title <- 'Cases per Million'
-    if(region != 'USA') {
+    
+    if (region != 'USA') {
+      
       title <- 'Confirmed Cases per Million Across the World'
       text <- paste(d$cases_per_million, d$country_name, sep = '\n')
+      
     } else {
+      
       title <- 'Confirmed Cases per Million in the USA'
-      text <- paste(d$cases_per_million, d$state, sep = '\n')
+      text <- paste(d$cases_per_million, d$state_name, sep = '\n')
+      
     }
+    
     d$variable <- d$group_cases_per_million
     tags <- c('0', '> 1', '> 10', '> 100', '> 1000', '> 10000')
+    
+    
+  }
+  
+  if (!(variable == 'StringencyIndex' & measure == 'Combined')) {
+    
     tags <- ticklab(tags)
     nFactor <- length(tags)
-    zmin <- 0
     zmax <- nFactor-1
     colours <- brewer.pal(n = nFactor, name = 'Reds')
     names(colours) <- tags
     colorscale <- data.frame(z=Z_Breaks(nFactor),
                              col=rep(colours,each=2),stringsAsFactors=FALSE)
-    colorbar <- list(title = legend_title, y = 0.75, tickvals = tickpos(nFactor), ticktext = names(colours), 
+    colorbar <- list(title = legend_title, y = 0.75, tickvals = tickpos(nFactor), ticktext = tags, 
                      tickfont = tickfont)
     
   }
   
   if (region == 'World') {
+    
     scope <- 'world'
     lataxis <- list(range = (c(-60, 90))) 
     lonaxis <- list(range = (c(-180, 180)))
     
   } else if (region == 'Europe') {
+    
     scope <- 'europe'
     
-  }else if (region == 'NorthAmerica') {
+  } else if (region == 'NorthAmerica') {
+    
     scope <- 'north america'
     
   } else if (region == 'SouthAmerica') {
+    
     scope <- 'south america'
     
   } else if (region == 'Asia') {
+    
     scope <- 'asia'
     
   } else if (region == 'Africa') {
+    
     scope <- 'africa'
     
   }
@@ -598,10 +556,13 @@ plot_world_data <- function(dat, selected_date, variable, measure, region, us_da
   plot_ly(data = d, type = 'choropleth', locations = locations, locationmode = locationmode, z = d$variable,
           zmin = zmin, zmax = zmax, stroke = I('black'), span = I(1),
           text = text, hoverinfo = hoverinfo, colorscale = colorscale, colorbar = colorbar) %>%
+    
     layout(title = list(text = title), geo = list(showcountries = TRUE, scope = scope, lataxis = lataxis, 
                                                   lonaxis = lonaxis),
-           dragmode = 'zoom', uirevision = 'date', margin = list(l = 0, r = 0, b = 0, t = 30)) %>% 
+           dragmode = 'zoom', margin = list(l = 0, r = 0, b = 0, t = 30)) %>% 
+    
     config(scrollZoom = FALSE)
+  
 }
 
 
