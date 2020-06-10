@@ -17,7 +17,7 @@ NA_countries <- c(
   
 )
 
-dat <- get_stringency_csv(force_download = TRUE)
+dat <- get_stringency_csv()
 country_codes <- get_country_codes()
 continent_list <- case_when(
   country_codes$CountryName %in% NA_countries ~ 'North America', 
