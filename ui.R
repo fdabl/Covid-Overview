@@ -179,8 +179,9 @@ body <- dashboardBody(
         div(style='display:inline-block', actionButton('TableApply','Apply')),
         actionButton('TableAll', 'Select All'),
         actionButton('TableClear', 'Clear Selection'),
-        dataTableOutput('countries_table'),
-        plotOutput('table_legend', inline = FALSE,height = '250px'),
+        plotOutput('table_legend', inline = FALSE,height = '220px',width = '500px'),
+        dataTableOutput('countries_table')
+        
         
       )
     ),

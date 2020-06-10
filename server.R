@@ -17,7 +17,7 @@ NA_countries <- c(
   
 )
 
-dat <- get_stringency_csv()
+dat <- get_stringency_csv(force_download = TRUE)
 country_codes <- get_country_codes()
 continent_list <- case_when(
   country_codes$CountryName %in% NA_countries ~ 'North America', 
@@ -95,7 +95,9 @@ shinyServer(function(session, input, output) {
   })
   
   output$table_legend <- renderPlot({
-    swatchplot('Table \nlegend' = sequential_hcl(n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE, register = ),font=3,cex=0.9,line=3)
+    swatchplot(sequential_hcl(n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE, register = ),font=3,cex=0.9,line=3)
+    mtext('Not Ready',side=2,las=2,line=-1)
+    mtext('Ready',side=4,las=2,line=-1)
   })
   
   output$countries_table <- renderDataTable({
@@ -116,8 +118,8 @@ shinyServer(function(session, input, output) {
     tab <- prepare_country_table(dat, selected_countries_table())
     tab <- datatable(tab, options = list(columnDefs = list(list(targets = 10:17, visible = FALSE)), rowCallback = JS(rowCallback))) %>% formatString(2:9,"In Place for "," Days") %>%
       formatStyle('roll',target='row',
-                  backgroundColor = styleInterval(seq(0,1.1,length.out = 9),
-                  sequential_hcl(n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE, register = )
+                  backgroundColor = styleInterval(c(0.35,0.45,0.55,0.65,0.75,0.85,0.95,0.99),
+                  sequential_hcl(n = 9, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE, register = )
                   )) %>%
       formatStyle('Mandatory school closing',valueColumns = 'C1_Flag', fontWeight = styleEqual(1,"bold")) %>%
       formatStyle('Mandatory workplace closing',valueColumns = 'C2_Flag', fontWeight = styleEqual(1,"bold")) %>%
