@@ -1,11 +1,15 @@
-library('shinydashboard')
-library('shinyWidgets')
 library('DT')
+library('shinyWidgets')
+library('shinydashboard')
+library('dashboardthemes')
 source('helpers.R')
 
 
-#world <- get_world_data()
-dat <- get_stringency_csv()
+country_codes <- get_country_codes()
+dat <- get_stringency_data(verbose = FALSE) %>% 
+  left_join(
+    country_codes, by = 'country_code'
+  )
 
 eu_countries <- c(
   'Austria','Belgium','Bulgaria','Croatia','Cyprus',
@@ -16,16 +20,13 @@ eu_countries <- c(
   'Sweden','United Kingdom'
 )
 
-
-
-
-# TODO:
 # Showing all countries slows the initial rendering of the app
 # down because it needs to generate all these html elements
-COUNTRIES <- eu_countries
-# COUNTRIES <- dat$Country # extremely slow
-MIN_DATE <- min(dat$Date)
-MAX_DATE <- max(dat$Date)
+# alx: solved by using unique()
+#COUNTRIES <- eu_countries # alx: not necessary anymore
+COUNTRIES <- dat$country_name %>% unique() 
+MIN_DATE <- min(dat$date)
+MAX_DATE <- max(dat$date)
 
 
 sidebar <- dashboardSidebar(
@@ -37,15 +38,16 @@ sidebar <- dashboardSidebar(
 
 
 body <- dashboardBody(
+  shinyDashboardThemes(
+    theme = 'grey_light'
+  ),
+  
   tabItems(
     tabItem(
       tabName = 'welcome',
       box(
         title = ('Overview of Lockdown Measures'), status = 'primary',
         solidHeader = TRUE, collapsible = TRUE,
-        tags$br(),
-        tags$p(''),
-        tags$br(),
         tags$p(
           'This dashboard shows an overview of how different lockdown measures were
           implemented across different countries', style = 'font-size:150%', align = 'center'
@@ -65,88 +67,136 @@ body <- dashboardBody(
         title = 'The Lockdown Across the Globe', status = 'primary', width = '100%',
         solidHeader = TRUE, collapsible = TRUE, align = 'center',
         
-        plotlyOutput('heatmap', width = "75%", inline = TRUE),
+        plotlyOutput('heatmap', inline = TRUE),
+        
+        
+        tags$head(tags$style(type='text/css', 
+                             '.slider-animate-button {font-size: 20pt !important; position: absolute; left: 49.3%; margin-top: 20px}')),
+        
+        tags$br(),
         
         sliderInput(
           inputId = 'mapdate', label = 'Date:', 
           min = MIN_DATE, 
           max = MAX_DATE,
           value = MAX_DATE,
-          step = 1, width = '75%',
-          animate = TRUE, animateOptions(interval = 100, loop = TRUE)
-        ),
-        tags$head(tags$style(type='text/css', 
-                             ".slider-animate-button {font-size: 20pt !important;}")),
-        
-        radioButtons(
-          inputId = 'variable_type',
-          label = 'Information displayed:', 
-          choices = c(
-            'Stringency' = 'StringencyIndex',
-            'Deaths' = 'Deaths',
-            'Cases' = 'Cases'
-          ), selected = 'StringencyIndex', inline = TRUE
+          ticks = FALSE,
+          timeFormat = '%B %d',
+          step = 1, width = '100%',
+          animate = TRUE, animateOptions(interval = 30, loop = TRUE)
         ),
         
-        conditionalPanel(condition = "input.variable_type == 'StringencyIndex'",
-                         radioButtons(inputId = "index_type", label = "Type of measures:",
-                                      choices = c("Combined" = "Combined",
-                                                  "School closing" = "School",
-                                                  "Workplace closing" = "Workplace",
-                                                  "Cancellation of public events" = "PublicEvents",
-                                                  "Restrictions on gatherings" = "Gatherings",
-                                                  "Closing of public transport" = "Transport",
-                                                  "Stay at home requirements" = "Home",
-                                                  "Restrictions on internal movement" = "Movement",
-                                                  "International travel controls" = "Travel"),
-                                      selected = "Combined",
-                                      inline = TRUE)),
+        tags$br(),
+        tags$br(),
+        tags$br(),
         
-        radioButtons(
-          inputId = 'continent',
-          label = 'Zoom in on:', 
-          choices = c(
-            'World' = 'World',
-            "Europe" = "Europe",
-            'North America' = 'NorthAmerica',
-            'South America' = 'SouthAmerica',
-            'Asia' = 'Asia',
-            'Africa' = 'Africa',
-            'Oceania' = 'Oceania'
-          ), selected = 'World', inline = TRUE
-        ),
-
-      ),
-      
-      
-      box(
-        title = 'Stringency Index and Daily Deaths', status = 'primary', solidHeader = TRUE,
-        collapsible = TRUE, align = 'center', width = '100%', height = "1000px",
-        
-        multiInput(
-          inputId = 'countries_lockdown',
-          label = 'Countries:',
-          choices = COUNTRIES,
-          selected = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom'),
-          width = '350px',
-          options = list(
-            enable_search = TRUE,
-            non_selected_header = 'Choose between:',
-            selected_header = 'You have selected:'
+        div(style='display:inline-block; width:25%; margin-right:2%',
+          selectInput(
+            inputId = 'variable_type',
+            label = 'Information displayed:', 
+            choices = c(
+              'Stringency' = 'StringencyIndex',
+              'Deaths' = 'Deaths',
+              'Cases' = 'Cases'
+            ), selected = 'StringencyIndex'
           )
         ),
         
-        radioButtons(
-          "regions", "Regions", 
-          c("OECD", "Europe", "Americas", "Asia", "Africa", "Oceania"),
-          inline = TRUE
+        conditionalPanel(condition = 'input.variable_type == \'StringencyIndex\'',
+                         selectInput(inputId = 'index_type', label = 'Type of measures:',
+                                     choices = c('Combined' = 'Combined',
+                                                 'School closing' = 'School',
+                                                 'Workplace closing' = 'Workplace',
+                                                 'Cancellation of public events' = 'PublicEvents',
+                                                 'Restrictions on gatherings' = 'Gatherings',
+                                                 'Closing of public transport' = 'Transport',
+                                                 'Stay at home requirements' = 'Home',
+                                                 'Restrictions on internal movement' = 'Movement',
+                                                 'International travel controls' = 'Travel'),
+                                     selected = 'Combined'),
+                         style = 'display:inline-block; width:25%'
         ),
-  
-        div(style="display:inline-block", actionButton("Countries", "Display by country")),
-        actionButton("Region", "Display by region"),
-       
-        plotOutput('lockdown_plot')
-        #height = '1000'  #textOutput("height")
+        
+        div(style='display:inline-block; width:25%; margin-left:2%',
+          selectInput(
+            inputId = 'region',
+            label = 'Region:', 
+            choices = c(
+              'World' = 'World',
+              'Europe' = 'Europe',
+              'North America' = 'NorthAmerica',
+              'South America' = 'SouthAmerica',
+              'Asia' = 'Asia',
+              'Africa' = 'Africa',
+              'OECD' = 'OECD',
+              'USA (States)' = 'USA'
+            ), 
+            selected = 'World'
+          )
+        )
+      ),
+      
+      
+      box(title = 'Stringency Index and Daily Deaths', status = 'primary', solidHeader = TRUE,
+          collapsible = TRUE, align = 'center', width = '100%', #height = '1000px',
+
+        div(style = 'height:1000px; overflow-y: scroll',
+           
+            div(style = 'display:inline-block; vertical-align:top',
+                multiInput(
+                  inputId = 'countries_lockdown',
+                  label = 'Select specific countries...',
+                  choices = COUNTRIES,
+                  selected = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom'),
+                  width = '400px',
+                  options = list(
+                    enable_search = TRUE,
+                    non_selected_header = 'Choose between:',
+                    selected_header = 'You have selected:'
+                  )
+                )
+            ),
+            
+            div(style = 'display:inline-block; vertical-align:top',
+                selectInput(
+                  'regions', 'or select a group of countries?', 
+                  c('I want to make my own selection', 'Africa', 'Asia', 'Europe', 'Oceania', 'North America', 'South America', 'OECD'),
+                  width = '300px'
+                ),
+                
+                
+                selectInput(
+                  'graph', 'Select the indicator:', 
+                  c('Daily deaths per 10 Million', 'Daily deaths (absolute value)',
+                    'New Cases per Million', 'New Cases (absolute value)'),
+                  width = '300px'
+                ),
+                
+                # selectInput(
+                #   'grouping', '', 
+                #   c('show selected countries', 'show selected group'),
+                #   width = '250px'
+                # ),
+                
+                # prettySwitch(
+                #   'grouping',
+                #   'Select specific countries:',
+                #   value = TRUE,
+                #   status = 'default',
+                #   slim = FALSE,
+                #   fill = FALSE,
+                #   bigger = FALSE,
+                #   inline = FALSE,
+                #   width = NULL
+                # ),
+                
+                actionButton('Refresh', 'Refresh graph')
+            ),
+            plotOutput('lockdown_plot_lines_scales')
+            
+        )
+
+        #height = '1000'  #textOutput('height')
       ),
       
       box(
@@ -155,8 +205,8 @@ body <- dashboardBody(
         multiInput(
           inputId = 'countries_table',
           label = 'Countries:',
-          choices = unique(dat$CountryName),
-          selected = unique(dat$CountryName),
+          choices = unique(dat$country_name),
+          selected = unique(dat$country_name),
           width = '350px',
           options = list(
             enable_search = TRUE,
@@ -168,7 +218,7 @@ body <- dashboardBody(
                     'Choose Continent:',
                     c(
                       'World' = 'World',
-                      "Europe" = "Europe",
+                      'Europe' = 'Europe',
                       'North America' = 'North America',
                       'South America' = 'South America',
                       'Asia' = 'Asia',
@@ -190,10 +240,12 @@ body <- dashboardBody(
       tabName = 'about',
       fluidPage(
         box(width = 1000,
-            h3('About'),
-            p(
-              'This Web App was developed by Fabian Dablander, Alexandra Rusu, Aleksandar Tomasevic,
-           and Marcel Raphael Schreiner on behalf of https://scienceversuscorona.com.' 
+            HTML(
+              '<h3 style = \'text-align: center;\'>About</h3>
+              <p style = \'font-size: 120%; text-align: center;\'>
+              This Web App was developed by Fabian Dablander, Alexandra Rusu, Marcel Raphael Schreiner,
+              and Aleksandar Tomasevic as a <a href=\'http://scienceversuscorona.com/\' target=\'_blank\'>Science versus Corona</a> project
+              <p>'
             )
         )
       )
