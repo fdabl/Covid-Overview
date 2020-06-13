@@ -562,79 +562,87 @@ plot_world_data <- function(dat, selected_date, variable, measure, region, us_da
 #' 
 #' @param dat stringency index data
 #' @param countries list of countries to be shown
+#' @param nr_cols number of columns for facet_wrap
 #' 
 #' @returns ggplot object
 plot_stringency_data_deaths_relative <- function(dat, countries, nr_cols) {
   
   d <- filter(dat, country_name %in% countries)
   
-  ggplot(d, aes(x = date)) +
-    geom_line(
-      stat = 'identity',
-      aes(y = new_deaths_per_million_smoothed * 10, color = 'New Deaths per 10 Million'),
-      size = 1
-    ) +
-    geom_line(aes(
-      y = stringency_index /  (10 / max(d$new_deaths_per_million_smoothed, na.rm = TRUE)),
-      color = 'Stringency Index')
-    ) +
-    scale_y_continuous(
-      sec.axis = sec_axis(~.*(10 / max(d$new_deaths_per_million_smoothed, na.rm = TRUE)), 
-                          name = 'Stringency Index')
-    ) +
-    facet_rep_wrap(~ country_name, ncol = nr_cols, repeat.tick.labels = 'TRUE') +
-    ylab('New Deaths per 10 Million') +
-    ggtitle('Stringency of Measures and New Deaths per 10 Million') +
-    xlab('Date') +
-    theme_bw() +
-    theme(
-      legend.position = 'top',
-      plot.title = element_text(hjust = 0.5, size = 16)
-    ) +
-    scale_colour_manual(
-      name = '', values = c('Stringency Index' = 'black', 'New Deaths per 10 Million' = '#E41A1C')
+  max_var <- max(d$new_deaths_per_million_smoothed, na.rm = TRUE) 
+  
+  annotation_data <- d %>%
+    filter(deaths != 0 | confirmed !=0) %>%
+    mutate(date_for_reference = today()- days(3)) %>%
+    filter(date == date_for_reference) %>%
+    select(country_name,
+           confirmed,
+           deaths,
+           population, daily_cases,
+           daily_deaths, date_for_reference
     )
-}
-
-
-plot_stringency_data_deaths_total<- function(dat, countries, nr_cols) {
-  d <- filter(dat, country_name %in% countries)
+  
   
   ggplot(d, aes(x = date)) +
     geom_line(
-      #stat = 'identity',
-      aes(y = daily_deaths, color = 'New Deaths'),
+      stat = 'identity',
+      aes(y = new_deaths_per_million_smoothed , color = 'New Deaths per Million'),
       size = 1
     ) +
-    geom_line(
-      aes(y = stringency_index / (100 / max(d$daily_deaths, na.rm = TRUE)),
-          color = 'Stringency Index')
+    geom_line(aes(
+      y = stringency_index /  (100 / max_var),
+      color = 'Stringency Index')
     ) +
     scale_y_continuous(
-      # alx: removed the limits because they were the reason data wasn't displayed
-      sec.axis = sec_axis(~.*(100 / max(d$daily_deaths, na.rm = TRUE)),
+      sec.axis = sec_axis(~.*(100 / max_var),
                           name = 'Stringency Index')
     ) +
-    facet_rep_wrap(~ country_name, ncol = nr_cols, repeat.tick.labels = 'bottom') +
-    ylab('New Deaths ') +
+    facet_rep_wrap(~ country_name, ncol = nr_cols, repeat.tick.labels = 'bottom') + #
+    ylab('New Deaths per Million') +
+    ggtitle('Stringency of Measures and New Deaths per Million') +
     xlab('Date') +
-    ggtitle('Stringency of Measures and New Deaths (absolute value)') +
     theme_bw() +
     theme(
       legend.position = 'top',
-      plot.title = element_text(hjust = 0.5, size = 16)
+      plot.title = element_text(hjust = 0.5, size = 16),
+      axis.ticks.y = element_blank(),
+      panel.spacing.x = unit(-1.5, "lines")
     ) +
     scale_colour_manual(
-      name = '',
-      values = c('Stringency Index' = 'black', 'New Deaths' = '#E41A1C')
+      name = '', values = c('Stringency Index' = 'black', 'New Deaths per Million' = '#E41A1C')
+      #)
+    ) +
+    geom_text(
+      data  = annotation_data,
+      aes(x = as.Date("2020-01-10", "%Y-%m-%d"),
+          y = max_var*0.85 ,
+          label = paste0('Total deaths:', deaths, '\n', 
+                         'New deaths recorded','\n', 
+                         '3 days ago:',  daily_deaths)),
+      #size = round(16/nr_cols),
+      hjust = 0
     )
 }
+
+
 
 
 plot_stringency_data_cases_relative <- function(dat, countries, nr_cols) {
   
   d <- filter(dat, country_name %in% countries)
   
+  max_var <- max(d$new_cases_per_million_smoothed, na.rm = TRUE) 
+  
+  annotation_data <- d %>%
+    filter(deaths != 0 | confirmed !=0) %>%
+    mutate(date_for_reference = today()- days(3)) %>%
+    filter(date == date_for_reference) %>%
+    select(country_name,
+           confirmed,
+           deaths,
+           population, daily_cases,
+           daily_deaths, date_for_reference
+    )
   ggplot(d, aes(x = date)) +
     geom_line(
       stat = 'identity',
@@ -642,57 +650,37 @@ plot_stringency_data_cases_relative <- function(dat, countries, nr_cols) {
       size = 1
     ) +
     geom_line(aes(
-      y = stringency_index / (100 / max(d$new_cases_per_million_smoothed, na.rm = TRUE)),
+      y = stringency_index / (100 / max_var),
       color = 'Stringency Index')
     ) +
     scale_y_continuous(
-      # alx: removed the limits because they were the reason data wasn't displayed
       sec.axis = sec_axis(
-        ~.*(100 / max(d$new_cases_per_million_smoothed, na.rm = TRUE)), name = 'Stringency Index'
+        ~.*(100 / max_var), name = 'Stringency Index'
       )
     ) +
-    facet_rep_wrap(~ country_name, ncol = nr_cols,  repeat.tick.labels = c('right', 'left')) +
+    facet_rep_wrap(~ country_name, ncol = nr_cols, repeat.tick.labels = 'bottom') + 
     ylab('New Cases per  Million') +
     xlab('Date') +
     ggtitle('Stringency of Measures and New Cases per Million') +
     theme_bw() +
     theme(
       legend.position = 'top',
-      plot.title = element_text(hjust = 0.5, size = 16)
+      plot.title = element_text(hjust = 0.5, size = 16),
+      axis.ticks.y = element_blank()
     ) +
     scale_colour_manual(
       name = '', values =c('Stringency Index' = 'black', 'New Cases per Million' = '#E41A1C')
+    ) +
+    geom_text(
+      data  = annotation_data,
+      aes(x = as.Date("2020-01-10", "%Y-%m-%d"),
+          y = max_var*0.85,
+          label = paste0('Total cases:', confirmed, '\n', 
+                         'New cases recorded','\n', 
+                         '3 days ago:',  daily_cases)),
+      #size = round(16/nr_cols),
+      hjust = 0
     )
 }
 
 
-plot_stringency_data_cases_total<- function(dat, countries, nr_cols) {
-  d <- filter(dat, country_name %in% countries)
-  
-  ggplot(d, aes(x = date)) +
-    geom_line(
-      stat = 'identity',
-      aes(y = daily_cases, color = 'New Cases'),
-      size = 1
-    ) +
-    geom_line(aes(y = stringency_index / (100 / max(d$daily_cases, na.rm = TRUE)),
-                  color = 'Stringency Index')) +
-    #scale_colour_manual(values = c('#E41A1C', 'black')) +
-    scale_y_continuous(
-      # alx: removed the limits because they were the reason data wasn't displayed
-      sec.axis = sec_axis(~.*(100/max(d$daily_cases, na.rm=T)),
-                          name = 'Stringency Index')#, limits = c(0, 100)
-    ) +
-    facet_wrap(~ country_name, ncol = nr_cols) +
-    ylab('New Cases') +
-    xlab('Date') +
-    ggtitle('Stringency of Measures and New Cases (absolute value)') +
-    theme_bw() +
-    theme(
-      legend.position = 'top',
-      plot.title = element_text(hjust = 0.5, size = 16)
-    ) +
-    scale_colour_manual(
-      name = '', values = c('Stringency Index' = 'black', 'New Cases' = '#E41A1C')
-    )
-}

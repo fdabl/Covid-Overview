@@ -1,7 +1,7 @@
 library('DT')
 library('shinyWidgets')
 library('shinydashboard')
-library('dashboardthemes')
+#library('dashboardthemes')
 source('helpers.R')
 
 
@@ -20,10 +20,7 @@ eu_countries <- c(
   'Sweden','United Kingdom'
 )
 
-# Showing all countries slows the initial rendering of the app
-# down because it needs to generate all these html elements
-# alx: solved by using unique()
-#COUNTRIES <- eu_countries # alx: not necessary anymore
+
 COUNTRIES <- dat$country_name %>% unique() 
 MIN_DATE <- min(dat$date)
 MAX_DATE <- max(dat$date)
@@ -38,9 +35,9 @@ sidebar <- dashboardSidebar(
 
 
 body <- dashboardBody(
-  shinyDashboardThemes(
-    theme = 'grey_light'
-  ),
+  # shinyDashboardThemes(
+  #   theme = 'grey_light'
+  # ),
   
   tabItems(
     tabItem(
@@ -91,15 +88,15 @@ body <- dashboardBody(
         tags$br(),
         
         div(style='display:inline-block; width:25%; margin-right:2%',
-          selectInput(
-            inputId = 'variable_type',
-            label = 'Information displayed:', 
-            choices = c(
-              'Stringency' = 'StringencyIndex',
-              'Deaths' = 'Deaths',
-              'Cases' = 'Cases'
-            ), selected = 'StringencyIndex'
-          )
+            selectInput(
+              inputId = 'variable_type',
+              label = 'Information displayed:', 
+              choices = c(
+                'Stringency' = 'StringencyIndex',
+                'Deaths' = 'Deaths',
+                'Cases' = 'Cases'
+              ), selected = 'StringencyIndex'
+            )
         ),
         
         conditionalPanel(condition = 'input.variable_type == \'StringencyIndex\'',
@@ -118,85 +115,73 @@ body <- dashboardBody(
         ),
         
         div(style='display:inline-block; width:25%; margin-left:2%',
-          selectInput(
-            inputId = 'region',
-            label = 'Region:', 
-            choices = c(
-              'World' = 'World',
-              'Europe' = 'Europe',
-              'North America' = 'NorthAmerica',
-              'South America' = 'SouthAmerica',
-              'Asia' = 'Asia',
-              'Africa' = 'Africa',
-              'OECD' = 'OECD',
-              'USA (States)' = 'USA'
-            ), 
-            selected = 'World'
-          )
+            selectInput(
+              inputId = 'region',
+              label = 'Region:', 
+              choices = c(
+                'World' = 'World',
+                'Europe' = 'Europe',
+                'North America' = 'NorthAmerica',
+                'South America' = 'SouthAmerica',
+                'Asia' = 'Asia',
+                'Africa' = 'Africa',
+                'OECD' = 'OECD',
+                'USA (States)' = 'USA'
+              ), 
+              selected = 'World'
+            )
         )
       ),
       
       
       box(title = 'Stringency Index and Daily Deaths', status = 'primary', solidHeader = TRUE,
           collapsible = TRUE, align = 'center', width = '100%', #height = '1000px',
-
-        div(style = 'height:1000px; overflow-y: scroll',
-           
-            div(style = 'display:inline-block; vertical-align:top',
-                multiInput(
-                  inputId = 'countries_lockdown',
-                  label = 'Select specific countries...',
-                  choices = COUNTRIES,
-                  selected = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom'),
-                  width = '400px',
-                  options = list(
-                    enable_search = TRUE,
-                    non_selected_header = 'Choose between:',
-                    selected_header = 'You have selected:'
-                  )
+          
+          div(style = 'height:1000px; overflow-y: scroll',
+              
+              #div(style = 'display:inline-block; vertical-align:top',
+              multiInput(
+                inputId = 'countries_lockdown',
+                label = 'Custom selection:',
+                choices = COUNTRIES,
+                selected = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom'),
+                width = '400px',
+                options = list(
+                  enable_search = TRUE,
+                  non_selected_header = 'Choose between:',
+                  selected_header = 'You have selected:'
                 )
-            ),
-            
-            div(style = 'display:inline-block; vertical-align:top',
-                selectInput(
-                  'regions', 'or select a group of countries?', 
-                  c('I want to make my own selection', 'Africa', 'Asia', 'Europe', 'Oceania', 'North America', 'South America', 'OECD'),
-                  width = '300px'
-                ),
                 
-                
-                selectInput(
-                  'graph', 'Select the indicator:', 
-                  c('Daily deaths per 10 Million', 'Daily deaths (absolute value)',
-                    'New Cases per Million', 'New Cases (absolute value)'),
-                  width = '300px'
-                ),
-                
-                # selectInput(
-                #   'grouping', '', 
-                #   c('show selected countries', 'show selected group'),
-                #   width = '250px'
-                # ),
-                
-                # prettySwitch(
-                #   'grouping',
-                #   'Select specific countries:',
-                #   value = TRUE,
-                #   status = 'default',
-                #   slim = FALSE,
-                #   fill = FALSE,
-                #   bigger = FALSE,
-                #   inline = FALSE,
-                #   width = NULL
-                # ),
-                
-                actionButton('Refresh', 'Refresh graph')
-            ),
-            plotOutput('lockdown_plot_lines_scales')
-            
-        )
-
-        #height = '1000'  #textOutput('height')
+              ),
+              
+              #div(style = 'display:inline-block; vertical-align:top',
+              selectInput(
+                'regions', 'Region:', 
+                c('I want to make my own selection', 'World', 'Europe',
+                  'North America', 'South America', 'Asia', 'Africa',
+                  'Oceania', 'OECD'),
+                width = '300px'
+              ),
+              
+              
+              selectInput(
+                'graph', 'Indicator:', 
+                c('New deaths per Million',
+                  'New Cases per Million'),
+                width = '300px'
+              ),
+              
+              actionButton('refresh', 'Apply'),
+              actionButton('all_graph', 'Select all'),
+              actionButton('clear_graph', 'Clear selection'),
+              
+              
+              
+              plotOutput('lockdown_plot_lines_scales')
+              
+          )
+          
+          #height = '1000'  #textOutput('height')
       ),
       
       box(
