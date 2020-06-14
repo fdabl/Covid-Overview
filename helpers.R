@@ -93,7 +93,7 @@ get_stringency_data <- function(...) {
       new_cases_per_million = round((daily_cases / population) * 1e6, 2),
       new_deaths_per_million = round((daily_deaths / population) * 1e6, 2),
       new_cases_per_million_smoothed = smooth(new_cases_per_million, order = 10),
-      new_deaths_per_million_smoothed = smooth(new_cases_per_million, order = 10),
+      new_deaths_per_million_smoothed = smooth(new_deaths_per_million, order = 10),
       
       group_deaths_per_million = case_when(
         deaths_per_million >= 0 & deaths_per_million <= 1 ~ 0,
