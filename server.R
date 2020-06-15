@@ -340,9 +340,9 @@ shinyServer(function(session, input, output) {
       formatStyle(
         'roll', target = 'row',
         backgroundColor = styleInterval(
-          seq(0, 1.1, length.out = 9),
+          c(0.5,0.6,0.7,0.8,0.9,0.95,0.99),
           sequential_hcl(
-            n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE#, register =
+            n = 8, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE#, register =
           )
         )
       )
