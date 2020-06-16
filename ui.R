@@ -40,6 +40,7 @@ body <- dashboardBody(
   
   tabItems(
     tabItem(
+      tags$style(type="text/css", "p{font-size: 130%;}"),
       tabName = 'welcome',
       box(
         title = ('Overview of Lockdown Measures'), status = 'primary',
@@ -236,5 +237,5 @@ body <- dashboardBody(
 )
 
 
-header <- dashboardHeader(title = 'Lifting Lockdowns')  
+header <- dashboardHeader(title = 'COVID-19 Overview')  
 dashboardPage(header, sidebar, body, skin = 'blue') 

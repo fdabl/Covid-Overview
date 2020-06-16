@@ -20,7 +20,6 @@ EUROPE <- get_countries(dat, 'Europe')
 OCEANIA <- get_countries(dat, 'Oceania')
 
 
-
 OECD <- c(
   'Australia', 'Austria', 'Belgium', 'Canada', 'Chile', 'Colombia',
   'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France', 
@@ -144,6 +143,10 @@ shinyServer(function(session, input, output) {
     if (input$regions == 'I want to make my own selection') {
       country_ls = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom')
       country_choices = dat$country_name %>% unique()
+      
+    } else if (input$regions == 'World') {
+      country_ls <- dat$country_name %>% unique()
+      country_choices <- country_ls
       
     } else if (input$regions == 'Africa') {
       country_ls = AFRICA
