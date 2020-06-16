@@ -166,7 +166,7 @@ body <- dashboardBody(
               
               selectInput(
                 'graph', 'Indicator:', 
-                c('New deaths per Million',
+                c('New Deaths per Million',
                   'New Cases per Million'),
                 width = '300px'
               ),

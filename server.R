@@ -140,7 +140,8 @@ shinyServer(function(session, input, output) {
   
   
   observeEvent(input$regions, {
-    if (input$regions == 'I want to make my own selection'){
+    
+    if (input$regions == 'I want to make my own selection') {
       country_ls = c('Germany', 'Netherlands', 'Romania', 'Serbia', 'United Kingdom')
       country_choices = dat$country_name %>% unique()
       
@@ -185,9 +186,7 @@ shinyServer(function(session, input, output) {
   })
   
   country_list <- reactive({
-
-        input$countries_lockdown
-
+      input$countries_lockdown
   })
   
   selected_countries <- reactive({ 
@@ -206,7 +205,7 @@ shinyServer(function(session, input, output) {
       
       plt <- plot.new()
       
-    } else if (input$graph == 'New deaths per Million') {
+    } else if (input$graph == 'New Deaths per Million') {
       
       plt <- plot_stringency_data_deaths_relative(dat, selected_countries(),
                                                   num_cols()) 

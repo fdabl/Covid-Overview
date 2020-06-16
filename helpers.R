@@ -615,12 +615,12 @@ plot_stringency_data_deaths_relative <- function(dat, countries, nr_cols) {
     geom_text(
       data  = annotation_data,
       aes(x = as.Date("2020-01-10", "%Y-%m-%d"),
-          y = max_var*0.85 ,
-          label = paste0('Total deaths:', deaths, '\n', 
-                         'New deaths recorded','\n', 
-                         '3 days ago:',  daily_deaths)),
-      #size = round(16/nr_cols),
-      hjust = 0
+          y = max_var*0.88,
+          label = paste0(
+            'Total Deaths: ', deaths, '\n', 
+            'New Deaths (3 Days Ago): ', daily_deaths
+          )),
+      hjust = 0, size = 3.5
     )
 }
 
@@ -659,7 +659,7 @@ plot_stringency_data_cases_relative <- function(dat, countries, nr_cols) {
       )
     ) +
     facet_rep_wrap(~ country_name, ncol = nr_cols, repeat.tick.labels = 'bottom') + 
-    ylab('New Cases per  Million') +
+    ylab('New Cases per Million') +
     xlab('Date') +
     ggtitle('Stringency of Measures and New Cases per Million') +
     theme_bw() +
@@ -669,17 +669,17 @@ plot_stringency_data_cases_relative <- function(dat, countries, nr_cols) {
       axis.ticks.y = element_blank()
     ) +
     scale_colour_manual(
-      name = '', values =c('Stringency Index' = 'black', 'New Cases per Million' = '#E41A1C')
+      name = '', values = c('Stringency Index' = 'black', 'New Cases per Million' = '#E41A1C')
     ) +
     geom_text(
       data  = annotation_data,
       aes(x = as.Date("2020-01-10", "%Y-%m-%d"),
-          y = max_var*0.85,
-          label = paste0('Total cases:', confirmed, '\n', 
-                         'New cases recorded','\n', 
-                         '3 days ago:',  daily_cases)),
-      #size = round(16/nr_cols),
-      hjust = 0
+          y = max_var*0.88,
+          label = paste0(
+            'Total Cases: ', confirmed, '\n', 
+            'New Cases (3 Days Ago): ', daily_cases
+          )),
+      hjust = 0, size = 3.5
     )
 }
 
