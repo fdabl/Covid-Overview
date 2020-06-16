@@ -320,7 +320,7 @@ shinyServer(function(session, input, output) {
       'function(row, data){',
       '  for(var i=2; i<data.length; i++){',
       '    if(data[i] === null){',
-      "      $('td:eq('+i+')', row).html('N/A')",
+      "      $('td:eq('+i+')', row).html('Data Not Available')",
       "        .css({'color': 'rgb(0,0,0)', 'font-style': 'italic'});",
       '    } else if(data[i] < 0){',
       "      $('td:eq('+i+')', row).html('Lifted '+ Math.abs(data[i]) + ' Days Ago')",

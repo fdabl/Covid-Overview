@@ -219,7 +219,6 @@ rollback <- function(dat, countries) {
       trace = (last(testing_policy) + last(contact_tracing)) / 5,
       risk = last(international_movement_restrictions) / 4,
       comm = (last(information_campaigns)) / 2,
-      comm = (last(information_campaigns)) / 3,
       roll = sum(c(dnc_rate, dgr_down, trace, risk, comm), na.rm = TRUE) / 4
     ) %>% select(country_name, roll)
   
