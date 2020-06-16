@@ -319,6 +319,7 @@ tickpos <- function(nFactor) {
   pos <- unique((head(Z_Breaks(nFactor), -1)) + head(Z_Breaks(nFactor))[2]/2)*(nFactor-1)
 }
 
+
 #' breaks tick labels into lines, each line being width characters long
 ticklab <- function(tags, width = 30) {
   x <- gsub(paste0('(.{1,', width, '})(\\s|$)'), '\\1\n', tags) %>%
@@ -333,6 +334,7 @@ ticklab <- function(tags, width = 30) {
   
   x
 }
+
 
 #' @param world world data
 #' @param dat stringency data
@@ -552,7 +554,6 @@ plot_world_data <- function(dat, selected_date, variable, measure, region, us_da
            dragmode = 'zoom', margin = list(l = 0, r = 0, b = 0, t = 30)) %>% 
     
     config(scrollZoom = FALSE)
-  
 }
 
 
@@ -683,5 +684,3 @@ plot_stringency_data_cases_relative <- function(dat, countries, nr_cols) {
       hjust = 0, size = 3.5
     )
 }
-
-
