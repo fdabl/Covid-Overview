@@ -1,7 +1,6 @@
 library('DT')
 library('shinyWidgets')
 library('shinydashboard')
-library('dashboardthemes')
 source('helpers.R')
 
 

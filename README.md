@@ -1,3 +1,2 @@
-# Shiny App COVID-19 Lockdown Overview
-
-This Shiny app provides an interactive overview of how countries lift the lockdown brought about by the novel coronavirus. The app uses the [Oxford Stringency Index](https://covidtracker.bsg.ox.ac.uk/about-api) and the death counts provided by [Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19).
+# Interactive Exploration of COVID-19 Spread and Measures
+This Shiny app provides an interactive overview of the effect of the novel coronavirus across countries, and what measures those countries have taken to combat it. The app uses the [*covid19* R package](https://covid19datahub.io/) as a source of data for confirmed cases, confirmed deaths, and the [Oxford Stringency Index](https://covidtracker.bsg.ox.ac.uk/about-api).
