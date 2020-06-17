@@ -89,7 +89,7 @@ body <- dashboardBody(
           per million and deaths per million. This normalization makes for more pleasant visualisations. Note, however,
           that these measures need to be interpreted relative to a country's population size. We display the total cases and
           total deaths as well as new cases and new deaths in the top left corner. Note that new cases and new deaths are those
-          reported three days ago, as reporting for today may lag behind. All data here andd in the world map refer to 7-day
+          reported three days ago, as reporting for today may lag behind. All data here and in the world map refer to 7-day
           rolling averages, and are provided by the
           <a href='https://covid19datahub.io/' target='_blank'>covid19 R package</a>.
           </p>
@@ -105,9 +105,9 @@ body <- dashboardBody(
           
           <h3>Caveats</h3>
           <p>
-          Note that international comparisons are difficult to make due to differences in testing and reporting across countries
-          but also across time. Please be mindful of these difficulties and do not overinterpret comparisons.
-          For a discussion of these difficulties, a more detailed explanation of this dashboard, and links to further resources,
+          Note that international comparisons are difficult due to differences in testing and reporting across countries
+          but also across time; beware of overinterpreting such comparisons. For a discussion of these difficulties,
+          a more detailed explanation of this dashboard, and links to further resources,
           see <a href='https://scienceversuscorona.com/visualising-the-covid-19-pandemic' target='_blank'>this blog post</a>.
           </p>
           "
@@ -295,7 +295,7 @@ body <- dashboardBody(
             <p style = 'text-align: center;'>
             This Web App was developed by
             <a href='https://twitter.com/fdabl' target='_blank'>Fabian Dablander</a>,
-            Alexandra Rusu,
+            <a href='https://nl.linkedin.com/in/ialmi' target='_blank'>Alexandra Rusu</a>,
             <a href='https://www.sowi.uni-mannheim.de/en/meiser/team/research-staff/marcel-schreiner/' target='_blank'>
             Marcel Schreiner</a>,
             and <a href='https://www.atomasevic.com/' target='_blank'>Aleksandar Tomasevic</a>
