@@ -265,8 +265,7 @@ rollback <- function(dat, countries) {
       dgr_down = if_else(last(dgr) < nth(dgr, 2), 0.5, 0), # Is daily growth rate less than week ago?
       trace = (last(testing_policy) + last(contact_tracing)) / 5,
       risk = last(international_movement_restrictions) / 4,
-      # comm = (last(information_campaigns) + last(H1_Flag)) / 3,
-      comm = (last(information_campaigns)) / 3,
+      comm = (last(information_campaigns)) / 2,
       roll = sum(c(dnc_rate, dgr_down, trace, risk, comm), na.rm = TRUE) / 4
     ) %>% select(country_name, roll)
   
@@ -346,9 +345,19 @@ prepare_country_table <- function(dat, countries) {
       # C7_Flag = if_else(C7_days > 0,last(C7_Flag),0),
     )
   
-  colnames(d)[1:9] <- cnames
-  r <- rollback(dat, countries) %>% rename(Country = country_name)
+  r <- rollback(dat, countries)
   d <- left_join(d, r)
+  d <- d %>% mutate(nas = rowSums(is.na(.))) %>% mutate(roll = if_else(nas > 7, NA_real_,d$roll)) %>%
+    mutate(C1_days = if_else(nas < 8, ifelse(is.na(d$C1_days),0,d$C1_days), NA_real_),
+           C2_days = if_else(nas < 8, ifelse(is.na(d$C2_days),0,d$C2_days), NA_real_),
+           C3_days = if_else(nas < 8, ifelse(is.na(d$C3_days),0,d$C3_days), NA_real_),
+           C4_days = if_else(nas < 8, ifelse(is.na(d$C4_days),0,d$C4_days), NA_real_),
+           C5_days = if_else(nas < 8, ifelse(is.na(d$C5_days),0,d$C5_days), NA_real_),
+           C6_days = if_else(nas < 8, ifelse(is.na(d$C6_days),0,d$C6_days), NA_real_),
+           C7_days = if_else(nas < 8, ifelse(is.na(d$C7_days),0,d$C7_days), NA_real_),
+           C8_days = if_else(nas < 8, ifelse(is.na(d$C8_days),0,d$C8_days), NA_real_)) %>%
+    select(-nas)
+  colnames(d)[1:9] <- cnames
   d
 }
 

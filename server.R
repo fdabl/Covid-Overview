@@ -302,12 +302,10 @@ shinyServer(function(session, input, output) {
   })
   
   output$table_legend <- renderPlot({
-    swatchplot(
-      'Table \nlegend' = sequential_hcl(
-        n = 10, h = c(250, 90), c = c(40, NA, 22),
-        l = c(68, 100), power = c(3, 3), rev = TRUE#, register =
-      ), font = 3,cex = 0.9, line = 3
-    )
+    swatchplot(sequential_hcl(n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE, register = ),font=3,cex=0.9,line=3)
+    mtext('Not \n Ready',side=2,las=2,line=1,cex = 1.25,outer = FALSE,adj=0.5)
+    mtext('How ready are countries to lift the Lockdown?',side=3,line=1,cex=1.5,outer=FALSE)
+    mtext('Ready',side=4,las=2, line=1,cex = 1.25,outer = FALSE,adj=0.65)
   })
   
   output$countries_table <- DT::renderDT({
@@ -315,12 +313,15 @@ shinyServer(function(session, input, output) {
       'function(row, data){',
       '  for(var i=2; i<data.length; i++){',
       '    if(data[i] === null){',
-      "      $('td:eq('+i+')', row).html('Not Implemented')",
+      "      $('td:eq('+i+')', row).html('Data Not Available')",
       "        .css({'color': 'rgb(0,0,0)', 'font-style': 'italic'});",
       '    } else if(data[i] < 0){',
       "      $('td:eq('+i+')', row).html('Lifted '+ Math.abs(data[i]) + ' Days Ago')",
       "        .css({'font-style': 'normal'});",
-      '  }',
+      '    } else if(data[i] === 0){',
+      "      $('td:eq('+i+')', row).html('Not Implemented')",
+      "        .css({'color': 'rgb(0,0,0)', 'font-style': 'italic'});",
+      '}',
       '}',
       '}'
     )
@@ -336,9 +337,9 @@ shinyServer(function(session, input, output) {
       formatStyle(
         'roll', target = 'row',
         backgroundColor = styleInterval(
-          seq(0, 1.1, length.out = 9),
+          c(0.5,0.6,0.7,0.8,0.9,0.95,0.99),
           sequential_hcl(
-            n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE#, register =
+            n = 8, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE#, register =
           )
         )
       )
