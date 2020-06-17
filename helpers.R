@@ -431,7 +431,7 @@ plot_world_data <- function(dat, selected_date, variable, measure, region, us_da
     
     if (measure == 'Combined') {
       
-      title <- 'Stringency of Lockdown Across the World'
+      title <- 'Stringency Index Across the World'
       legend_title <- 'Stringency Index'
       text <- paste(d$stringency_index, d$country_name, sep = '\n')
       d$variable <- d$stringency_index
@@ -510,16 +510,16 @@ plot_world_data <- function(dat, selected_date, variable, measure, region, us_da
     
   } else if (variable == 'Deaths') {
     
-    legend_title <- 'Deaths per Million'
+    legend_title <- 'Total Deaths per Million'
     
     if (region != 'USA') {
       
-      title <- 'Confirmed Deaths per Million Across the World'
+      title <- 'Total Deaths per Million Across the World'
       text <- paste(d$deaths_per_million_s, d$country_name, sep = '\n')
       
     } else {
       
-      title <- 'Confirmed Deaths per Million in the USA'
+      title <- 'Total Deaths per Million in the USA'
       text <- paste(d$deaths_per_million_s, d$state_name, sep = '\n')
       
     }
@@ -529,16 +529,16 @@ plot_world_data <- function(dat, selected_date, variable, measure, region, us_da
     
   } else if (variable == 'Cases') {
     
-    legend_title <- 'Cases per Million'
+    legend_title <- 'Total Cases per Million'
     
     if (region != 'USA') {
       
-      title <- 'Confirmed Cases per Million Across the World'
+      title <- 'Total Confirmed Cases per Million Across the World'
       text <- paste(d$cases_per_million_s, d$country_name, sep = '\n')
       
     } else {
       
-      title <- 'Confirmed Cases per Million in the USA'
+      title <- 'Total Confirmed Cases per Million in the USA'
       text <- paste(d$cases_per_million_s, d$state_name, sep = '\n')
       
     }

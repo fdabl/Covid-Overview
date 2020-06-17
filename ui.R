@@ -31,6 +31,7 @@ CUSTOM_SELECTION <- c(
 
 
 sidebar <- dashboardSidebar(
+  width = 250,
   sidebarMenu(
     menuItem('Overview', tabName = 'welcome', icon = icon('door-open')),
     menuItem('About', tabName = 'about', icon = icon('address-card'))
@@ -43,28 +44,74 @@ body <- dashboardBody(
   
   tabItems(
     tabItem(
-      tags$style(type="text/css", "p{font-size: 130%;}"),
+      tags$style(type = "text/css", "p{font-size: 150%;}"),
       tabName = 'welcome',
       box(
-        title = ('Overview of Lockdown Measures'), status = 'primary',
-        solidHeader = TRUE, collapsible = TRUE,
-        tags$p(
-          'This dashboard shows an overview of how different lockdown measures were
-          implemented across different countries', style = 'font-size:150%', align = 'center'
+        width = NULL,
+        tags$h1(
+          'Visualising the COVID-19 Pandemic', align = 'center'
         ),
         tags$br(),
-        tags$p(
-          'The source of the data is Hale, Thomas, Sam Webster, Anna Petherick, Toby Phillips,
-          and Beatriz Kira (2020). Oxford COVID-19 Government Response Tracker, Blavatnik School of Government.
-          Data use policy: Creative Commons Attribution CC BY standard.',
-          style = 'font-size:100%', align = 'center'
-        ),
-        tags$br(),
-        width = '100%'
+        HTML(
+          "
+          <p>
+          The novel coronavirus has a firm grip on nearly all countries across the world,
+          and there is large heterogeneity in how countries have responded to the threat.
+          In three parts, this dashboard provides an overview of confirmed cases, deaths, and measures that
+          countries have taken to curb the spread of the virus.
+          </p>
+          
+          <h3>The World At Once</h3>
+          <p>
+          An interactive world map allows you to compare confirmed cases, deaths, and how
+          countries have responded using Stringency Measures — such as school or
+          workplace closures — collected by the
+          <a href='https://www.bsg.ox.ac.uk/research/research-projects/coronavirus-government-response-tracker'
+          target='_blank'>Oxford COVID-19 Government Response Tracker</a>. The Oxford Stringency Index combines these measures (and one
+          measure about public information campaigns) into a composite score ranging from 0 to 100
+          (for details, see Hale et al., <a href='https://www.bsg.ox.ac.uk/research/publications/variation-government-responses-covid-19'
+          target='_blank'>2020a</a>), and you can explore how this index has changed across countries and time as well. Note that we show
+          the total confirmed cases and deaths per million inhabitants. Therefore, this number is never decreasing, and population size
+          needs to be taken into account when wishing to compare total outbreak sizes. For more comprehensive visualisations of confirmed
+          cases and deaths, see
+          <a href='https://ourworldindata.org/covid-cases' target='_blank'>here</a> and 
+          <a href='https://ourworldindata.org/covid-deaths' target='_blank'>here</a>.
+          </p>
+          
+          <h3>Comparing Individual Countries</h3>
+          <p>
+          Below the world map you find an interactive Figure which allows you to single out
+          individual countries and visualize the Oxford Stringency Index together with confirmed cases
+          per million and deaths per million. This normalization makes for more pleasant visualisations. Note, however,
+          that these measures need to be interpreted relative to a country's population size. We display the total cases and
+          total deaths as well as new cases and new deaths in the top left corner. Note that new cases and new deaths are those
+          reported three days ago, as reporting for today may lag behind. All data here andd in the world map refer to 7-day
+          rolling averages, and are provided by the
+          <a href='https://covid19datahub.io/' target='_blank'>covid19 R package</a>.
+          </p>
+          
+          <h3>Who's Ready To Rollback?</h3>
+          <p>
+          The last part of the app is an interactive Table which shows in more detail which
+          countries have imposed or lifted what Stringency Measures, and when. Individual rows are coloured
+          according to how close each country is to the WHO recommendations for rolling back lockdowns, using the approach
+          outlined in Hale et al. (<a href='https://www.bsg.ox.ac.uk/research/publications/lockdown-rollback-checklist'
+          target='_blank'>2020b</a>)
+          </p>
+          
+          <h3>Caveats</h3>
+          <p>
+          Note that international comparisons are difficult to make due to differences in testing and reporting across countries
+          but also across time. Please be mindful of these difficulties and do not overinterpret comparisons.
+          For a discussion of these difficulties, a more detailed explanation of this dashboard, and links to further resources,
+          see <a href='https://scienceversuscorona.com/visualising-the-covid-19-pandemic' target='_blank'>this blog post</a>.
+          </p>
+          "
+        )
       ),
       
       box(
-        title = 'Measures, Cases, and Deaths Across the Globe', status = 'primary', width = '100%',
+        title = 'The World At Once', status = 'primary', width = '100%',
         solidHeader = TRUE, collapsible = TRUE, align = 'center',
         tags$head(
           tags$style(
@@ -142,7 +189,7 @@ body <- dashboardBody(
       
       
       box(
-        title = 'Stringency Index, Cases, and Deaths', status = 'primary', solidHeader = TRUE,
+        title = 'Comparing Individual Countries', status = 'primary', solidHeader = TRUE,
         collapsible = TRUE, align = 'center', width = '100%', #height = '1000px',
         div(
           style = 'height:1000px; overflow-y: scroll',
@@ -173,8 +220,8 @@ body <- dashboardBody(
             'graph',
             'Indicator',
             choices = c(
-              'New Deaths per Million',
-              'New Cases per Million'
+              'New Cases per Million',
+              'New Deaths per Million'
             ),
             
             # choices = c(
@@ -182,6 +229,7 @@ body <- dashboardBody(
             #   'New Cases per Million',
             #   'New Tests per Confirmed Case'
             # ),
+            selected = 'New Cases per Million',
             width = '300px'
           ),
           
@@ -195,7 +243,7 @@ body <- dashboardBody(
       ),
       
       box(
-        title = 'Stringency Measures and Rollback Readiness', status = 'primary', solidHeader = TRUE,
+        title = 'Who\'s Ready To Rollback? ', status = 'primary', solidHeader = TRUE,
         collapsible = TRUE, align = 'center', width = '100%',
         multiInput(
           inputId = 'countries_table',
@@ -235,11 +283,19 @@ body <- dashboardBody(
         box(
           width = 1000,
           HTML(
-            '<h3 style = \'text-align: center;\'>About</h3>
-            <p style = \'font-size: 120%; text-align: center;\'>
-            This Web App was developed by Fabian Dablander, Alexandra Rusu, Marcel Raphael Schreiner,
-            and Aleksandar Tomasevic as a <a href=\'http://scienceversuscorona.com/\' target=\'_blank\'>Science versus Corona</a> project
-            <p>'
+            "
+            <h3 style = 'text-align: center;'>About</h3>
+            
+            <p style = 'text-align: center;'>
+            This Web App was developed by
+            <a href='https://twitter.com/fdabl' target='_blank'>Fabian Dablander</a>,
+            Alexandra Rusu,
+            <a href='https://www.sowi.uni-mannheim.de/en/meiser/team/research-staff/marcel-schreiner/' target='_blank'>
+            Marcel Schreiner</a>,
+            and <a href='https://www.atomasevic.com/' target='_blank'>Aleksandar Tomasevic</a>
+            as a <a href='http://scienceversuscorona.com/' target='_blank'>Science versus Corona</a> project.
+            <p>
+            "
           )
         )
       )
