@@ -672,12 +672,18 @@ plot_stringency_data_deaths_relative <- function(dat, countries, nr_cols) {
     ylab('New Deaths per Million') +
     ggtitle('Stringency of Measures and New Deaths per Million') +
     xlab('Date') +
-    theme_bw() +
+    theme_minimal() +
     theme(
       legend.position = 'top',
-      plot.title = element_text(hjust = 0.5, size = 16),
+      plot.title = element_text(hjust = 0.5, size = 18),
       axis.ticks.y = element_blank(),
-      panel.spacing.x = unit(-1.5, "lines")
+      strip.text.x = element_text(size = 16),
+      panel.spacing.x = unit(-2, "lines"),
+      panel.spacing.y = unit(0.75, "lines"),
+      panel.border = element_rect(colour = "black", fill = NA, size = 0.75),
+      legend.text = element_text(size = 12),
+      axis.text = element_text(size = 12),
+      axis.title = element_text(size = 14)
     ) +
     scale_colour_manual(
       name = '', values = c('Stringency Index' = 'black', 'New Deaths per Million' = '#E41A1C')
@@ -728,15 +734,22 @@ plot_stringency_data_cases_relative <- function(dat, countries, nr_cols) {
         ~.*(100 / max_var), name = 'Stringency Index'
       )
     ) +
-    facet_rep_wrap(~ country_name, ncol = nr_cols, repeat.tick.labels = 'bottom') + 
+    facet_rep_wrap(~ country_name, ncol = nr_cols, repeat.tick.labels = 'bottom') +
     ylab('New Cases per Million') +
     xlab('Date') +
     ggtitle('Stringency of Measures and New Cases per Million') +
-    theme_bw() +
+    theme_minimal() +
     theme(
       legend.position = 'top',
-      plot.title = element_text(hjust = 0.5, size = 16),
-      axis.ticks.y = element_blank()
+      plot.title = element_text(hjust = 0.5, size = 18),
+      axis.ticks.y = element_blank(),
+      strip.text.x = element_text(size = 16),
+      panel.spacing.x = unit(-2, "lines"),
+      panel.spacing.y = unit(0.75, "lines"),
+      panel.border = element_rect(colour = "black", fill = NA, size = 0.75),
+      legend.text = element_text(size = 12),
+      axis.text = element_text(size = 12),
+      axis.title = element_text(size = 14)
     ) +
     scale_colour_manual(
       name = '', values = c('Stringency Index' = 'black', 'New Cases per Million' = '#E41A1C')

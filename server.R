@@ -313,7 +313,6 @@ shinyServer(function(session, input, output) {
     )
 
     tab <- prepare_country_table(dat, selected_countries_table())
-    print(tab)
     tab <- datatable(
       tab, options = list(
         columnDefs = list(list(targets = 10, visible = FALSE)), rowCallback = JS(rowCallback),
