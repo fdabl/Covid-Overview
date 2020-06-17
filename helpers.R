@@ -12,7 +12,7 @@ library('covid19us')
 library('colorspace')
 library('countrycode')
 library('RColorBrewer')
-library('dashboardthemes')
+#library('dashboardthemes')
 
 
 #' Returns moving-averaged data
@@ -347,15 +347,15 @@ prepare_country_table <- function(dat, countries) {
   
   r <- rollback(dat, countries)
   d <- left_join(d, r)
-  d <- d %>% mutate(nas = rowSums(is.na(.))) %>% mutate(roll = if_else(nas > 7, NA_real_,d$roll)) %>%
-    mutate(C1_days = if_else(nas < 8, ifelse(is.na(d$C1_days),0,d$C1_days), NA_real_),
-           C2_days = if_else(nas < 8, ifelse(is.na(d$C2_days),0,d$C2_days), NA_real_),
-           C3_days = if_else(nas < 8, ifelse(is.na(d$C3_days),0,d$C3_days), NA_real_),
-           C4_days = if_else(nas < 8, ifelse(is.na(d$C4_days),0,d$C4_days), NA_real_),
-           C5_days = if_else(nas < 8, ifelse(is.na(d$C5_days),0,d$C5_days), NA_real_),
-           C6_days = if_else(nas < 8, ifelse(is.na(d$C6_days),0,d$C6_days), NA_real_),
-           C7_days = if_else(nas < 8, ifelse(is.na(d$C7_days),0,d$C7_days), NA_real_),
-           C8_days = if_else(nas < 8, ifelse(is.na(d$C8_days),0,d$C8_days), NA_real_)) %>%
+  d2 <- d %>% mutate(nas = rowSums(is.na(.))) %>% mutate(roll = if_else(nas > 7, NA_real_,d$roll)) %>%
+    mutate(C1_days = if_else(nas < 8, ifelse(is.na(d$C1_days),integer(0),d$C1_days),NA_integer_),
+           C2_days = if_else(nas < 8, ifelse(is.na(d$C2_days),integer(0),d$C2_days),NA_integer_),
+           C3_days = if_else(nas < 8, ifelse(is.na(d$C3_days),integer(0),d$C3_days),NA_integer_),
+           C4_days = if_else(nas < 8, ifelse(is.na(d$C4_days),integer(0),d$C4_days),NA_integer_),
+           C5_days = if_else(nas < 8, ifelse(is.na(d$C5_days),integer(0),d$C5_days),NA_integer_),
+           C6_days = if_else(nas < 8, ifelse(is.na(d$C6_days),integer(0),d$C6_days),NA_integer_),
+           C7_days = if_else(nas < 8, ifelse(is.na(d$C7_days),integer(0),d$C7_days),NA_integer_),
+           C8_days = if_else(nas < 8, ifelse(is.na(d$C8_days),integer(0),d$C8_days),NA_integer_)) %>%
     select(-nas)
   colnames(d)[1:9] <- cnames
   d
