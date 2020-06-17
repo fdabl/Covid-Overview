@@ -86,6 +86,7 @@ shinyServer(function(session, input, output) {
         choices = c(
           'Deaths' = 'Deaths',
           'Cases' = 'Cases'
+          # 'Tests' = 'Tests'
           ), selected = selected_variable()
       )
       
@@ -97,6 +98,7 @@ shinyServer(function(session, input, output) {
           'Stringency Index' = 'StringencyIndex',
           'Deaths' = 'Deaths',
           'Cases' = 'Cases'
+          # 'Tests' = 'Tests'
         ), selected = selected_variable()
       )
       
@@ -109,8 +111,8 @@ shinyServer(function(session, input, output) {
         choices = c(
           'World' = 'World',
           'Europe' = 'Europe',
-          'North America' = 'NorthAmerica',
-          'South America' = 'SouthAmerica',
+          'North America' = 'North America',
+          'South America' = 'South America',
           'Asia' = 'Asia',
           'Africa' = 'Africa',
           'OECD' = 'OECD'),
@@ -124,8 +126,8 @@ shinyServer(function(session, input, output) {
         choices = c(
           'World' = 'World',
           'Europe' = 'Europe',
-          'North America' = 'NorthAmerica',
-          'South America' = 'SouthAmerica',
+          'North America' = 'North America',
+          'South America' = 'South America',
           'Asia' = 'Asia',
           'Africa' = 'Africa',
           'OECD' = 'OECD',
@@ -219,17 +221,24 @@ shinyServer(function(session, input, output) {
     
     if (input$graph == 'New Deaths per Million') {
       
-      plt <- plot_stringency_data_deaths_relative(
+      p <- plot_stringency_data_deaths_relative(
         dat, selected_countries(), num_cols()
       )
     
+    } else if (input$graph == 'New Cases per Million') {
+      
+      p <- plot_stringency_data_cases_relative(
+        dat, selected_countries(), num_cols()
+      )
+      
     } else {
-      plt <- plot_stringency_data_cases_relative(
+      p <- plot_stringency_data_tests(
         dat, selected_countries(), num_cols()
       )
-    } 
+      
+    }
     
-    plt
+    p
   })
   
   how_high <- reactive({

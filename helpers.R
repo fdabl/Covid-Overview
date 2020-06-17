@@ -15,15 +15,15 @@ library('RColorBrewer')
 library('dashboardthemes')
 
 
-#' Returns averaged data
-smooth <- function(x, order = 10) {
+#' Returns moving-averaged data
+smooth <- function(x, order = 7) {
   n <- length(x)
   y <- rep(NA, n)
   
   for (i in seq(n)) {
-    sel <- seq(i - 10, i)
+    sel <- seq(i - order, i)
     sel <- sel[sel > 0]
-    y[i] <- mean(x[sel])
+    y[i] <- mean(x[sel], na.rm = TRUE)
   }
   
   y
@@ -86,31 +86,58 @@ get_stringency_data <- function(...) {
   dat <- covid19(...) %>% 
     group_by(id) %>% 
     mutate(
-      # Deaths and Cases
-      cases_per_million = round((confirmed / population) * 1e6, 2),
-      deaths_per_million = round((deaths / population) * 1e6, 2),
+      # Tests, Cases, and Deaths
+      tests_per_million = (tests / population) * 1e6,
+      cases_per_million = (confirmed / population) * 1e6,
+      deaths_per_million = (deaths / population) * 1e6,
+      
+      tests_per_million_s = round(smooth(tests_per_million, order = 7), 2),
+      cases_per_million_s = round(smooth(cases_per_million, order = 7), 2),
+      deaths_per_million_s = round(smooth(deaths_per_million, order = 7), 2),
+      
+      tests_per_case = tests / confirmed,
+      tests_per_case_s = round(smooth(tests_per_case, order = 7), 2),
+      
+      daily_tests = c(0, diff(tests)),
       daily_cases = c(0, diff(confirmed)),
       daily_deaths = c(0, diff(deaths)),
-      new_cases_per_million = round((daily_cases / population) * 1e6, 2),
-      new_deaths_per_million = round((daily_deaths / population) * 1e6, 2),
-      new_cases_per_million_smoothed = smooth(new_cases_per_million, order = 10),
-      new_deaths_per_million_smoothed = smooth(new_deaths_per_million, order = 10),
+      daily_tests_per_case = c(0, diff(tests_per_case)),
+      new_daily_tests_per_case_s = round(smooth(daily_tests_per_case, order = 7), 2),
+      
+      new_tests_per_million = (daily_tests / population) * 1e6,
+      new_cases_per_million = (daily_cases / population) * 1e6,
+      new_deaths_per_million = (daily_deaths / population) * 1e6,
+      
+      new_tests_per_million_s = round(smooth(new_tests_per_million, order = 7), 2),
+      new_cases_per_million_s = round(smooth(new_cases_per_million, order = 7), 2),
+      new_deaths_per_million_s = round(smooth(new_deaths_per_million, order = 7), 2),
+      
+      # Check whether that grouping is adequate!
+      group_tests_per_case = case_when(
+        tests_per_case_s >= 0 & tests_per_case_s <= 5 ~ 1,
+        tests_per_case_s > 5 & tests_per_case_s <= 10 ~ 2,
+        tests_per_case_s > 10 & tests_per_case_s <= 20 ~ 3,
+        tests_per_case_s > 20 & tests_per_case_s <= 50 ~ 4,
+        tests_per_case_s > 50 & tests_per_case_s <= 100 ~ 5,
+        tests_per_case_s > 100 & tests_per_case_s <= 1000 ~ 5,
+        tests_per_case_s > 1000 ~ 6
+      ),
       
       group_deaths_per_million = case_when(
-        deaths_per_million >= 0 & deaths_per_million <= 1 ~ 0,
-        deaths_per_million > 1 & deaths_per_million <= 10 ~ 1,
-        deaths_per_million > 10 & deaths_per_million <= 100 ~ 2,
-        deaths_per_million > 100 & deaths_per_million <= 1000 ~ 3,
-        deaths_per_million > 1000 ~ 4
+        deaths_per_million_s >= 0 & deaths_per_million_s <= 1 ~ 0,
+        deaths_per_million_s > 1 & deaths_per_million_s <= 10 ~ 1,
+        deaths_per_million_s > 10 & deaths_per_million_s <= 100 ~ 2,
+        deaths_per_million_s > 100 & deaths_per_million_s <= 1000 ~ 3,
+        deaths_per_million_s > 1000 ~ 4
       ),
       
       group_cases_per_million = case_when(
-        cases_per_million >= 0 & cases_per_million <= 1 ~ 0,
-        cases_per_million > 1 & cases_per_million <= 10 ~ 1,
-        cases_per_million > 10 & cases_per_million <= 100 ~ 2,
-        cases_per_million > 100 & cases_per_million <= 1000 ~ 3,
-        cases_per_million > 1000 & cases_per_million <= 10000 ~ 4,
-        cases_per_million > 10000 ~ 5
+        cases_per_million_s >= 0 & cases_per_million_s <= 1 ~ 0,
+        cases_per_million_s > 1 & cases_per_million_s <= 10 ~ 1,
+        cases_per_million_s > 10 & cases_per_million_s <= 100 ~ 2,
+        cases_per_million_s > 100 & cases_per_million_s <= 1000 ~ 3,
+        cases_per_million_s > 1000 & cases_per_million_s <= 10000 ~ 4,
+        cases_per_million_s > 10000 ~ 5
       ),
       
       # Stringency Data
@@ -139,25 +166,44 @@ get_us_data <- function() {
       state = key_alpha_2
     ) %>%
     mutate(
-      cases_per_million = round((confirmed / population) * 1e6, 2),
-      deaths_per_million = round((deaths / population) * 1e6, 2),
+      tests_per_million = (tests / population) * 1e6,
+      cases_per_million = (confirmed / population) * 1e6,
+      deaths_per_million = (deaths / population) * 1e6,
+      
+      tests_per_million_s = round(smooth(tests_per_million, order = 7), 2),
+      cases_per_million_s = round(smooth(cases_per_million, order = 7), 2),
+      deaths_per_million_s = round(smooth(deaths_per_million, order = 7), 2),
+      
+      tests_per_case = tests / confirmed,
+      tests_per_case_s = round(smooth(tests_per_case, order = 7), 2),
+      
+      # Check whether that grouping is adequate!
+      group_tests_per_case = case_when(
+        tests_per_case_s >= 0 & tests_per_case_s <= 5 ~ 1,
+        tests_per_case_s > 5 & tests_per_case_s <= 10 ~ 2,
+        tests_per_case_s > 10 & tests_per_case_s <= 20 ~ 3,
+        tests_per_case_s > 20 & tests_per_case_s <= 50 ~ 4,
+        tests_per_case_s > 50 & tests_per_case_s <= 100 ~ 5,
+        tests_per_case_s > 100 & tests_per_case_s <= 1000 ~ 5,
+        tests_per_case_s > 1000 ~ 6
+      ),
       
       group_deaths_per_million = case_when(
-        deaths_per_million >= 0 & deaths_per_million <= 1 ~ 0,
-        deaths_per_million > 1 & deaths_per_million <= 10 ~ 1,
-        deaths_per_million > 10 & deaths_per_million <= 100 ~ 2,
-        deaths_per_million > 100 & deaths_per_million <= 1000 ~ 3,
-        deaths_per_million > 1000 ~ 4
+        deaths_per_million_s >= 0 & deaths_per_million_s <= 1 ~ 0,
+        deaths_per_million_s > 1 & deaths_per_million_s <= 10 ~ 1,
+        deaths_per_million_s > 10 & deaths_per_million_s <= 100 ~ 2,
+        deaths_per_million_s > 100 & deaths_per_million_s <= 1000 ~ 3,
+        deaths_per_million_s > 1000 ~ 4
       ),
       
       group_cases_per_million = case_when(
-        cases_per_million >= 0 & cases_per_million <= 1 ~ 0,
-        cases_per_million > 1 & cases_per_million <= 10 ~ 1,
-        cases_per_million > 10 & cases_per_million <= 100 ~ 2,
-        cases_per_million > 100 & cases_per_million <= 1000 ~ 3,
-        cases_per_million > 1000 & cases_per_million <= 10000 ~ 4,
-        cases_per_million > 10000 ~ 5
-      )
+        cases_per_million_s >= 0 & cases_per_million_s <= 1 ~ 0,
+        cases_per_million_s > 1 & cases_per_million_s <= 10 ~ 1,
+        cases_per_million_s > 10 & cases_per_million_s <= 100 ~ 2,
+        cases_per_million_s > 100 & cases_per_million_s <= 1000 ~ 3,
+        cases_per_million_s > 1000 & cases_per_million_s <= 10000 ~ 4,
+        cases_per_million_s > 10000 ~ 5
+      ),
     )
   
   dat
@@ -469,17 +515,17 @@ plot_world_data <- function(dat, selected_date, variable, measure, region, us_da
     if (region != 'USA') {
       
       title <- 'Confirmed Deaths per Million Across the World'
-      text <- paste(d$deaths_per_million, d$country_name, sep = '\n')
+      text <- paste(d$deaths_per_million_s, d$country_name, sep = '\n')
       
     } else {
       
       title <- 'Confirmed Deaths per Million in the USA'
-      text <- paste(d$deaths_per_million, d$state_name, sep = '\n')
+      text <- paste(d$deaths_per_million_s, d$state_name, sep = '\n')
       
     }
     
     d$variable <- d$group_deaths_per_million
-    tags <- c('0', '> 1', '> 10', '> 100', '> 1000')
+    tags <- c('0', '1', '10', '100', '1000')
     
   } else if (variable == 'Cases') {
     
@@ -488,19 +534,37 @@ plot_world_data <- function(dat, selected_date, variable, measure, region, us_da
     if (region != 'USA') {
       
       title <- 'Confirmed Cases per Million Across the World'
-      text <- paste(d$cases_per_million, d$country_name, sep = '\n')
+      text <- paste(d$cases_per_million_s, d$country_name, sep = '\n')
       
     } else {
       
       title <- 'Confirmed Cases per Million in the USA'
-      text <- paste(d$cases_per_million, d$state_name, sep = '\n')
+      text <- paste(d$cases_per_million_s, d$state_name, sep = '\n')
       
     }
     
     d$variable <- d$group_cases_per_million
-    tags <- c('0', '> 1', '> 10', '> 100', '> 1000', '> 10000')
+    tags <- c('0', '1', '10', '100', '1000', '10000')
     
     
+  } else if (variable == 'Tests') {
+    
+    legend_title <- 'Tests per Confirmed Case'
+    
+    if (region != 'USA') {
+      
+      title <- 'Tests per Confirmed Case Across the World'
+      text <- paste(d$tests_per_case_s, d$country_name, sep = '\n')
+      
+    } else {
+      
+      title <- 'Tests per Confirmed Case in the USA'
+      text <- paste(d$tests_per_case_s, d$state_name, sep = '\n')
+      
+    }
+    
+    d$variable <- d$group_tests_per_case
+    tags <- c('0', '5', '10', '20', '50', '100', '1000')
   }
   
   if (!(variable == 'StringencyIndex' & measure == 'Combined')) {
@@ -527,11 +591,11 @@ plot_world_data <- function(dat, selected_date, variable, measure, region, us_da
     
     scope <- 'europe'
     
-  } else if (region == 'NorthAmerica') {
+  } else if (region == 'North America') {
     
     scope <- 'north america'
     
-  } else if (region == 'SouthAmerica') {
+  } else if (region == 'South America') {
     
     scope <- 'south america'
     
@@ -558,8 +622,6 @@ plot_world_data <- function(dat, selected_date, variable, measure, region, us_da
 
 
 
-# Fabian: Alexandra, these functions can all be one function with different arguments!
-
 #' Returns ggplot of stringency index across countries
 #' 
 #' @param dat stringency index data
@@ -571,7 +633,7 @@ plot_stringency_data_deaths_relative <- function(dat, countries, nr_cols) {
   
   d <- filter(dat, country_name %in% countries)
   
-  max_var <- max(d$new_deaths_per_million_smoothed, na.rm = TRUE) 
+  max_var <- max(d$new_deaths_per_million_s, na.rm = TRUE) 
   
   annotation_data <- d %>%
     filter(deaths != 0 | confirmed !=0) %>%
@@ -584,11 +646,10 @@ plot_stringency_data_deaths_relative <- function(dat, countries, nr_cols) {
            daily_deaths, date_for_reference
     )
   
-  
   ggplot(d, aes(x = date)) +
     geom_line(
       stat = 'identity',
-      aes(y = new_deaths_per_million_smoothed , color = 'New Deaths per Million'),
+      aes(y = new_deaths_per_million_s, color = 'New Deaths per Million'),
       size = 1
     ) +
     geom_line(aes(
@@ -617,10 +678,10 @@ plot_stringency_data_deaths_relative <- function(dat, countries, nr_cols) {
     geom_text(
       data  = annotation_data,
       aes(x = as.Date("2020-01-10", "%Y-%m-%d"),
-          y = max_var*0.88,
+          y = max_var*0.86,
           label = paste0(
             'Total Deaths: ', deaths, '\n', 
-            'New Deaths (3 Days Ago): ', daily_deaths
+            'New Deaths: ', daily_deaths
           )),
       hjust = 0, size = 3.5
     )
@@ -628,12 +689,11 @@ plot_stringency_data_deaths_relative <- function(dat, countries, nr_cols) {
 
 
 
-
 plot_stringency_data_cases_relative <- function(dat, countries, nr_cols) {
   
   d <- filter(dat, country_name %in% countries)
   
-  max_var <- max(d$new_cases_per_million_smoothed, na.rm = TRUE) 
+  max_var <- max(d$new_cases_per_million_s, na.rm = TRUE) 
   
   annotation_data <- d %>%
     filter(deaths != 0 | confirmed !=0) %>%
@@ -648,7 +708,7 @@ plot_stringency_data_cases_relative <- function(dat, countries, nr_cols) {
   ggplot(d, aes(x = date)) +
     geom_line(
       stat = 'identity',
-      aes(y = new_cases_per_million_smoothed, color = 'New Cases per Million'),
+      aes(y = new_cases_per_million_s, color = 'New Cases per Million'),
       size = 1
     ) +
     geom_line(aes(
@@ -676,10 +736,71 @@ plot_stringency_data_cases_relative <- function(dat, countries, nr_cols) {
     geom_text(
       data  = annotation_data,
       aes(x = as.Date("2020-01-10", "%Y-%m-%d"),
-          y = max_var*0.88,
+          y = max_var*0.86,
           label = paste0(
             'Total Cases: ', confirmed, '\n', 
-            'New Cases (3 Days Ago): ', daily_cases
+            'New Cases: ', daily_cases
+          )),
+      hjust = 0, size = 3.5
+    )
+}
+
+
+plot_stringency_data_tests <- function(dat, countries, nr_cols) {
+  
+  d <- filter(dat, country_name %in% countries)
+  
+  max_var <- max(d$new_daily_tests_per_case_s, na.rm = TRUE) 
+  
+  annotation_data <- d %>%
+    filter(deaths != 0 | confirmed !=0) %>%
+    mutate(date_for_reference = today()- days(3)) %>%
+    filter(date == date_for_reference) %>%
+    select(country_name,
+           confirmed,
+           deaths,
+           tests,
+           daily_tests,
+           population, daily_cases,
+           daily_deaths, date_for_reference
+    )
+  
+  ggplot(d, aes(x = date)) +
+    geom_line(
+      stat = 'identity',
+      aes(y = new_daily_tests_per_case_s, color = 'New Tests per Confirmed Case'),
+      size = 1
+    ) +
+    geom_line(aes(
+      y = stringency_index /  (100 / max_var),
+      color = 'Stringency Index')
+    ) +
+    scale_y_continuous(
+      sec.axis = sec_axis(~.*(100 / max_var),
+                          name = 'Stringency Index')
+    ) +
+    facet_rep_wrap(~ country_name, ncol = nr_cols, repeat.tick.labels = 'bottom') + #
+    ylab('New Tests per Confirmed Case') +
+    ggtitle('Stringency of Measures and New Tests per Confirmed Case') +
+    xlab('Date') +
+    theme_bw() +
+    theme(
+      legend.position = 'top',
+      plot.title = element_text(hjust = 0.5, size = 16),
+      axis.ticks.y = element_blank(),
+      panel.spacing.x = unit(-1.5, "lines")
+    ) +
+    scale_colour_manual(
+      name = '', values = c('Stringency Index' = 'black', 'New Tests per Confirmed Case' = '#E41A1C')
+      #)
+    ) +
+    geom_text(
+      data  = annotation_data,
+      aes(x = as.Date("2020-01-10", "%Y-%m-%d"),
+          y = max_var*0.86,
+          label = paste0(
+            'Total Tests: ', tests, '\n', 
+            'New Tests: ', daily_tests
           )),
       hjust = 0, size = 3.5
     )

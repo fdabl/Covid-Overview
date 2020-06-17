@@ -1,4 +1,5 @@
 library('DT')
+library('shinyjs')
 library('shinyWidgets')
 library('shinydashboard')
 source('helpers.R')
@@ -76,7 +77,7 @@ body <- dashboardBody(
         tags$br(),
         
         sliderInput(
-          inputId = 'mapdate', label = 'Date:', 
+          inputId = 'mapdate', label = 'Date', 
           min = MIN_DATE, 
           max = MAX_DATE,
           value = MAX_DATE,
@@ -99,6 +100,7 @@ body <- dashboardBody(
               'Stringency' = 'StringencyIndex',
               'Deaths' = 'Deaths',
               'Cases' = 'Cases'
+              # 'Tests' = 'Tests'
             ), selected = 'StringencyIndex'
           )
         ),
@@ -126,8 +128,8 @@ body <- dashboardBody(
             choices = c(
               'World' = 'World',
               'Europe' = 'Europe',
-              'North America' = 'NorthAmerica',
-              'South America' = 'SouthAmerica',
+              'North America' = 'North America',
+              'South America' = 'South America',
               'Asia' = 'Asia',
               'Africa' = 'Africa',
               'OECD' = 'OECD',
@@ -168,9 +170,18 @@ body <- dashboardBody(
           ),
           
           selectInput(
-            'graph', 'Indicator', 
-            c('New Deaths per Million',
-              'New Cases per Million'),
+            'graph',
+            'Indicator',
+            choices = c(
+              'New Deaths per Million',
+              'New Cases per Million'
+            ),
+            
+            # choices = c(
+            #   'New Deaths per Million',
+            #   'New Cases per Million',
+            #   'New Tests per Confirmed Case'
+            # ),
             width = '300px'
           ),
           
