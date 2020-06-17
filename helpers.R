@@ -328,14 +328,14 @@ prepare_country_table <- function(dat, countries) {
     
     group_by(country_name) %>% 
     summarize(
-      C1_days = days_active(school_closing),
-      C2_days = days_active(workplace_closing),
-      C3_days = days_active(cancel_events),
-      C4_days = days_active(gatherings_restrictions),
-      C5_days = days_active(transport_closing),
-      C6_days = days_active(stay_home_restrictions),
-      C7_days = days_active(internal_movement_restrictions),
-      C8_days = days_active(international_movement_restrictions)
+      C1_days = as.double(days_active(school_closing)),
+      C2_days = as.double(days_active(workplace_closing)),
+      C3_days = as.double(days_active(cancel_events)),
+      C4_days = as.double(days_active(gatherings_restrictions)),
+      C5_days = as.double(days_active(transport_closing)),
+      C6_days = as.double(days_active(stay_home_restrictions)),
+      C7_days = as.double(days_active(internal_movement_restrictions)),
+      C8_days = as.double(days_active(international_movement_restrictions))
       # C1_Flag = if_else(C1_days > 0,last(C1_Flag),0),
       # C2_Flag = if_else(C2_days > 0,last(C2_Flag),0),
       # C3_Flag = if_else(C3_days > 0,last(C3_Flag),0),
@@ -348,14 +348,14 @@ prepare_country_table <- function(dat, countries) {
   r <- rollback(dat, countries)
   d <- left_join(d, r)
   d <- d %>% mutate(nas = rowSums(is.na(.))) %>% mutate(roll = if_else(nas > 7, NA_real_,d$roll)) %>%
-    mutate(C1_days = if_else(nas < 8, ifelse(is.na(d$C1_days),integer(0),d$C1_days),NA_integer_),
-           C2_days = if_else(nas < 8, ifelse(is.na(d$C2_days),integer(0),d$C2_days),NA_integer_),
-           C3_days = if_else(nas < 8, ifelse(is.na(d$C3_days),integer(0),d$C3_days),NA_integer_),
-           C4_days = if_else(nas < 8, ifelse(is.na(d$C4_days),integer(0),d$C4_days),NA_integer_),
-           C5_days = if_else(nas < 8, ifelse(is.na(d$C5_days),integer(0),d$C5_days),NA_integer_),
-           C6_days = if_else(nas < 8, ifelse(is.na(d$C6_days),integer(0),d$C6_days),NA_integer_),
-           C7_days = if_else(nas < 8, ifelse(is.na(d$C7_days),integer(0),d$C7_days),NA_integer_),
-           C8_days = if_else(nas < 8, ifelse(is.na(d$C8_days),integer(0),d$C8_days),NA_integer_)) %>%
+    mutate(C1_days = if_else(nas < 8, ifelse(is.na(d$C1_days),0,d$C1_days),NA_real_),
+           C3_days = if_else(nas < 8, ifelse(is.na(d$C3_days),0,d$C3_days),NA_real_),
+           C2_days = if_else(nas < 8, ifelse(is.na(d$C2_days),0,d$C2_days),NA_real_),
+           C4_days = if_else(nas < 8, ifelse(is.na(d$C4_days),0,d$C4_days),NA_real_),
+           C5_days = if_else(nas < 8, ifelse(is.na(d$C5_days),0,d$C5_days),NA_real_),
+           C6_days = if_else(nas < 8, ifelse(is.na(d$C6_days),0,d$C6_days),NA_real_),
+           C7_days = if_else(nas < 8, ifelse(is.na(d$C7_days),0,d$C7_days),NA_real_),
+           C8_days = if_else(nas < 8, ifelse(is.na(d$C8_days),0,d$C8_days),NA_real_)) %>%
     select(-nas)
   colnames(d)[1:9] <- cnames
   d
