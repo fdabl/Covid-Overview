@@ -236,7 +236,7 @@ body <- dashboardBody(
           actionButton('refresh', 'Apply'),
           actionButton('all_graph', 'Select all'),
           actionButton('clear_graph', 'Clear selection'),
-          
+          tags$br(),
           tags$br(),
           plotOutput('lockdown_plot_lines_scales')
         )
@@ -269,13 +269,12 @@ body <- dashboardBody(
                       'Oceania' = 'Oceania'
                     ), selected = 'World', width = '175px',
         ) ,
-        div(style='display:inline-block', actionButton('TableApply','Apply')),
+        
+        div(style = 'display:inline-block', actionButton('TableApply','Apply')),
         actionButton('TableAll', 'Select All'),
         actionButton('TableClear', 'Clear Selection'),
-        plotOutput('table_legend', inline = FALSE,height = '220px',width = '500px'),
+        plotOutput('table_legend', inline = FALSE, height = '220px', width = '500px'),
         dataTableOutput('countries_table')
-        
-        
       )
     ),
     
@@ -286,7 +285,7 @@ body <- dashboardBody(
           width = 1000,
           HTML(
             "
-            <h3 style = 'text-align: center;'>About</h3>
+            <h2 style = 'text-align: center;'>About</h2>
             
             <p style = 'text-align: center;'>
             This Web App was developed by

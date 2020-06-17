@@ -302,10 +302,16 @@ shinyServer(function(session, input, output) {
   })
   
   output$table_legend <- renderPlot({
-    swatchplot(sequential_hcl(n = 10, h = c(250, 90), c = c(40, NA, 22), l = c(68, 100), power = c(3, 3), rev = TRUE, register = ),font=3,cex=0.9,line=3)
-    mtext('Not \n Ready',side=2,las=2,line=1,cex = 1.25,outer = FALSE,adj=0.5)
-    mtext('How ready are countries to lift the Lockdown?',side=3,line=1,cex=1.5,outer=FALSE)
-    mtext('Ready',side=4,las=2, line=1,cex = 1.25,outer = FALSE,adj=0.65)
+    swatchplot(
+      sequential_hcl(
+        n = 10, h = c(250, 90), c = c(40, NA, 22),
+        l = c(68, 100), power = c(3, 3), rev = TRUE
+      ), font = 3, cex = 0.9, line = 3
+    )
+    
+    mtext('Not \n Ready', side = 2, las = 2, line = 1, cex = 1.25, outer = FALSE, adj = 0.5)
+    mtext('How ready are countries to lift the Lockdown?', side = 3, line = 1, cex = 1.5, outer = FALSE)
+    mtext('Ready', side = 4, las = 2, line = 1, cex = 1.25, outer = FALSE, adj = 0.65)
   })
   
   output$countries_table <- DT::renderDT({
@@ -329,7 +335,8 @@ shinyServer(function(session, input, output) {
     tab <- prepare_country_table(dat, selected_countries_table())
     tab <- datatable(
       tab, options = list(
-        columnDefs = list(list(targets = 10, visible = FALSE)), rowCallback = JS(rowCallback)
+        columnDefs = list(list(targets = 10, visible = FALSE)), rowCallback = JS(rowCallback),
+        pageLength = 25
         # columnDefs = list(list(targets = 10:17, visible = FALSE)), rowCallback = JS(rowCallback)
         )
       ) %>%
