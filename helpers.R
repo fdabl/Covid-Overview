@@ -630,7 +630,6 @@ plot_world_data <- function(dat, selected_date, variable, measure, region, us_da
 }
 
 
-
 #' Returns ggplot of stringency index across countries
 #' 
 #' @param dat stringency index data

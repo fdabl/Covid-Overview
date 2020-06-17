@@ -20,6 +20,10 @@ eu_countries <- c(
   'Sweden','United Kingdom'
 )
 
+CUSTOM <- c(
+  'Germany', 'Netherlands', 'Iran', 'Brazil',
+  'United Kingdom', 'United States', 'Sweden', 'South Korea'
+)
 
 COUNTRIES <- dat$country_name %>% unique() 
 MIN_DATE <- min(dat$date)
@@ -249,7 +253,7 @@ body <- dashboardBody(
           inputId = 'countries_table',
           label = 'Countries',
           choices = unique(dat$country_name),
-          selected = unique(dat$country_name),
+          selected = CUSTOM,
           width = '350px',
           options = list(
             enable_search = TRUE,
@@ -260,6 +264,7 @@ body <- dashboardBody(
         selectInput('continent_table',
                     'Region',
                     c(
+                      'Custom' = 'Custom',
                       'World' = 'World',
                       'Europe' = 'Europe',
                       'North America' = 'North America',
@@ -267,7 +272,7 @@ body <- dashboardBody(
                       'Asia' = 'Asia',
                       'Africa' = 'Africa',
                       'Oceania' = 'Oceania'
-                    ), selected = 'World', width = '175px',
+                    ), selected = 'Custom', width = '175px',
         ) ,
         
         div(style = 'display:inline-block', actionButton('TableApply','Apply')),
@@ -295,7 +300,11 @@ body <- dashboardBody(
             Marcel Schreiner</a>,
             and <a href='https://www.atomasevic.com/' target='_blank'>Aleksandar Tomasevic</a>
             as a <a href='http://scienceversuscorona.com/' target='_blank'>Science versus Corona</a> project.
-            <p>
+            </p>
+            
+            <p style = 'text-align: center;'>
+            The code is available on <a href='https://github.com/fdabl/Covid-Overview' target='_blank'>Github</a>, and we invite anybody who is interested to contribute!
+            </p>
             "
           )
         )

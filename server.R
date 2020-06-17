@@ -17,6 +17,7 @@ get_countries <- function(dat, continent) {
 AFRICA <- get_countries(dat, 'Africa')
 ASIA <- get_countries(dat, 'Asia')
 EUROPE <- get_countries(dat, 'Europe')
+EUROPE <- EUROPE[!is.na(EUROPE)] # remove one NA
 OCEANIA <- get_countries(dat, 'Oceania')
 
 
@@ -57,6 +58,11 @@ SOUTH_AMERICA <- c(
   'Peru', 'Puerto Rico', 'Suriname', 'Uruguay', 'Venezuela'
 )
 
+CUSTOM <- c(
+  'Germany', 'Netherlands', 'Iran', 'Brazil',
+  'United Kingdom', 'United States', 'Sweden', 'South Korea'
+)
+
 dat_us <- get_us_data()
 
 continent_list <- case_when(
@@ -65,8 +71,24 @@ continent_list <- case_when(
   TRUE ~ as.character(country_codes$continent)
 )
 
+MAPPING <- list(
+  'Custom' = CUSTOM,
+  'World' = dat$country_name %>% unique(),
+  'Africa' = AFRICA,
+  'North America' = NORTH_AMERICA,
+  'South America' = SOUTH_AMERICA,
+  'Asia' = ASIA,
+  'Europe' = EUROPE,
+  'Oceania' = OCEANIA,
+  'OECD' = OECD
+)
+
 
 shinyServer(function(session, input, output) {
+  
+  ############################
+  #### Code for the World Map
+  ############################
   
   # Reactive Elements for the Map
   selected_mapdate <- reactive({ input$mapdate })
@@ -104,7 +126,7 @@ shinyServer(function(session, input, output) {
       
     }
 
-    if(var == 'StringencyIndex') {
+    if (var == 'StringencyIndex') {
       
       updateSelectInput(
         session, 'region',
@@ -136,55 +158,27 @@ shinyServer(function(session, input, output) {
       )
       
     }
-
   })
+  
+  output$heatmap <- renderPlotly({
+    p <- plot_world_data(
+      dat, selected_mapdate(), selected_variable(),
+      selected_measure(), selected_region(), dat_us
+    )
+    p
+  })
+  
+  #######################################
+  #### Code for Individual Country Figure
+  #######################################
   
   observeEvent(input$regions, {
     region <- input$regions
-    
-    if (region == 'Custom') {
-      country_ls <- c(
-        'Germany', 'Netherlands', 'Iran', 'Brazil',
-        'United Kingdom', 'United States', 'Sweden', 'South Korea'
-      )
-      country_choices <- dat$country_name %>% unique()
-      
-    } else if (region == 'World') {
-      country_ls <- dat$country_name %>% unique()
-      country_choices <- country_ls
-      
-    } else if (region == 'Africa') {
-      country_ls <- AFRICA
-      country_choices <- AFRICA
-      
-    } else if (region == 'North America'){
-      country_ls <- NORTH_AMERICA
-      country_choices <- NORTH_AMERICA
-      
-    } else if (region == 'South America'){
-      country_ls <- SOUTH_AMERICA
-      country_choices <- SOUTH_AMERICA
-      
-    } else if (region == 'Asia'){
-      country_ls <- ASIA
-      country_choices <- ASIA
-      
-    } else if (region == 'Europe'){
-      country_ls <- EUROPE
-      country_choices <- EUROPE
-      
-    } else if (region == 'Oceania'){
-      country_ls <- OCEANIA
-      country_choices <- OCEANIA
-      
-    } else if (region == 'OECD'){
-      country_ls <- OECD
-      country_choices <- OECD
-    }
+    country_choices <-  MAPPING[[region]]
     
     updateSelectInput(
       session, 'countries_lockdown',
-      choices = country_choices, selected = country_ls
+      choices = country_choices, selected = country_choices
     )
   })
 
@@ -217,6 +211,7 @@ shinyServer(function(session, input, output) {
     ifelse(len > 10, 5, ifelse(len > 4, 4, len))
   })
   
+  
   selected_plot <- reactive({
     
     if (input$graph == 'New Deaths per Million') {
@@ -235,7 +230,6 @@ shinyServer(function(session, input, output) {
       p <- plot_stringency_data_tests(
         dat, selected_countries(), num_cols()
       )
-      
     }
     
     p
@@ -250,6 +244,11 @@ shinyServer(function(session, input, output) {
     input$refresh
     isolate(selected_plot())
   }, height = how_high)
+  
+  
+  #######################
+  #### Code for the Table
+  #######################
   
   # Reactive Elements for the Table
   selected_countries_table <- eventReactive(
@@ -266,39 +265,20 @@ shinyServer(function(session, input, output) {
   })
   
   observeEvent(input$continent_table, {
+    region <- input$continent_table
+    country_choices <-  MAPPING[[region]]
     
-    if (input$continent_table == 'World'){
-      
-      sel_cont <- unique(dat$country_name)
-      sel_cnt <- input$countries_table
-
-     if (input$TableApply == 0) {
-      sel_cnt <- unique(dat$country_name)
-      
-     }
-    
-    } else {
-      
-      sel_cont <- country_codes %>%
-        mutate(continent = continent_list) %>% 
-        filter(continent == input$continent_table) %>%
-        select(country_name) %>% 
-        filter(country_name %in% dat$country_name)
-      
-      sel_cont <- sel_cont[,1]
-      sel_cnt <- input$countries_table
-      
-    }
-    
-    updateSelectInput(session, 'countries_table', choices = sel_cont, selected = sel_cnt)
-  })
-
-  output$heatmap <- renderPlotly({
-    p <- plot_world_data(
-      dat, selected_mapdate(), selected_variable(),
-      selected_measure(), selected_region(), dat_us
+    updateSelectInput(
+      session, 'countries_table',
+      choices = country_choices, selected = country_choices
     )
-    p
+  })
+  
+  observe({
+    # Do not allow user to click 'Apply' when selection is empty
+    toggleState(
+      'TableApply', condition = length(input$countries_table) != 0
+    )
   })
   
   output$table_legend <- renderPlot({
@@ -333,6 +313,7 @@ shinyServer(function(session, input, output) {
     )
 
     tab <- prepare_country_table(dat, selected_countries_table())
+    print(tab)
     tab <- datatable(
       tab, options = list(
         columnDefs = list(list(targets = 10, visible = FALSE)), rowCallback = JS(rowCallback),
