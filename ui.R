@@ -296,7 +296,7 @@ body <- dashboardBody(
             This Web App was developed by
             <a href='https://twitter.com/fdabl' target='_blank'>Fabian Dablander</a>,
             <a href='https://nl.linkedin.com/in/ialmi' target='_blank'>Alexandra Rusu</a>,
-            <a href='https://www.sowi.uni-mannheim.de/en/meiser/team/research-staff/marcel-schreiner/' target='_blank'>
+            <a href='http://smip.uni-mannheim.de/PhD%20Candidates/Cohort%202019/Schreiner,%20Marcel/' target='_blank'>
             Marcel Schreiner</a>,
             and <a href='https://www.atomasevic.com/' target='_blank'>Aleksandar Tomasevic</a>
             as a <a href='http://scienceversuscorona.com/' target='_blank'>Science versus Corona</a> project.

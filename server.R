@@ -174,11 +174,16 @@ shinyServer(function(session, input, output) {
   
   observeEvent(input$regions, {
     region <- input$regions
-    country_choices <-  MAPPING[[region]]
+    country_choices <- MAPPING[[region]]
+    country_selected <- MAPPING[[region]]
+    
+    if (region == 'Custom') {
+      country_choices <- MAPPING[['World']]
+    }
     
     updateSelectInput(
       session, 'countries_lockdown',
-      choices = country_choices, selected = country_choices
+      choices = country_choices, selected = country_selected
     )
   })
 
@@ -266,11 +271,16 @@ shinyServer(function(session, input, output) {
   
   observeEvent(input$continent_table, {
     region <- input$continent_table
-    country_choices <-  MAPPING[[region]]
+    country_choices <- MAPPING[[region]]
+    country_selected <- MAPPING[[region]]
+    
+    if (region == 'Custom') {
+      country_choices <- MAPPING[['World']]
+    }
     
     updateSelectInput(
       session, 'countries_table',
-      choices = country_choices, selected = country_choices
+      choices = country_choices, selected = country_selected
     )
   })
   
